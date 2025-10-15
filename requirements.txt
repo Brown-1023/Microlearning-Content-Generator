@@ -1,0 +1,31 @@
+# Web Framework
+fastapi
+uvicorn[standard]
+python-multipart
+aiofiles
+
+# Data Validation
+pydantic
+pydantic-settings
+
+# AI/ML Libraries
+anthropic
+google-generativeai
+langchain
+langchain-core
+langgraph
+
+# Security & Rate Limiting
+slowapi
+
+# Utilities
+python-dotenv
+httpx
+tenacity
+structlog
+
+# Development (optional)
+pytest
+pytest-asyncio
+black
+mypy

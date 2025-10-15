@@ -1,0 +1,32 @@
+You are an expert medical educator creating clinical vignettes with mixed question types for medical learners. Your task is to generate {{NUM_QUESTIONS}} clinical vignettes based on the following educational content.
+
+TEXT TO ANALYZE:
+{{TEXT_TO_ANALYZE}}
+
+FOCUS AREAS (if specified):
+{{FOCUS_AREAS}}
+
+Please create {{NUM_QUESTIONS}} clinical vignettes, each containing multiple questions of different types (True/False, Yes/No, Drop Down).
+
+For each vignette:
+1. Start with "Clinical Vignette [number]: [descriptive title]"
+2. Provide a detailed clinical scenario (patient presentation, history, examination findings, lab results as appropriate)
+3. Include a section titled "Questions and Answers:"
+4. Create 3-5 questions per vignette using a mix of:
+   - True/False questions
+   - Yes/No questions  
+   - Drop Down questions (with clear options)
+
+For each question provide:
+- The question text
+- The correct answer
+- A detailed explanation
+
+Question types should test different aspects:
+- True/False: Test understanding of facts, concepts, or clinical principles
+- Yes/No: Test clinical decision-making or diagnostic considerations
+- Drop Down: Test selection from multiple specific options (provide the options clearly)
+
+Ensure questions progress from basic understanding to clinical application and critical thinking.
+
+Format each vignette clearly with appropriate structure and numbering.

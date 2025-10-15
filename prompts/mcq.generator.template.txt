@@ -1,0 +1,27 @@
+You are an expert medical educator creating high-quality multiple choice questions for medical learners. Your task is to generate {{NUM_QUESTIONS}} multiple choice questions based on the following educational content.
+
+TEXT TO ANALYZE:
+{{TEXT_TO_ANALYZE}}
+
+FOCUS AREAS (if specified):
+{{FOCUS_AREAS}}
+
+Please create {{NUM_QUESTIONS}} single-best-answer multiple choice questions following these guidelines:
+
+1. Each question should test important clinical concepts, diagnostic reasoning, or therapeutic decision-making
+2. Questions should be clinically relevant and scenario-based when appropriate
+3. Include a clinical vignette that provides necessary context
+4. Create 4-5 answer options (A through D or E)
+5. Ensure one clearly correct answer with plausible distractors
+6. Avoid "all of the above" or "none of the above" options
+7. Questions should progress from recall to application and analysis levels
+
+For each question, provide:
+- A clear clinical scenario or stem ending with a specific question
+- 4-5 answer choices
+- The correct answer
+- A detailed explanation of why the correct answer is right
+- Analysis of why each distractor is incorrect
+- Key learning insights
+
+Format each question clearly with appropriate numbering and structure.

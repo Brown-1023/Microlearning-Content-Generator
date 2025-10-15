@@ -1,0 +1,476 @@
+Example input text
+
+INTRODUCTION
+The term VITT (vaccine-induced immune thrombotic thrombocytopenia) was introduced during the coronavirus disease 2019 (COVID-19) pandemic to refer to a rare autoimmune thrombosis syndrome caused by adenoviral-vectored COVID-19 vaccines. This syndrome, similar to heparin-induced thrombocytopenia (HIT) but without heparin exposure, was subsequently understood to be caused by autoantibodies generated in response to adenoviral antigens.
+We now use the VITT acronym to refer to virus-induced immune thrombotic thrombocytopenia. Additional VITT-like disorders have since been identified, such as those associated with autoimmune disorders and monoclonal gammopathy of thrombotic significance (MGTS). Along with HIT, we refer to these anti-PF4 disorders collectively as PF4-associated immune thrombocytopenia and thrombosis (PITT).
+
+HISTORY AND TERMINOLOGY
+The terminology for VITT was introduced during the COVID-19 pandemic and subsequently expanded to include other conditions after the pandemic; some of these likely existed before VITT was characterized. The understanding of disease mechanisms and the best approach to cataloging these syndromes are evolving [1].
+?History
+	•In February 2021, a prothrombotic syndrome was observed in a few individuals who received adenoviral-vectored vaccines for COVID-19, leading to the designation of a new syndrome, vaccine-induced immune thrombotic thrombocytopenia (VITT). (See 'Adenoviral-vectored COVID-19 vaccines (no longer in use)' below.)
+	•In 2023, VITT-like antibodies were reported in two individuals with adenovirus infections. Additional case reports followed, and it was hypothesized that previous severe complications of adenoviral infection reported in the literature (before this syndrome was identified) may have had a similar pathophysiology. (See 'Adenoviral infection' below.)
+	•Subsequent case reports described individuals with autoantibodies of similar characteristics associated with monoclonal gammopathy and other viral infections. (See 'Monoclonal gammopathy' below and 'Other viruses' below.)
+	•We now consider VITT and VITT-like syndromes to be a spectrum of immunothrombotic disorders characterized by autoantibodies targeting platelet factor 4 (PF4). As with heparin-induced thrombocytopenia (HIT), these anti-PF4 autoantibodies bind platelets and cause thrombosis and thrombocytopenia, but unlike HIT, they are triggered by factors unrelated to heparin, such as exposure to viral antigens, and the pathogenic antibodies bind to PF4 in a heparin-independent fashion. (See 'Differential diagnosis' below.)
+?Terminology
+	•VITT (post-COVID-19 vaccination) – Vaccine-induced immune thrombotic thrombocytopenia is the original name introduced in 2021 to describe the syndrome associated with vaccination for COVID-19 using an adenoviral-vectored vaccine [2]. This name described the sequence of events, with thrombosis often presenting before thrombocytopenia. Since the implicated vaccines have been removed from the market, additional cases of vaccination-related VITT are not expected. Other adenoviral-based vaccines that have not been implicated in VITT continue to be used, such as for Ebola [3].
+	•TTS – Thrombosis with thrombocytopenia syndrome (TTS) was used in some publications as a more general descriptive name for a syndrome of thrombosis and thrombocytopenia of any cause following COVID-19 vaccination. Some individuals with TTS may have not been evaluated for anti-PF4 antibodies; some may have causes of thrombosis and thrombocytopenia other than VITT, such as antiphospholipid syndrome (APS), cancer-associated thrombosis and thrombocytopenia, disseminated intravascular coagulation (DIC), or thrombotic thrombocytopenic purpura (TTP) [4]. (See 'Differential diagnosis' below.)
+	•VITT (vaccine/virus-induced immune thrombocytopenia and thrombosis) – From 2024 onwards, the term VITT was expanded to include a viral trigger, particularly adenovirus. Post-vaccination and post-viral VITT have identical (or nearly identical) antibody characteristics. (See 'Antibody characteristics' below.)
+	•VITT-like disorders – Additional disorders with similar (but perhaps not identical) anti-PF4 antibody characteristics continue to emerge. These may include syndromes caused by other viruses with distinct antigens from adenovirus (eg, cytomegalovirus [CMV]); occasionally, no preceding trigger is identified. The autoantibodies are similar to VITT antibodies in that they target PF4, cause thrombocytopenia and thrombosis, and are not detected in rapid HIT assays. (See 'Anti-PF4 assays' below.)
+	The term VITT-like is especially applicable in settings in which the antibody composition ("clonotype") is shown to be distinct from those implicated in post-vaccine/post-viral VITT.
+	-The best example of these is the chronic VITT-like disorder associated with monoclonal gammopathy, where the monoclonal (M) protein itself is the highly pathologic VITT-like antibody. (See 'Monoclonal gammopathy' below.)
+	-A case of an anti-PF4 disorder featuring prodromal CMV infection is another well-documented VITT-like disorder. (See 'Other viruses' below.)
+	Some of these disorders are more acute, related to an aberrant but transient immune response triggered by viral infection, and others are more chronic (eg, monoclonal gammopathies). (See 'Overview of clinical presentation' below.)
+	•HIT and PITT – Heparin-induced thrombocytopenia (HIT) is the original syndrome of anti-PF4 autoantibodies induced by heparin exposure. (See "Clinical presentation and diagnosis of heparin-induced thrombocytopenia", section on 'Terminology and HIT variants'.)
+	The term PITT (PF4-associated immune thrombocytopenia and thrombosis) has been introduced as an umbrella term for all platelet-activating anti-PF4 disorders and to shift the focus to the general mechanism rather than the expanding list of specific triggers of antibody formation/expansion, some of which may not be apparent in some patients [5].
+	The autoantibodies in VITT and VITT-like disorders are distinct from those in HIT, although both types of autoantibodies cause thrombocytopenia and thrombosis. HIT autoantibodies are detected in rapid HIT assays, while VITT and VITT-like autoantibodies are not. (See 'Antibody characteristics' below.)
+This distinction from HIT autoantibodies is crucial for diagnosis and appropriate treatment. (See 'Differences from other thrombotic thrombocytopenic disorders' below.)
+PATHOPHYSIOLOGY
+Differences from other thrombotic thrombocytopenic disorders — VITT and VITT-like disorders are caused by antibodies that recognize platelet factor 4 (PF4, also called CXCL4). The antibodies form multimolecular complexes on platelet surfaces containing PF4 and immunoglobulin G (IgG). These complexes activate platelets via low affinity platelet Fc?IIa receptors (receptors on the platelet surface that bind the Fc portion of IgG). (See 'Antibody characteristics' below and "The adaptive humoral immune response", section on 'Opsonic Fc receptors'.)
+Ultimately, platelet activation (and possibly activation of other cells such as neutrophils) markedly stimulates the coagulation system and causes clinically significant thromboembolic complications. (See 'Mechanisms and sites of thrombosis' below.)
+Distinction from other disorders with thrombosis and thrombocytopenia is critical, as these are life-threatening disorders with markedly different treatments:
+
+PF4-associated immune thrombocytopenia and thrombosis (PITT) disorders
+Table 1
+?Comparison with HIT – VITT and VITT-like disorders belong to a spectrum of platelet-activating anti-PF4 disorders (table 1) that also includes classic heparin-induced thrombocytopenia (HIT), autoimmune HIT (aHIT), and spontaneous HIT (SpHIT) [6].
+For VITT and VITT-like disorders, the antibodies are heparin-independent, whereas for HIT the antibodies are typically heparin-dependent [2]. In atypical disorders such as aHIT and SpHIT, the antibodies have both heparin-dependent and heparin-independent features. Rapid HIT assays cannot be used to diagnose VITT and VITT-like disorders, while HIT and HIT variant antibodies (including aHIT and SpHIT) are recognized in rapid HIT assays. Treatment of VITT and VITT-like disorders involves anticoagulation and treatment of the underlying trigger, whereas treatment of HIT involves avoiding heparin and treating with a nonheparin anticoagulant until the syndrome resolves.
+Diagnosis and treatment of HIT and HIT variants are discussed separately. (See "Clinical presentation and diagnosis of heparin-induced thrombocytopenia" and "Management of heparin-induced thrombocytopenia".)
+?Comparison with DIC and TMAs – Disseminated intravascular coagulation (DIC) is a consumptive coagulopathy that is a feature of VITT but that can also be explained by dozens of other conditions such as infection, shock states, or cancer. Clinical features include thrombocytopenia and/or thrombosis along with coagulation abnormalities. Unlike in VITT and VITT-like disorders, anti-PF4 antibodies are not involved, and treatment focuses on the underlying condition. (See "Evaluation and management of disseminated intravascular coagulation (DIC) in adults".)
+Thrombotic microangiopathies (TMAs) like thrombotic thrombocytopenic purpura (TTP), complement-mediated TMA (CM-TMA), and drug-induced TMA (DITMA) are syndromes with microthrombi in small blood vessels that cause organ injury. Unlike in VITT, VITT-like disorders, and HIT, the thrombi contain platelets and von Willebrand factor but not coagulation factors. When autoantibodies are responsible for TMAs, they are directed at other proteins, and anti-PF4 assays are negative. (See "Diagnostic approach to suspected TTP, HUS, or other thrombotic microangiopathy (TMA)".)
+However, in some patients with severe hypercoagulability associated with PITT disorders such as aHIT, SpHIT, or VITT, features of microangiopathy such as schistocytes and normoblasts can be seen, potentially resulting in diagnostic confusion. (See 'Differential diagnosis' below.)
+?Comparison with ITP – Immune thrombocytopenia (ITP) generally causes thrombocytopenia without thrombosis and is unlikely to be confused with VITT or VITT-like disorders. However, VITT and VITT-like disorders sometimes present initially with isolated thrombocytopenia, and thrombosis may not have occurred or may be clinically silent in the early stages. (See "Immune thrombocytopenia (ITP) in adults: Clinical manifestations and diagnosis".)
+The key feature that distinguishes VITT and VITT-like disorders from ITP is that antiplatelet antibodies in VITT activate platelets, causing thrombosis, whereas antiplatelet antibodies in ITP do not; in ITP, antibodies cause increased platelet clearance without platelet activation. VITT and VITT-like disorders have a greatly elevated D-dimer, while in ITP the D-dimer is normal or only mildly elevated. (See 'Laboratory testing' below and 'Differential diagnosis' below.)
+Triggers for autoantibody production — The list of reported triggers for VITT-like disorders continues to increase. Some individuals may have a chronic VITT-like disorder with anti-PF4 platelet-activating antibodies that does not have an obvious trigger [7].
+For most of these, the VITT-like disorder remains a very rare complication of the underlying trigger, likely affecting a very small percentage of individuals. This suggests that a "second hit" or other concomitant risk factor may be necessary to manifest the thrombotic disorder. Possible second hits include inflammation caused by the condition (infection, immune dysregulation) and/or yet-to-be-identified genetic predispositions.
+Adenoviral infection — Adenoviral infections can cause various febrile illnesses, typically in young children and most commonly presenting with respiratory tract symptoms. (See "Pathogenesis, epidemiology, and clinical manifestations of adenovirus infections".)
+An extremely small percentage of individuals with adenoviral infections can develop VITT; this was first proposed in a case report describing two individuals (a five-year-old boy and a 58-year-old woman) who had a recent adenovirus infection [8]. Additional case reports followed [9-12].
+Earlier case reports prior to the identification of VITT described cerebral venous thrombosis (CVT, also called cerebral venous sinus thrombosis [CVST]), thrombocytopenia, and autoantibodies following an unspecified viral infection that may have been undiagnosed adenovirus infection [10,13].
+Adenoviral-vectored COVID-19 vaccines (no longer in use) — Initial reports of VITT were in patients who had received an adenoviral-vectored vaccine for COVID-19. In most countries, these vaccines were subsequently removed from the market and are no longer available.
+Adenoviral proteins in the vaccine were determined to be responsible, likely a complex of adenoviral hexon proteins bound to PF4 [14,15]. The pathophysiologic model implicated a two-hit process in which the vaccine stimulated neoantigen formation (first hit) and led to a systemic inflammatory response (second hit), which together stimulated production of anti-PF4 antibodies [14].
+An adenoviral-vectored Ebola virus vaccine is in use; thrombotic complications have not been reported [3]. (See "Treatment and prevention of Ebola and Sudan virus disease", section on 'Ad26.ZEBOV/MVA-BN-Filo vaccine'.)
+In contrast to adenoviral-vectored vaccines, adeno-associated virus-based vaccines and gene therapy constructs have not been reported to trigger an anti-PF4 VITT-like disorder. Despite sharing a similar name, adenovirus and adeno-associated virus are completely distinct viruses. (See "Pathogenesis, epidemiology, and clinical manifestations of adenovirus infections" and "Overview of gene therapy, gene editing, and gene silencing", section on 'Types of vectors'.)
+Other viruses — It is possible that other viruses could trigger anti-PF4 autoimmunity with similar characteristics. One example is after cytomegalovirus (CMV) infection; in a case report of a patient with CMV infection, the patient's anti-PF4 antibodies were shown to be distinct from those reported in adenovirus-induced VITT, with both HIT/HIT-like and VITT/VITT-like features [5]. (See "Epidemiology, clinical manifestations, and treatment of cytomegalovirus infection in immunocompetent adults".)
+Autoimmune disorders — A 2023 case report described a patient with chronic thrombocytopenia associated with recurrent thromboses in whom platelet-activating anti-PF4 antibodies were implicated [7]. This patient tested negative on several occasions for M proteins by serum protein electrophoresis (SPEP)/immunofixation, and a presumptive diagnosis was made of autoimmune anti-PF4 disorder. Treatment with ibrutinib resulted in improvement of symptoms during the initial period of follow-up (several months), with decreased platelet activation and absence of recurrent thrombosis despite persistent anti-PF4 antibodies during several months of follow-up.
+Monoclonal gammopathy — Monoclonal gammopathies can be associated with an increased risk of thrombosis (referred to as monoclonal gammopathy of thrombotic significance [MGTS]). There may be several mechanisms involved. (See "Clinical course and management of monoclonal gammopathy of undetermined significance", section on 'Thromboembolic disease'.)
+In some patients with MGTS, the paraprotein is composed of VITT-like autoantibodies; these are IgGs that bind to PF4 and activate platelets, suggesting that a VITT-like disorder may account for a subset of MGTS [16-18]. Unlike other MGTS disorders, however, VITT-like MGTS can be readily identified by standard PF4-dependent enzyme-linked immunosorbent assay (ELISA) and PF4-dependent platelet activation assays (the latter performed in reference laboratories).
+A 2025 case report described a neonate who had cerebral venous and arterial thrombosis caused by transplacental passage of maternal anti-PF4 antibodies related to MGTS [19].
+Antibody characteristics — Antibodies in VITT and VITT-like syndromes are the primary mediator of thrombotic risk because they recognize and bind to platelet factor 4 (PF4, also called CXCL4) on platelets, leading to platelet activation. (See 'Mechanisms and sites of thrombosis' below.)
+The pathogenesis of the syndrome and characteristics of the antibodies appear to recognize a shared antigen that was present in adenoviral-vectored COVID-19 vaccines and adenovirus infection (no vaccine). The resulting antibodies are IgGs that activate platelets via low affinity platelet Fc?IIa receptors (receptors on the platelet surface that bind the Fc portion of IgG). (See "The adaptive humoral immune response", section on 'Opsonic Fc receptors'.)
+Antibody characteristics are as follows [2,20-22]:
+?IgG class.
+?Recognize PF4 bound to platelets.
+?Bind an eight amino acid region of PF4 located within the heparin binding site [22-24]. The VITT epitope on PF4 overlaps with but differs from the epitope recognized by anti-PF4 antibodies in heparin-induced thrombocytopenia (HIT). VITT antibody binding to platelets is also stronger than HIT antibody binding.
+?Cause platelet activation, leading to thrombocytopenia and thrombosis. (See 'Mechanisms and sites of thrombosis' below.)
+?Heparin independent (not induced by heparin exposure; do not require heparin for detection in in vitro platelet activation assays). (See 'Anti-PF4 assays' below.)
+This is a major difference from HIT antibodies, which are typically heparin dependent. In vitro studies have documented that heparin actually suppressed binding of the antibodies to platelets and platelet aggregation with patient sera [25,26]. One study reported that generation of procoagulant markers in an in vitro assay was heparin dependent, the clinical significance of which is unclear [27]. Use of heparin to treat VITT is discussed below. (See 'Anticoagulation' below.)
+?Detectable in PF4/polyanion and PF4 ELISA and in functional assays.
+?In vitro, show positive reactivity (including positive serotonin release and PF4/polyanion ELISA) to PF4 alone, in the absence of heparin. This also distinguishes them from the anti-PF4 antibodies in HIT. (See "Clinical presentation and diagnosis of heparin-induced thrombocytopenia", section on 'Pathophysiology'.)
+In contrast, VITT and VITT-like antibodies do not react with PF4/heparin complexes by fluid-phase ELISA, PF4/polyanion chemiluminescence assay, and latex-enhanced immunoassay (the latter two assays being commercially available rapid HIT tests) [8,9]. This is another difference from anti-PF4 antibodies in HIT. For the rapid HIT assays, the manufacturer has made a very specific PF4/polyanion complex that is recognized by HIT antibodies but not VITT antibodies. In contrast, in PF4/polyanion ELISAs, it appears that there are more presentations of PF4 and PF4/polyanion complexes formed on the microtiter plate, some of which are recognized by HIT antibodies and others by VITT antibodies.
+?Some, such as those associated with classic VITT in response to COVID-19 vaccination, are transient [28,29]. Others, such as with a chronic autoimmune disorder, may persist.
+Hexon is the major adenoviral surface protein. The complex between PF4 and hexon appears to be mediated by electrostatic interactions [14,15]. (See "Pathogenesis, epidemiology, and clinical manifestations of adenovirus infections", section on 'Virion structure'.)
+PF4 is a positively-charged tetrameric protein; the positive charge usually causes PF4 molecules to repel each other, but in the presence of negatively charged (polyanionic) molecules such as heparin, pentosan polysulfate (a rarely used medication), or endogenous polyphosphates, PF4 may form higher order structures that act as neoantigens [30,31]. DNA and RNA (deoxyribonucleic acid and ribonucleic acid, respectively) also have polyanionic properties and may create a neoantigen when bound to PF4 [32,33]. It is possible that one or more of these nonheparin polyanions is responsible for triggering SpHIT in exceptional circumstances.
+Mechanisms and sites of thrombosis
+?Mechanisms – Anti-PF4 antibodies cause "pancellular" activation, meaning that they activate many pathways that lead to clotting [14]:
+	•Platelets, leading to activation of platelet-dependent clotting factors
+	•Monocytes and endothelial cells, leading to tissue factor expression
+	•Neutrophils, leading to NETosis (neutrophil extracellular traps)
+Activation of these cell types further exacerbates the high thrombosis risk. This mechanism may be very similar to the mechanism of thrombosis in classical HIT. (See "Clinical presentation and diagnosis of heparin-induced thrombocytopenia", section on 'Mechanism of thrombosis'.)
+?Sites – Thrombosis in VITT and VITT-like disorders can occur in typical sites of venous thromboembolism (VTE) such as pulmonary embolism (PE) or deep vein thrombosis (DVT) in the leg [34]. However, a distinctive feature of the syndrome is thrombosis in unusual sites including veins and arteries:
+	•Venous sites
+	-Cerebral and ophthalmic veins
+	-Splanchnic veins (mesenteric, splenic, portal)
+	-Adrenal veins (risk for adrenal failure)
+	-Deep and superficial veins (including risk for pulmonary embolism)
+	•Arterial sites
+	-Brain, with ischemic stroke (often middle cerebral artery)
+	-Peripheral arterial occlusion, often in individuals with concomitant venous thrombosis
+The spectrum and distribution of thromboses are discussed below. (See 'Thrombosis' below.)
+The pathophysiologic explanation for these unusual sites of thrombosis is unknown. The distribution is similar to that seen with other thrombophilias such as paroxysmal nocturnal hemoglobinuria (PNH) and myeloproliferative neoplasms.
+EPIDEMIOLOGY
+VITT and VITT-like disorders are extremely rare.
+?VITT – New cases have not been reported since adenoviral-vectored COVID-19 vaccines were removed from the market. During 2021 to 2022, there were two adenoviral vector-based vaccines implicated in causing VITT; these are no longer available in the United States and many other countries.
+	•ChAdOx1 nCoV-19 (AstraZeneca, University of Oxford, and Serum Institute of India)
+	•Ad26.COV2.S (Janssen; Johnson & Johnson)
+Despite VITT being extremely rare, mass vaccination of many millions of individuals resulted in several hundred patients being affected during 2021 to 2022 [2,21,35,36].
+Data are limited for the Gam-COVID-Vac/Sputnik V (Gamaleya Institute) vaccine, but a few cases were reported [37]. mRNA-based vaccines have not been reported to cause VITT. Several case reports suggested extremely rare cases of anti-PF4 antibodies with thrombocytopenia and thrombosis in <1 in 1 million vaccinated individuals [35,38-42]; these likely represent background rates in the general population of autoimmune HIT or autoimmune VITT, or a non-VITT etiology, rather than VITT due to mRNA-based vaccines.
+Other adenoviral vaccines have been administered to large numbers of individuals without reported cases of VITT. Examples include an Ad5-based COVID-19 vaccine (CanSino Biologics) and the Ad26.ZEBOV-GP (recombinant) Ebola vaccine (Janssen Biologics). It is unknown whether this represents a biologic difference in vaccine safety due to different vaccine constituents or a difference in reporting.
+For VITT, there was a suggestion of predominance in females and younger individuals, but this may have been a reflection of the vaccination rates in the population at the time, especially young female medical workers during the initial years after vaccines became available [2,21,43-45]. A subsequent analysis did not show a large female predominance [46].
+?VITT-like disorders – These disorders have only been described in case reports; the prevalence is unknown and may be subject to under-reporting due to lack of recognition of the syndrome.
+CLINICAL FEATURES
+Overview of clinical presentation — VITT and VITT-like disorders strongly mimic autoimmune heparin-induced thrombocytopenia (aHIT), with typical clinical features noted below, despite the antibodies recognizing different epitopes on PF4. (See 'Thrombocytopenia' below and 'Thrombosis' below and 'Coagulation abnormalities/DIC' below.)
+?For VITT from a COVID-19 vaccination, the window between vaccination and development of symptoms was approximately 5 to 10 days in most cases [2,38,47-50].
+?For VITT from an adenoviral infection, the timing of onset is likely similar (approximately 5 to 10 days); there may be a few days' difference, reflecting an unknown duration of the postviral infection incubation period versus the precise and discrete timing of vaccination.
+?A similar syndrome can follow a bacterial infection, although occasionally no preceding trigger is identified [13]; however, this phenomenon is more consistent with SpHIT than with VITT.
+The greatest number of affected patients has been described for VITT from COVID-19 vaccination, which is unlikely to occur after adenoviral-vectored COVID-19 vaccines were removed from the market. As an example, a systematic review from 2024 that included 366 patients who met stringent criteria for VITT from COVID-19 vaccination (thrombosis, thrombocytopenia, and laboratory confirmation of anti-PF4 antibodies 4 to 42 days after adenoviral-vectored vaccine) identified 647 thromboses, with most patients having more than one site of thrombosis [46]:
+?Age – 39 percent ?39 years; 41 percent 40 to 59 years; 20 percent ?60 years.
+?Sex – 54 percent female; 46 percent male.
+?Time since vaccination – Median 9 days; range 2 to 31 days.
+?Site of thromboses – Venous in 81 percent; arterial in 19 percent.
+Of the venous thromboses, sites were as follows:
+	•Cerebral venous sinus (CVT) – 30 percent.
+	•DVT (upper or lower extremity) or pulmonary embolism (PE) – 28 percent.
+	•Splanchnic vein thrombosis – 14 percent.
+?Bleeding – 36 percent, most commonly in the central nervous system (CNS); of 95 intracerebral hemorrhages, 83 percent were associated with CVT.
+?Laboratory values:
+	•Platelet count nadir <50,000/microL – 63 percent.
+	•D-dimer >500 mcg/L– 99 percent.
+?Mortality – 24 percent. (See 'Prognosis' below.)
+Thrombocytopenia — The typical platelet count range of patients with definite VITT from a COVID-19 vaccination was 10,000 to 100,000/microL. Median platelet counts varied by studies but were generally <50,000/microL [2,43].
+Some individuals with VITT or a VITT-like disorder may have mild thrombocytopenia or a platelet count outside this range [34]. Examples include an individual with early VITT and a decreasing platelet count or an individual with a higher baseline platelet count for whom a count of 120,000/microL may represent a significant decrease.
+
+Thrombosis symptoms and evaluation in VITT and VITT-like disorders
+Table 2
+Thrombosis — Thrombosis was the presenting feature in most of the initial reported cases of VITT associated with COVID-19 vaccination [2,21,36,51]. Both venous and arterial thromboses were described, often at multiple sites and in unusual locations. Autopsy studies in individuals who died of VITT associated with COVID-19 vaccination demonstrated catastrophic venous thrombosis involving multiple large and small vessels [52]. The table summarizes symptoms of thrombosis (table 2).
+Cerebral venous sinus thrombosis (CVT, also abbreviated CVST) and dural sinus thrombosis (DST), which may present as intracerebral hemorrhage, were the most common sites of thrombosis in some series [36,53-55].
+Clinical features of CVT include those related to intracranial hypertension (headache), focal findings and seizures, and encephalopathic changes (mental status changes, coma), as discussed separately. (See "Cerebral venous thrombosis: Etiology, clinical features, and diagnosis", section on 'Clinical presentations'.)
+Treatment for strongly suspected VITT or a VITT-like disorder should not be withheld due to inability to document thrombosis. (See 'Management' below.)
+Locations of thrombosis with VITT from COVID-19 vaccination included:
+?Venous – Listed above. (See 'Overview of clinical presentation' above.)
+?Arterial
+	•Ischemic stroke, especially middle cerebral artery territory
+	•Acute limb ischemia
+	•Myocardial infarction
+?Sudden death – Sudden death (diagnosis of VITT established postmortem) may reflect any number of thrombotic complications including coronary thrombosis, PE, or intracerebral hemorrhage [2].
+Coagulation abnormalities/DIC — Individuals with VITT have a high frequency of overt, decompensated disseminated intravascular coagulation (DIC), which manifests the following abnormalities:
+?Moderate to severe thrombocytopenia, or a significant decrease from the individual's baseline platelet count (see 'Thrombocytopenia' above)
+?Elevated D-dimer (often greatly elevated, >10 mg/L [>10,000 ng/mL]) fibrinogen equivalent units (FEU)
+?Decreased fibrinogen (approximately one-third to 50 percent have a fibrinogen level below the normal range; many of the remainder are in the low-normal range)
+?Normal or mildly increased prothrombin time (PT), international normalized ratio (INR), and activated partial thromboplastin time (aPTT)
+Elevations in D-dimer are nonspecific and may reflect ongoing thrombosis, chronic inflammatory states, and/or DIC, but marked elevations can help distinguish disorders of platelet and clotting factor consumption (HIT, VITT, VITT-like disorders, DIC) from disorders of isolated platelet consumption (TTP and other TMAs) and disorders of isolated platelet clearance (ITP, drug-induced ITP). (See "Clinical use of coagulation tests", section on 'Fibrin D-dimer' and 'Differential diagnosis' below.)
+A DIC-like picture appears to be more common with autoimmune HIT syndromes, VITT, and VITT-like disorders than with classic HIT. (See 'Pathophysiology' above.)
+Often bleeding predominates in acute DIC, whereas in VITT, thrombosis predominates. However, bleeding complications have been reported in VITT, especially intracerebral bleeding (usually in association with CVT and subsequent hemorrhage). (See "Evaluation and management of disseminated intravascular coagulation (DIC) in adults", section on 'Clinical manifestations' and 'Bleeding' below.)
+Bleeding — Clinically serious bleeding has been described in some individuals, especially those with cerebral venous thrombosis (CVT) who subsequently developed intracranial bleeding while receiving anticoagulation with a heparin product [2,21]. Hemorrhage is a frequent manifestation of CVT in the absence of anticoagulation (due to venous congestion) and it is not clear what role, if any, the use of anticoagulation or the exposure to heparin had in these bleeding manifestations. Antithrombotic agents are recommended in CVT, even in individuals with hemorrhage. (See 'Anticoagulation' below.)
+Isolated thrombocytopenia (without thrombosis) and hemorrhage have also been reported; this individual also had a very high D-dimer [36].
+Minor bleeding (bruising) and petechiae are also common.
+EVALUATION
+When to suspect — VITT-like disorders are challenging to identify since they are extremely rare. They generally should be suspected in individuals with thrombocytopenia plus thrombosis in one or more unusual sites (venous and/or arterial) without another strong risk factor. Negative testing for other dramatically prothrombotic disorders discussed below is also supportive. (See 'Differential diagnosis' below.)
+?Symptoms related to thrombocytopenia such as bruising and petechiae are common. More serious bleeding is possible but unusual.
+?Symptoms of thrombosis depend on the location, as summarized in the table (table 2). CVT may be more common in females.
+The mnemonic VITT can be used to codify these key features; the first two letters initially referred to vaccination using selected COVID-19 vaccines and have been adapted to other related syndromes:
+?Viral (typically adenovirus) infection; previously Vaccine (adenoviral-vectored COVID-19 vaccine)
+?Immune mechanism (anti-PF4 autoantibodies); previously Interval (5 to 30 days postvaccine)
+?Thrombosis (usually the event that draws attention to VITT or a VITT-like disorder)
+?Thrombocytopenia (usually recognized when a complete blood count [CBC] is drawn to investigate thrombosis; less often, can be incidentally detected)
+Laboratory testing — Diagnosis of a VITT-like disorder requires consideration of clinical and laboratory features. Laboratory testing includes:
+?CBC – A complete blood count (CBC) with platelet count to document thrombocytopenia and compare platelet counts over time. The degree of thrombocytopenia (or decrease from the individual's baseline) is helpful in estimating the likelihood of a VITT-like or autoimmune HIT disorder. No specific abnormalities are seen on the peripheral blood smear.
+?Coagulation testing – Testing the prothrombin time (PT) with international normalized ratio (INR) and activated partial thromboplastin time (aPTT) is standard before starting anticoagulation and helps distinguish disorders with consumption of clotting factors such as VITT or disseminated intravascular coagulation (DIC), in which the PT and aPTT are often prolonged, from most of the thrombotic microangiopathies (TMAs), in which the PT and aPTT are usually normal. Severe DIC can have features of a TMA (severe hemolysis with schistocytes), but in DIC the PT and aPTT are often prolonged, fibrinogen is often low, and D-dimer is usually greatly increased; severe TMAs can sometimes have features of DIC.
+One-third of patients with VITT have hypofibrinogenemia, although overt bleeding is less common (except for secondary cerebral hemorrhage with CVT and adrenal hemorrhage with adrenal vein thrombosis); in some patients, fibrinogen replacement may be appropriate, but caution is warranted given risk of fomenting the prothrombotic state with fibrinogen and/or platelet transfusions. (See 'Minimize platelet transfusions and procoagulant medications' below.)
+D-dimer is especially helpful in distinguishing between consumptive thrombocytopenias (D-dimer is greatly elevated in HIT, VITT, and DIC) versus thrombocytopenias with increased platelet clearance (D-dimer is not usually greatly elevated in ITP, drug-induced ITP, or posttransfusion purpura [PTP]). Thrombotic thrombocytopenic purpura (TTP) is a consumptive thrombocytopenia in which D-dimer is not greatly elevated because platelets alone (not coagulation factors) are consumed. (See "Diagnostic approach to thrombocytopenia in adults", section on 'Accelerated clearance or consumption'.)
+?PF4 antibody testing – Positive testing is confirmatory; details are discussed below. (See 'Anti-PF4 assays' below.)
+However, a positive anti-PF4 antibody test alone (without thrombocytopenia or thrombosis) is not sufficient to make the diagnosis.
+In some institutions, there may be a delay of multiple days while awaiting the results of the PF4 antibody testing. Appropriate treatment should not be delayed while awaiting the results of confirmatory testing if VITT or a VITT-like disorder is strongly suspected. (See 'Management' below.)
+?Testing for triggering conditions – Individuals with symptoms attributable to a viral infection may be tested for specific virus(es).
+Anti-PF4 assays — There are different types of anti-platelet factor 4 (PF4) antibody tests, and it is important to verify that the correct test has been done and results are properly interpreted.
+?ELISA – Enzyme-linked immunosorbent assay (ELISA) testing is the recommended initial test [56]. Commercial PF4/polyanion ELISA tests are usually positive in either HIT or VITT, especially the Immucor (PF4/polyvinyl sulfonate [PVS]) ELISA.
+In preliminary case reports, individuals with VITT from adenoviral-vectored COVID-19 vaccines had high optical density (OD) readings of 2 to 3 (or even higher) OD units, which would be sufficient to confirm the syndrome (particularly in the absence of proximate heparin exposure) [2,21]. In these individuals with a high OD, a serotonin release assay (SRA) may not be required but may be useful for mechanistic understanding and case reporting.
+Some reference laboratories offer specialized tests that can identify VITT or VITT-like antibodies. For example, a newly developed fluid-phase ELISA can distinguish between HIT and VITT or VITT-like antibodies [13].
+A study that evaluated multiple ELISA assays found that no single ELISA method detected all cases of VITT [56]. Some false-negative results have been reported with PF4/heparin and PF4/platelet lysate ELISA tests. The observation that high OD readings predict the presence of VITT is similar to HIT. (See "Clinical presentation and diagnosis of heparin-induced thrombocytopenia", section on 'Immunoassays (eg, ELISA)'.)
+?SRA – Functional assays such as the serotonin release assay (SRA) are often positive in VITT or VITT-like disorders, but some are negative [57]. However, if PF4 is supplemented (without heparin), the SRA becomes positive [44]. The SRA or another functional assay is not required for diagnosis if the ELISA is strongly positive (high OD reading) but may be helpful in cases in which VITT or a VITT-like disorder is strongly suspected and the ELISA is negative or equivocal, or in situations of case-identification using specific clinical and laboratory criteria.
+?Rapid HIT assays – Rapid HIT assays are generally negative in VITT and VITT-like disorders and should not be used to confirm or exclude the diagnosis due to their poor sensitivity [36,50,56,58]. It is important to notify the laboratory that VITT or a VITT-like disorder is under consideration and that an ELISA or functional assay is needed. Examples of rapid HIT assays to avoid include:
+	•Latex-enhanced immunoassay (HemosIL HIT-Ab(PF4-H) [Instrumentation Laboratory/Werfen]; used in the United States)
+	•Chemiluminescence immunoassay (HemosIL AcuStar HIT-IgG [Instrumentation Laboratory/Werfen]; used in the United States)
+	•Lateral flow immunoassay (STic Expert HIT [Diagnostica Stago]; not used in the United States)
+The diagnosis of VITT or a VITT-like disorder is considered confirmed by a positive anti-PF4 ELISA, typically with an OD >2, in the appropriate clinical context of proximate adenovirus infection or other trigger (such as a monoclonal gammopathy of undetermined significance [MGUS]) together with thrombosis and/or thrombocytopenia (including lack of proximate heparin exposure to explain the positive ELISA), or by a positive functional assay (SRA, or PF4-enhanced SRA, or other PF4-dependent functional assay).
+Imaging to diagnose thrombosis — Diagnostic testing for various sites of thrombosis is summarized in the table (table 2) and discussed in separate topic reviews. If imaging is negative but the suspicion for VITT or a VITT-like disorder remains high, presumptive treatment and repeat imaging may be prudent, especially for suspected CVT. (See 'Thrombosis' above.)
+?CVT – (See "Cerebral venous thrombosis: Etiology, clinical features, and diagnosis", section on 'Confirmatory neuroimaging'.)
+?Portal vein thrombosis – (See "Recent portal vein thrombosis in adults: Clinical features, diagnosis, and management", section on 'Diagnostic evaluation'.)
+?Mesenteric vein thrombosis – (See "Mesenteric venous thrombosis in adults", section on 'Diagnosis'.)
+?DVT – (See "Clinical presentation and diagnosis of the nonpregnant adult with suspected deep vein thrombosis of the lower extremity", section on 'Diagnostic compression ultrasonography (CUS)'.)
+?Pulmonary embolism – (See "Pulmonary embolism: Epidemiology and pathogenesis in adults".)
+?Ischemic stroke – (See "Overview of the evaluation of stroke", section on 'Imaging studies'.)
+?Limb ischemia – (See "Clinical features and diagnosis of acute arterial occlusion of the lower extremities" and "Overview of upper extremity ischemia".)
+
+Distinguishing features between VITT, ITP, and TTP
+Table 3
+Differential diagnosis — Other causes of thrombocytopenia and/or thrombosis should be considered, especially in individuals with negative PF4 antibody testing. The table summarizes the differences between VITT and other thrombocytopenic disorders (table 3).
+In a series of nearly 300 individuals evaluated for possible VITT, alternative diagnoses included metastatic cancer and chronic disseminated intravascular coagulation (DIC) from an aortic aneurysm [43].
+?COVID-19 – COVID-19 carries a high risk of thrombosis and coagulation abnormalities in hospitalized individuals, including severe thrombocytopenia, particularly in individuals in the intensive care unit (ICU). Thrombosis in atypical locations, including cerebral venous thrombosis (CVT) and arterial thrombosis, as well as very high D-dimer levels, have been reported. Unlike VITT, COVID-19-associated thrombosis is not expected to cause a positive anti-PF4 assay result, and therapeutic anticoagulation for COVID-19-associated thrombosis typically includes low molecular weight (LMW) heparin during hospitalization (or a direct oral anticoagulant during the recuperation phase). (See "COVID-19: Hypercoagulability", section on 'Management'.)
+?Other causes of thrombocytopenia and thrombosis – The pathophysiologic differences that distinguish VITT and VITT-like disorders from other platelet consumption disorders with thrombosis are discussed above. (See 'Differences from other thrombotic thrombocytopenic disorders' above.)
+	•TTP and other TMAs – Thrombotic thrombocytopenic purpura (TTP) is another rare syndrome characterized by thrombocytopenia and thrombosis. In TTP, thrombosis is typically microvascular, affecting various organ systems including the central nervous system and heart. TTP is associated with microangiopathic hemolytic anemia, characterized by findings of hemolysis (anemia, high lactate dehydrogenase [LDH], and bilirubin), high reticulocyte count, and schistocytes (red blood cell fragments) on the blood smear. The absence of schistocytes on the blood smear argues against TTP. Diagnosis of TTP typically correlates with severely reduced ADAMTS13 activity (<10 percent). (See "Diagnosis of immune TTP".)
+	Other thrombotic microangiopathies (TMAs) can cause thrombosis and thrombocytopenia, but unlike VITT, the thromboses are generally in small vessels, causing microangiopathic hemolysis (with schistocytes on the blood smear) and neurologic and other organ manifestations. Unlike VITT, the TMAs have other pathophysiologies and unique diagnostic testing, which are discussed in more detail separately. TMAs are not treated with anticoagulation because thrombosis is due to platelet activation and clotting factors are not significantly involved. (See "Diagnostic approach to suspected TTP, HUS, or other thrombotic microangiopathy (TMA)".)
+	•Classic HIT and autoimmune HIT – Classic HIT resembles VITT clinically but occurs following heparin exposure. Classic HIT is generally only suspected in an individual with a recent heparin exposure (within three months), which is not the case for most individuals with suspected VITT. Spontaneous HIT, although extremely rare, is also possible [38]. In HIT, anti-PF4 antibodies are heparin dependent, and thrombocytopenia generally resolves rapidly following cessation of heparin exposure. In classic HIT, withdrawal of heparin and anticoagulation with a nonheparin agent (generally at therapeutic dosing) are usually sufficient therapy, and intravenous immune globulin (IVIG) is usually not required. (See "Clinical presentation and diagnosis of heparin-induced thrombocytopenia".)
+	Other HIT syndromes, such as autoimmune HIT (severe HIT with additional heparin-independent platelet-activating antibodies) or spontaneous HIT (clinical and serologic picture of HIT but not triggered by heparin), as well as non-PF4-mediated disorders (antiphospholipid syndrome [APS], catastrophic APS [CAPS], various TMA syndromes) may be considered in the differential diagnosis. (See "Clinical manifestations of antiphospholipid syndrome" and "Catastrophic antiphospholipid syndrome (CAPS)" and "Diagnostic approach to suspected TTP, HUS, or other thrombotic microangiopathy (TMA)".)
+	•Anti-histone and other autoantibodies – A case series described 18 individuals who developed thrombocytopenia (median nadir platelet count, 59,000/microL; range, 0 to 127,000/microL) and thrombosis (venous, arterial, or DIC, including three with CVT and one with splanchnic vein thrombosis) at variable time intervals after receiving an mRNA COVID-19 vaccine (median, seven days; range, 1 to 61 days) [59]. All patients tested negative for anti-PF4 antibodies implicated in VITT and HIT. However, platelet activating antibodies were detected in 12 of the patients, of which eight showed anti-histone reactivity; moreover, histone/anti-histone immune complexes induced procoagulant platelet activation. Some of the patients had comorbidities (kidney transplantation, COVID-19, lymphoma, ITP) and/or autoantibodies against platelet surface glycoproteins that could have been responsible for some of the clinical features. Details of the mechanism remain to be clarified, including the role, if any, of vaccination.
+?Other causes of isolated thrombocytopenia or thrombosis with normal platelet count – Other causes of thrombocytopenia include infections, immune thrombocytopenia (ITP), medications, hypersplenism, and inherited disorders. Like VITT, there may be symptoms of thrombocytopenia. ITP is a diagnosis of exclusion. Unlike VITT, the risk of thrombosis with these disorders is usually not increased, and anticoagulation can further increase bleeding risk without providing any benefit. (See "Diagnostic approach to thrombocytopenia in adults" and "COVID-19: Hypercoagulability", section on 'Coagulation abnormalities'.)
+Other acquired risk factors for thrombosis include cancer, trauma, surgery, pregnancy, immobility, and hormonal medications. Inherited thrombophilias can also increase thrombosis risk. Unlike VITT-like disorders, thrombosis of other causes (with the exception of HIT) can be treated with heparin and does not require IVIG, which is itself potentially prothrombotic. (See "Overview of the causes of venous thrombosis in adults".)
+Specific testing for anti-PF4 antibodies in individuals with an appropriate clinical history is used to distinguish VITT and VITT-like disorders from these other diagnoses. (See 'Laboratory testing' above.)
+MANAGEMENT
+VITT and VITT-like disorders are potentially life threatening. Management recommendations are evolving. The decision to initiate each treatment (anticoagulation, intravenous immune globulin [IVIG]) requires clinical judgment regarding the likelihood of VITT versus other diagnoses; input from the consulting hematologist or other hemostasis and thrombosis expert is advised.
+Hematologist input and expert guidelines — Input from the consulting hematologist or other hemostasis and thrombosis experts is critical to assist with evaluation (including assessment of the likelihood of a VITT-like disorder versus other conditions) and management (including decisions regarding anticoagulation, intravenous immune globulin [IVIG], therapeutic plasma exchange [TPE], and transfusions) as well as case reporting.
+Other consultations may be appropriate, including neurology specialists regarding cerebral venous thrombosis (CVT) and procedural experts [60].
+Several guideline documents have been produced, and our approach is largely consistent with these expert groups; however, many of these guideline statements were produced early in the COVID-19 pandemic and do not address other VITT-like disorders and the latest information about management:
+?American Society of Hematology (ASH) – https://www.hematology.org/covid-19/vaccine-induced-immune-thrombotic-thrombocytopenia
+?International Society on Thrombosis and Haemostasis (ISTH) – https://www.isth.org/news/561406/
+?American College of Cardiology (ACC) – https://www.acc.org/latest-in-cardiology/articles/2021/04/01/01/42/vaccine-induced-thrombotic-thrombocytopenia-vitt-and-covid-19-vaccines
+?American Heart Association (AHA) on CVT – https://www.ahajournals.org/doi/10.1161/STR.0000000000000456
+?AHA and American Stroke Association on VITT – https://www.ahajournals.org/doi/10.1161/STROKEAHA.121.035564
+Hospitalization — Many individuals are hospitalized during an acute episode due to the severity of their clinical condition. An exception may be an individual with isolated thrombocytopenia (without thrombosis) who can be treated with a direct oral anticoagulant (DOAC) with very close outpatient follow-up. Individuals with chronic VITT-like disorders may be treated as outpatients once their condition is stabilized. (See 'When is it safe to discharge' below.)
+Anticoagulation
+?Indications for anticoagulation – Therapeutic anticoagulation is one of the primary treatments for VITT and VITT-like disorders. All patients should be treated with therapeutic-dose anticoagulation unless there is a contraindication such as expanding intracerebral hemorrhage. CVT associated with central nervous system (CNS) hemorrhage is not a contraindication to anticoagulation. (See "Cerebral venous thrombosis: Treatment and prognosis".)
+In addition to those with confirmed thrombosis, this includes individuals for whom there is a strong clinical suspicion for VITT or a VITT-like disorder who are awaiting confirmatory testing and those with positive laboratory testing for VITT who have not had a thrombosis.
+?Use of heparin – Given that VITT and VITT-like antibodies target the heparin-binding region of PF4, along with the corollary observation that most VITT and VITT-like antibodies are inhibited in vitro by addition of heparin, it is reasonable to consider using unfractionated or low molecular weight (LMW) heparin or fondaparinux for anticoagulation in VITT and VITT-like disorders. (See 'Antibody characteristics' above.)
+However, it is reasonable to avoid heparin in cases of diagnostic uncertainty in which heparin-induced thrombocytopenia (HIT, including delayed or spontaneous HIT) remains possible. (See 'Differential diagnosis' above.)
+Data suggesting that heparin does not exacerbate VITT include:
+	•A meta-analysis of observational studies involving >600 patients with VITT from COVID-19 vaccines did not identify a signal of increased mortality between heparin and nonheparin anticoagulation for VITT (overall mortality, 32 percent; risk ratio [RR] 0.84, 95% CI 0.47-1.50; p = 0.80) [61].
+	•In the largest study from the above meta-analysis, which included 220 individuals with definite or probable VITT, the authors stated that "heparin did not appear to be harmful in patients who received it"; this included approximately one-fourth of individuals who received heparin at some point during their treatment [43]. Mortality was 20 percent in those who received heparin and 16 percent in those who did not; the group that received heparin was heavily biased towards presentations earlier in the pandemic when the syndrome was unrecognized and outcomes may have been adversely affected by delays in diagnosis.
+	•A series of 99 patients with VITT presenting with CVT did not find a statistically significant difference in survival with use of heparin versus a nonheparin anticoagulant (adjusted odds ratio [OR] for mortality with nonheparin anticoagulants 0.70, 95% CI 0.24-2.04) [47].
+	•In vitro studies also suggest that heparin is not harmful. (See 'Pathophysiology' above.)
+?Choice of anticoagulant – The choice of anticoagulant depends on the patient's clinical status and anticipated need to stop anticoagulation rapidly (based on risk of bleeding or need for an invasive procedure). Options include:
+	•A heparin (unfractionated or LMW), provided that the diagnosis of VITT or a VITT-like disorder is assured and HIT is excluded.
+	•Fondaparinux or danaparoid (danaparoid is not available in the United States).
+	•A direct oral anticoagulant (DOAC). Options include a factor Xa inhibitor (apixaban, edoxaban, or rivaroxaban); the oral direct thrombin inhibitor dabigatran may also be an option, although it is less studied.
+	•A parenteral direct thrombin inhibitor (argatroban or bivalirudin).
+In many cases of VITT, disseminated intravascular coagulation (DIC) is present and may cause issues with parenteral direct thrombin inhibitor therapy that is monitored with the activated partial thromboplastin time (aPTT) due to a phenomenon known as "aPTT confounding" (systematic underdosing due to aPTT prolongation associated with DIC rather than due to therapeutic anticoagulation).
+
+Anticoagulant selection in heparin-induced thrombocytopenia (HIT; suspected or confirmed)
+Table 4
+The table summarizes advantages and disadvantages of nonheparin anticoagulants (table 4).
+?Dose level – Standard full therapeutic dosing is appropriate, provided there is no active bleeding, with appropriate adjustments for body weight and kidney function. Details of dosing for individual agents are discussed separately. (See "Management of heparin-induced thrombocytopenia", section on 'Specific agents'.)
+?Duration of anticoagulation – The appropriate duration of anticoagulation is unknown. Analogous with spontaneous HIT following orthopedic surgery, thrombocytopenia can be prolonged (eg, eight weeks). A reasonable approach for VITT or a VITT-like disorder with thrombosis would be to continue anticoagulation for three months after normalization of the platelet count, as long as no further thrombosis occurs. For individuals without thrombosis, it appears prudent to continue anticoagulation until platelet count recovery and perhaps longer if tolerated (four to six weeks after platelet count recovery), by analogy with the duration of anticoagulation for classic HIT. (See "Management of heparin-induced thrombocytopenia", section on 'Duration of anticoagulation'.)
+Individuals who are discharged from the hospital can be switched to a DOAC if they were receiving a parenteral anticoagulant in the hospital. Warfarin and other vitamin K antagonists (VKAs) should be avoided while the patient is thrombocytopenic, due to lack of efficacy during ongoing hemostatic activation, but a VKA might be an option following platelet count recovery for an individual who is unable to receive a DOAC, as long as appropriate bridging is used until the INR reaches the therapeutic range.
+IVIG — High-dose intravenous immune globulin (IVIG) interrupts antibody-induced platelet activation. (See 'Mechanisms and sites of thrombosis' above.)
+?Indications for IVIG – We suggest IVIG in all individuals with VITT or a VITT-like disorder, unless there is a contraindication. We also suggest IVIG in individuals with a high clinical suspicion for a VITT-like disorder (thrombosis, thrombocytopenia, and high D-dimer within three months after adenoviral infection) while awaiting results of the anti-PF4 antibody testing, especially if the patient is clinically ill or unstable.
+?Dose and duration – A typical IVIG dose is 1 g/kg (based on actual body weight) intravenously once per day. We generally provide IVIG for two days total (although there is a possibility to give a third partial or full dose if no benefit is seen after two doses).
+?Monitoring – After IVIG is administered, thrombocytopenia can recur (within a few days after IVIG is completed). It is important to continue to monitor the platelet count during hospitalization and following discharge from the hospital. (See 'Monitoring' below.)
+?Supporting evidence – Evidence supporting the use of IVIG comes from:
+	•Use in autoimmune HIT – (See "Management of heparin-induced thrombocytopenia", section on 'Role of IVIG'.)
+	•Observational studies
+	-In a nonrandomized series of 99 individuals with VITT presenting with CVT, use of IVIG was associated with a statistically significant reduction in mortality (29 percent, versus 70 percent in those who did not receive IVIG; adjusted odds ratio [OR] 0.19, 95% CI 0.06-0.58) [47].
+	-In a series of three individuals with VITT and arterial thrombosis after receiving the ChAdOx1 nCoV-19 vaccine, treatment with high-dose IVIG was associated with rapid improvements in platelet counts and decrease in markers of hypercoagulability [44]. Another series of five individuals with VITT and various thrombotic manifestations had rapid improvements in platelet counts [62]. None of the three individuals in the first series had new or progressive thrombosis following IVIG administration; one individual in the second series had progression of CVT.
+These findings suggest that IVIG halts platelet activation in VITT (sometimes, only transiently), and clinicians need to remain vigilant to identify new thrombotic or bleeding complications.
+?Mechanism of action – The mechanism of action of IVIG is thought to be similar to its role in other autoantibody-mediated disorders and to involve autoantibody binding to cellular receptors (in this case, platelet Fc?IIa receptors). In the series of three patients above, in vitro testing showed that IVIG blocked platelet activation in a functional assay but did not disrupt autoantibody binding to PF4 [44]. (See 'Pathophysiology' above.)
+Minimize platelet transfusions and procoagulant medications — Platelet transfusions are generally reserved for critical bleeding (bleeding into a critical anatomical site or that causes hemodynamic or respiratory compromise). Platelet transfusions should be provided to patients with life-threatening complications including bleeding or need for emergency surgery. (See 'Treatment of bleeding' below.)
+In such cases, it may be reasonable to transfuse platelets and/or a source of fibrinogen (fibrinogen concentrate, plasma, or cryoprecipitate), depending on the platelet count and fibrinogen level. Hematology and/or transfusion medicine input may be especially helpful in these cases. (See 'Hematologist input and expert guidelines' above and "Cryoprecipitate and fibrinogen concentrate".)
+Other than these indications, platelet transfusions are minimized to avoid worsening thrombosis, a theoretical risk based on extrapolation from other conditions. (See "Platelet transfusion: Indications, ordering, and associated risks", section on 'TTP or HIT'.)
+We do not transfuse platelets for thrombocytopenia without bleeding, regardless of the platelet count, as the platelet count is expected to improve with therapies discussed above. (See 'Anticoagulation' above and 'IVIG' above and 'Plasma exchange for refractory disease' below.)
+A similar approach can be considered for fibrinogen replacement in an individual with marked hypofibrinogenemia. Fibrinogen concentrates (or Fresh Frozen Plasma or Cryoprecipitate) should be minimized in the absence of bleeding or need for surgery.
+Treatment of bleeding — Management of bleeding in an individual with VITT or a VITT-like disorder is especially challenging due to the competing goals of stopping bleeding and preventing thrombosis.
+General principles of managing concurrent bleeding and thrombosis should be followed, with input from the consulting hemostasis specialist. Details are presented in separate topic reviews. (See "Evaluation and management of disseminated intravascular coagulation (DIC) in adults", section on 'Treatment' and "Management of bleeding in patients receiving direct oral anticoagulants".)
+Monitoring — Clinical monitoring for signs of thrombosis is critical. Platelet count monitoring is especially important in VITT and VITT-like disorders because thrombocytopenia can recur after the effects of IVIG wear off.
+?Inpatients – Hospitalized patients should have daily platelet count monitoring. Other monitoring may include coagulation studies (prothrombin time [PT] with international normalized ratio [INR], aPTT, fibrinogen, D-dimer), especially if abnormal.
+?Outpatients – After discharge, the monitoring interval can be extended according to the patient's clinical status. An example would be twice weekly monitoring for clinical status and platelet count for one to two weeks, as long as the platelet count is increasing or stable, followed by less frequent clinical evaluations.
+When is it safe to discharge — The duration of acute illness in VITT and VITT-like disorders is unknown. Analogous to spontaneous HIT, thrombocytopenia can persist for days to weeks.
+We would continue inpatient management until all of the following occur:
+?The platelet count is >50,000/microL and improving for at least two to three days.
+?The patient is on stable anticoagulation with no new or progressive thrombosis.
+?There is no bleeding for at least two to three days.
+?Appropriate follow-up has been assured.
+REFRACTORY DISEASE
+Plasma exchange for refractory disease — Therapeutic plasma exchange (TPE) and immunosuppression have been proposed for refractory disease or disease with concerning features such as cerebral vein thrombosis (CVT) or multiple thromboses with evidence of excessive platelet activation (platelet count <30,000/microL) [43,63]. Plasma rather than albumin is preferred as the replacement fluid, given that the higher immunoglobulin levels provided by plasma may help in inhibiting VITT antibody-induced platelet aggregation. (See "Therapeutic apheresis (plasma exchange or cytapheresis): Indications and technology", section on 'Replacement fluids'.)
+Supporting evidence includes:
+?In three patients with VITT who had persistent thrombocytopenia and ongoing thrombosis despite treatment with anticoagulation and IVIG, TPE using plasma (or plasma plus albumin) as the replacement fluid resulted in cessation of thrombosis and improvement in platelet counts [64]. TPE was performed daily for five to seven days. In one case, IVIG was added after each treatment partway through the course, and in another case, one dose of rituximab was given after the fifth TPE procedure.
+?In a large series of 220 patients with definite or probable VITT, 17 (8 percent) were treated with TPE [43]. The authors noted that TPE in individuals with severe thrombocytopenia plus CVT or severe thrombocytopenia plus extensive thrombosis was associated with a survival rate of 90 percent, which was higher than would be expected for these individuals (overall mortality for platelet count <30,000/microL, 41 percent), leading them to strongly consider TPE in such individuals.
+Other therapies for refractory disease — Case reports have described use of immunosuppressive therapies; the approach to these would be similar to classic HIT. (See "Management of heparin-induced thrombocytopenia", section on 'Immunosuppression'.)
+PROGNOSIS
+For VITT caused by COVID-19 vaccines, case series and a meta-analysis suggested a mortality rate of 22 to 24 percent [43,54]. Risk factors for death included cerebral venous thrombosis (CVT) and more pronounced hemostatic abnormalities (more severe thrombocytopenia, higher D-dimer, and lower fibrinogen). A separate meta-analysis also identified CVT, thrombotic storm, and severe thrombocytopenia as risk factors for increased mortality [65].
+
+SUMMARY AND RECOMMENDATIONS
+?Pathophysiology and incidence – VITT (previously vaccine-induced immune thrombotic thrombocytopenia; subsequently virus-induced immune thrombotic thrombocytopenia) was an extremely rare syndrome seen in individuals who received certain adenoviral-vectored coronavirus disease 2019 (COVID-19) vaccines that are no longer used. After VITT was identified, a related syndrome was described in individuals with adenovirus infection, and VITT-like disorders were reported with other rare conditions including other viruses, autoimmune diseases, and monoclonal gammopathies. These disorders are similar to heparin-induced thrombocytopenia (HIT) in that the antibodies bind platelet factor 4 (PF4) and activate platelets, but the antigenic site is different, and in VITT and VITT-like disorders, the antibodies are heparin-independent. (See 'Pathophysiology' above and 'Epidemiology' above.)
+?Presentation – Most individuals present with thrombosis (table 2), prompting laboratory evaluation leading to recognition of thrombocytopenia. Cerebral vein thrombosis (CVT) is common. Isolated thrombocytopenia without thrombosis can occur. (See 'Clinical features' above.)
+?Evaluation
+	•VITT due to adenovirus infection or a VITT-like disorder of other cause may be suspected in individuals with unexplained thrombocytopenia and thrombosis, especially in unusual venous sites (CVT, splanchnic, ophthalmic, pulmonary) and arterial sites and especially with a known underlying trigger such as recent adenovirus infection or monoclonal gammopathy. (See 'When to suspect' above.)
+	•Laboratory testing includes complete blood count (CBC), platelet count, prothrombin time (PT) with international normalized ratio (INR), activated partial thromboplastin time (aPTT), fibrinogen, D-dimer, imaging for thrombosis, and often testing for SARS-CoV-2. Positive anti-PF4 antibody testing using an appropriate test (enzyme-linked immunosorbent assay [ELISA] and/or functional test) is needed to confirm the diagnosis. "Rapid HIT assays" are unreliable and should be avoided for this indication. (See 'Laboratory testing' above and 'Imaging to diagnose thrombosis' above.)
+	•Other causes of thrombocytopenia and thrombosis should be considered (table 3). (See 'Differential diagnosis' above.)
+?Management
+	•Anticoagulation – All individuals with VITT or a VITT-like disorder and thrombosis require full (therapeutic) dose anticoagulation. (See 'Anticoagulation' above.)
+	-We suggest a nonheparin anticoagulant rather than heparin as initial therapy (Grade 2C); this is because it takes time to obtain the results of anti-PF4 antibody testing and to exclude HIT. Heparin is a reasonable option if HIT has been definitively excluded.
+	-We also suggest anticoagulation for individuals with VITT-like disorders who do not have thrombosis (Grade 2C).
+	-If the suspicion for a VITT-like disorder is high, anticoagulation should not be delayed while awaiting confirmatory testing.
+	-The ideal duration of anticoagulation is unknown; it is reasonable to continue anticoagulation for three months after normalization of the platelet count as long as no further thrombosis occurs, or, if there is no thrombosis, for four to six weeks after platelet count recovery.
+	•IVIG – We suggest intravenous immune globulin (IVIG) for all individuals with VITT or a VITT-like disorder (Grade 2C). A typical dose is 1 g/kg daily for two days. (See 'IVIG' above.)
+	•Bleeding – Platelet transfusions may be required but are generally reserved for critical bleeding (bleeding into a critical anatomic site or hemodynamic or respiratory compromise). Administration of fibrinogen (from a concentrate, plasma, or Cryoprecipitate) may be appropriate for individuals with critical bleeding and hypofibrinogenemia but should not be used for asymptomatic hypofibrinogenemia. (See 'Treatment of bleeding' above and 'Minimize platelet transfusions and procoagulant medications' above.)
+	•Refractory disease – Therapeutic plasma exchange (TPE) can be used in refractory disease or in individuals with especially concerning features (platelet count <30,000/microL with CVT; severe thrombocytopenia with multiple thromboses). Other options include immunosuppressive therapies used for refractory HIT. (See 'Plasma exchange for refractory disease' above and "Management of heparin-induced thrombocytopenia", section on 'Immunosuppression'.)
+
+
+
+
+
+PF4-associated immune thrombocytopenia and thrombosis (PITT) disorders
+Clinical entity	Description
+HIT/HIT-like disorders	
+Classic HIT (cHIT)	HIT featuring predominantly heparin-dependent platelet activation
+Autoimmune HIT (aHIT)	Heparin-induced (antibodies including heparin-independent platelet-activating properties)
+• Delayed-onset HIT	HIT that begins or worsens after stopping of heparin
+• Refractory (persisting) HIT	HIT that persists for >1 week despite stopping heparin
+• Heparin flush HIT	HIT induced by heparin flushes
+• Fondaparinux-associated HIT	HIT triggered by exposure to fondaparinux
+• Severe HIT with overt DIC	HIT with unusually severe thrombocytopenia (platelet count <20,000/microL) or with 1 or more of the following:
+	• Relative/absolute hypofibrinogenemia
+	• Elevated INR without another explanation
+	• Normoblastemia (circulating nucleated RBCs)
+	• Microvascular thrombosis
+Spontaneous HIT (SpHIT)	Disorder that clinically and serologically mimics HIT despite absence of proximate* heparin exposure or vaccination (eg, after knee replacement surgery)
+VITT/VITT-like disorders	
+VITT	Disorder caused by anti-PF4 antibodies associated with proximate* exposure to a viral infection (usually adenovirus; previously described after exposure to an adenoviral-vectored COVID-19 vaccine)
+VITT-like disorder	Disorder that clinically and serologically mimics VITT, caused by another condition such as a monoclonal gammopathy or autoimmune disease
+PITT	Umbrella term for anti-PF4 disorders
+Post-CMV PITT	Disorder with mixed HIT/HIT-like and VITT/VITT-like characteristics (reported case had immune thrombocytopenia and thrombosis post-CMV infection)
+
+CMV: cytomegalovirus; COVID-19: coronavirus disease 2019; DIC: disseminated intravascular coagulation; HIT: heparin-induced thrombocytopenia; INR: international normalized ratio; PF4: platelet factor 4; RBCs: red blood cells; VITT: virus-induced immune thrombotic thrombocytopenia, previously called vaccine-induced immune thrombotic thrombocytopenia.
+* Proximate refers to exposure within approximately the previous 3 months.
+
+
+Thrombosis symptoms and evaluation in VITT and VITT-like disorders
+Site of thrombosis	Typical presenting symptoms	Diagnostic imaging and caveats*
+Cerebral veins and dural venous sinuses	• New, persistent headache	• Magnetic resonance venography
+	• Vomiting	• Conventional angiography
+	• Visual impairment	• Brain MRI
+(NOTE: CT is often normal and is thus unreliable)
+	• Focal neurologic deficits or seizures
+	• Encephalopathy
+Splanchnic veins (splenic, portal, mesenteric)	• Severe abdominal pain	• CT with contrast
+	• Back pain	• Doppler ultrasound
+DVT of the leg	• Leg pain	• Compression ultrasonography with Doppler
+	• Leg swelling/edema
+Pulmonary embolism	• Acute chest pain	• CT pulmonary angiography
+	• Dyspnea	• Ventilation/perfusion (V/Q) scan
+Ophthalmic vein thrombosis	• Orbital pain	• MRI
+	• Diplopia or vision loss	• Magnetic resonance venography
+Ischemic stroke	• Sudden onset focal neurologic deficit	• Brain MRI and/or head CT
+	• Encephalopathy	• CT or magnetic resonance angiography of the head and neck
+Acute limb ischemia	• Pain	• CT angiography
+	• Pulseless pallor	• Catheter-based angiography
+	• Neurologic deficits (sensory or motor)
+Additional testing includes CBC with platelet count, anti-PF4 antibody testing (ELISA and/or functional assay), and coagulation testing (PT, aPTT, fibrinogen, and D-dimer).
+aPTT: activated partial thromboplastin time; CBC: complete blood count; CT: computed tomography; DVT: deep vein thrombosis; ELISA: enzyme-linked immunosorbent assay; MRI: magnetic resonance imaging; PF4: platelet factor 4; PT: prothrombin time; VITT: virus-induced immune thrombotic thrombocytopenia, previously called vaccine-induced immune thrombotic thrombocytopenia.
+
+
+Distinguishing features between VITT, ITP, and TTP
+ 	Syndrome		
+	VITT or VITT-like disorder	ITP	TTP
+Thrombocytopenia	• Yes, typically 10,000 to 100,000/microL	• Yes	• Yes
+Thrombosis	• Yes, including atypical sites of venous and arterial thrombosis	• Generally not seen, although there may be a slightly increased risk for VTE	• Typically microvascular rather than VTE
+Other clinical	• Adenovirus infection or other trigger (eg, monoclonal gammopathy)	• Petechiae or purpura	• Neurologic, kidney, and/or cardiac involvement may be seen
+	• Flu-like syndrome	• Often, otherwise well; often an incidental finding
+Other laboratory	• Normal to slightly prolonged PT and aPTT	• Normal PT and aPTT	• Normal PT and aPTT
+	• Fibrinogen may be low	• Normal fibrinogen and D-dimer	• Normal fibrinogen and D-dimer
+	• D-dimer often markedly increased	• Normal hemoglobin (unless anemia from bleeding)	• Microangiopathic hemolytic anemia with laboratory findings of hemolysis and schistocytes on the blood smear
+Diagnostic confirmation	• Positive anti-PF4 antibody ELISA or functional assay	• Diagnosis of exclusion	• Severe ADAMTS13 deficiency (activity <10%)
+Management implications*	• Anticoagulation	• Platelet transfusions for critical bleeding	• Therapeutic plasma exchange
+	• Avoid warfarin (unless platelet count has recovered)	• Glucocorticoids or IVIG for serious bleeding or severe thrombocytopenia	• Glucocorticoids
+	• High-dose IVIG	• Rituximab, splenectomy, TPO-RA, or fostamatinib in selected cases	• Rituximab
+	• Minimize platelet and plasma transfusions		• Caplacizumab in selected cases
+			• Avoid platelet transfusions unless major bleeding
+Bolded text identifies some of the key distinguishing features of VITT. Hematologist input is advised to assist in distinguishing among these and other syndromes with thrombocytopenia and thrombosis.
+aPTT: activated partial thromboplastin time; COVID-19: coronavirus disease 2019; ELISA: enzyme-linked immunosorbent assay; ITP: immune thrombocytopenia; IVIG: intravenous immune globulin; PT: prothrombin time; TPO-RA: thrombopoietin receptor agonist; TTP: thrombotic thrombocytopenia; VITT: virus-induced immune thrombotic thrombocytopenia, previously called vaccine-induced immune thrombotic thrombocytopenia; VTE: venous thromboembolism.
+
+
+Anticoagulant selection in heparin-induced thrombocytopenia (HIT; suspected or confirmed)
+Anticoagulant	Features affecting selection	Mechanism, administration, and monitoring
+Argatroban	• Short-acting	• Parenteral direct thrombin inhibitor
+	• Can be used in CKD; no dose adjustment needed	• Administered by continuous intravenous infusion
+	• Eliminated hepatically; dose adjustment needed in liver impairment	• Monitored and adjusted by aPTT; obtain aPTT prior to initiation, 2 hours after starting infusion, and after dose changes
+	• Can be used in pregnancy	• Half-life approximately 40 to 50 minutes (prolonged to approximately 180 minutes in hepatic impairment)
+	• Use in breastfeeding unknown	• Prolongs the PT/INR
+		• No reversal agent (but effect is rapidly reversed upon discontinuation)
+		• Expensive
+Bivalirudin	• Short-acting	• Parenteral direct thrombin inhibitor
+	• Eliminated by the kidney; dose adjustment needed in CKD	• Administered by continuous intravenous infusion
+	• Can be used in liver impairment; no dose adjustment is needed	• Monitored and adjusted by aPTT; obtain aPTT prior to infusion, 2 hours after starting infusion, and after dose changes
+	• Multi-organ failure in critical illness; dose adjustment is needed	• Half-life approximately 25 minutes (prolonged to approximately 3.5 hours in ESKD)
+	• Can be used in pregnancy	• Prolongs the PT/INR, less so than argatroban
+	• Use in breastfeeding unknown	• No reversal agent (but effect is rapidly reversed upon discontinuation)
+		• Expensive
+Danaparoid (not available in United States)	• Parenteral agent; may be given subcutaneously following initial intravenous bolus	• Parenteral inhibitor of thrombin and factor Xa (indirect, heparinoid, derived from porcine intestine)
+	• Eliminated by the kidney; dose adjustment needed in CKD	• Administered intravenously or subcutaneously (intravenous dosing preferred if an invasive procedure is likely to be needed)
+	• Can be used in liver impairment; no dose adjustment is needed	• No routine coagulation test monitoring; anti-factor Xa activity can be monitored if needed*
+	• Can be used in pregnancy	• Half-life (anti-factor Xa activity) is approximately 25 hours; prolonged to 29 to 35 hours in CKD
+	• Can be used in breastfeeding	• No reversal agent
+Fondaparinux	• Subcutaneous agent	• Parenteral inhibitor of factor Xa (indirect)
+	• Eliminated by the kidney; dose adjustment is needed for CrCl 30 to 50 mL/minute and should not be used if CrCl is <30 mL/minute	• Administered subcutaneously, once per day
+	• Can be used in liver impairment; no dose adjustment is needed	• No routine coagulation test monitoring; anti-factor Xa activity can be monitored if needed*
+	• Not suitable if likely to undergo urgent invasive procedure due to long half-life	• Half-life 17 to 21 hours; prolonged in renal impairment, older adults, and low body weight
+	• Can be used in pregnancy	• Possible reversal with andexanet alfa
+Apixaban	• Oral agent	• Oral direct factor Xa inhibitor
+	• Eliminated by the kidney and liver (less dependent on kidney function than other DOACs); no dose adjustment is needed for CrCl ?25 mL/minute or mild to moderate hepatic impairment	• Administered orally, twice-daily dosing (higher initial dose for VTE treatment)
+	• Do not use if CrCl <25 mL/minute, serum creatinine >2.5 mg/dL, dialysis-dependent, or severe hepatic impairment	• Half-life approximately 12 hours
+	• Subject to CYP3A4 and P-gp drug interactions	• No routine coagulation test monitoring; anti-factor Xa activity can be monitored if needed*
+	• Use in pregnancy and breastfeeding unknown	• Reversal agent (andexanet alfa or PCC)
+		• Not dialyzable
+Dabigatran	• Oral agent	• Oral direct thrombin inhibitor
+	• Mostly eliminated by the kidney; no dose adjustment needed for CrCl >30 mL/minute or liver impairment¶	• Administered orally, twice-daily dosing (initial parenteral agent for VTE treatment)
+	• Do not use if CrCl ?30 mL/minute or dialysis-dependent	• Half-life 12 to 17 hours; prolonged up to 28 hours in severe renal impairment
+	• Subject to P-gp drug interactions	• No routine coagulation test monitoring; 
+
+
+	• Use in pregnancy and breastfeeding unknown	• Reversal agent (idarucizumab)
+Edoxaban	• Oral agent	• Oral direct factor Xa inhibitor
+	• Eliminated by the kidney and liver; no dose adjustment required for CrCl >50 mL/minute or mild liver impairment	• Administered orally, once-daily dosing (initial parenteral agent for VTE treatment)
+	• Dose adjustment is needed for CrCl 15 to 50 mL/minute	• Half-life 10 to 14 hours; prolonged in renal impairment
+	• Do not use if CrCl ?15 mL/minute or >95 mL/minute, dialysis-dependent, or moderate to severe liver impairment	• No routine coagulation test monitoring; anti-factor Xa activity can be monitored if needed*
+	• Dose adjustment needed for body weight ?60 kg	• Reversal agent (andexanet alfa or PCC)
+	• Subject to P-gp drug interactions
+	• Use in pregnancy and breastfeeding unknown
+Rivaroxaban	• Eliminated by the kidney and liver; no dose adjustment is needed for CrCl >30 mL/minute or mild liver impairment	• Oral direct factor Xa inhibitor
+	• Do not use if CrCl ?30 mL/minute, dialysis-dependent, or moderate to severe hepatic impairment	• Administered orally, once-daily dosing (initial twice-daily dosing for VTE treatment)
+	• Subject to CYP3A4 and P-gp drug interactions	• Half-life 5 to 9 hours
+	• Use in pregnancy and breastfeeding unknown	• No routine monitoring; anti-factor Xa activity can be monitored if needed*
+		• Reversal agent (andexanet alfa or PCC)
+Warfarin	• Cannot be used until stable anticoagulation with another non-heparin anticoagulant has been established and the platelet count has normalized or returned to baseline	• Oral vitamin K antagonist, interferes with synthesis of thrombin and factors VII, IX, and X
+	• Can be used in severe kidney or liver impairment; monitor INR closely	• Administered orally, once-daily dosing with regular monitoring and dose adjustments based on the PT/INR
+	• Many drug and dietary interactions	• Requires at least five consecutive days of overlapping non-heparin anticoagulant that is continued until the INR is therapeutic
+	• Can be used in patients with a mechanical heart valve	• If transitioning from argatroban to warfarin, refer to institutional guidelines for INR target as both agents elevate the INR
+	• Teratogen: Avoid in first trimester of pregnancy unless benefits outweigh risks (eg, mechanical heart valve)	• Reversal agent (vitamin K and PCC)
+		• Inexpensive
+
+For patients with a thromboembolic event, DOACs require initial higher dosing or a parenteral agent:
+• Dabigatran or edoxaban – Must be preceded by 5 days of a parenteral anticoagulant.
+• Apixaban or rivaroxaban – Initial dosing is higher.
+For agents that inhibit factor Xa, anti-factor Xa testing may be useful in selected patients (prior to urgent neurosurgery, extremes of body weight, CKD). If anti-factor Xa testing is used, it must be calibrated for the specific anticoagulant. Anti-factor-Xa activity calibrated for fondaparinux or danaparoid is not available in many clinical settings.
+aPTT: activated partial thromboplastin time; CKD: chronic kidney disease; CrCl: creatinine clearance; DOACs: direct-acting oral anticoagulants; ESKD: end-stage kidney disease; factor Xa: activated factor X; HIT: heparin-induced thrombocytopenia; INR: international normalized ratio; PCC: prothrombin complex concentrate; PT: prothrombin time; VTE: venous thromboembolism.
+* If anti-factor Xa monitoring is used, it must be done using an assay calibrated for the specific drug the patient is taking.
+¶ In some countries other than the United States, the approved product information recommends a dose reduction in patients with moderately impaired kidney function and elevated risk of bleeding.
+
+
+
+
+
+
+
+
+Question generation
+Question 1
+A 34-year-old woman presents to the emergency department with a severe, persistent headache and blurred vision that began 4 days ago. Ten days prior, she was diagnosed with an adenovirus infection after presenting with fever and pharyngitis. Her physical examination is notable for papilledema. An initial head CT is unremarkable. Laboratory studies show a platelet count of 45,000/microL, D-dimer of 12,500 ng/mL, and fibrinogen of 110 mg/dL. A rapid latex-enhanced immunoassay for HIT antibodies is performed and returns negative. An MR venogram is pending. Given the high suspicion for a VITT-like disorder, which of the following is the most appropriate next step in establishing the diagnosis?
+A. Order ADAMTS13 activity level
+B. Repeat the rapid HIT assay
+C. Order a PF4/polyanion ELISA
+D. Assume ITP and start glucocorticoids
+E. Perform a bone marrow biopsy
+Correct Answer: C
+<answer>
+Question 1
+Question Statement: A 34-year-old woman presents to the emergency department with a severe, persistent headache and blurred vision that began 4 days ago. Ten days prior, she was diagnosed with an adenovirus infection after presenting with fever and pharyngitis. Her physical examination is notable for papilledema. An initial head CT is unremarkable. Laboratory studies show a platelet count of 45,000/microL, D-dimer of 12,500 ng/mL, and fibrinogen of 110 mg/dL. A rapid latex-enhanced immunoassay for HIT antibodies is performed and returns negative. An MR venogram is pending. Given the high suspicion for a VITT-like disorder, which of the following is the most appropriate next step in establishing the diagnosis?
+Correct Answer: C) Order a PF4/polyanion ELISA
+Explanation of the Correct Answer:
+The patient presents with a classic clinical picture for a VITT-like disorder: a recent adenoviral infection trigger, thrombosis in an unusual site (suspected cerebral venous thrombosis given headache and papilledema), thrombocytopenia, and a markedly elevated D-dimer. The provided text explicitly states that rapid HIT assays are unreliable for diagnosing VITT and VITT-like disorders. Specifically, it warns, "Rapid HIT assays are generally negative in VITT and VITT-like disorders and should not be used to confirm or exclude the diagnosis due to their poor sensitivity." Examples of assays to avoid include the "Latex-enhanced immunoassay." Therefore, the negative rapid test is expected and does not rule out the diagnosis. The text recommends that the "Enzyme-linked immunosorbent assay (ELISA) testing is the recommended initial test" and that "Commercial PF4/polyanion ELISA tests are usually positive in either HIT or VITT." Ordering the correct assay is the critical next diagnostic step.
+Analysis of Other Options (“Distractors”):
+* A) Order ADAMTS13 activity level: This test is used to diagnose thrombotic thrombocytopenic purpura (TTP). While TTP is in the differential for thrombotic microangiopathies, the text notes that in TTP, the D-dimer is "not greatly elevated because platelets alone (not coagulation factors) are consumed." This patient's markedly elevated D-dimer and low fibrinogen point away from TTP and towards a consumptive coagulopathy like VITT or DIC, making the ELISA a more direct and higher-yield test.
+* B) Repeat the rapid HIT assay: Repeating a test that is known to have poor sensitivity for the suspected condition is inappropriate and will only delay the correct diagnosis. The text is clear that these rapid assays are designed to detect HIT antibodies, which have different binding characteristics than VITT antibodies.
+* D) Assume ITP and start glucocorticoids: Immune thrombocytopenia (ITP) "generally causes thrombocytopenia without thrombosis." While VITT can present with isolated thrombocytopenia, this patient's presentation is dominated by symptoms of thrombosis. Furthermore, the greatly elevated D-dimer is a key feature distinguishing VITT from ITP, in which the "D-dimer is normal or only mildly elevated."
+* E) Perform a bone marrow biopsy: A bone marrow biopsy is used to evaluate for primary bone marrow failure or infiltrative processes as a cause of thrombocytopenia. In this acute setting with clear evidence of a consumptive process (thrombosis, high D-dimer), a bone marrow biopsy is not indicated and would not be the most appropriate next step.
+<summary>
+**Key Takeaways:**
+1. VITT and VITT-like disorders should be suspected in patients with thrombosis (especially at unusual sites) and thrombocytopenia following a trigger like an adenovirus infection.
+2. Rapid HIT immunoassays (e.g., latex-enhanced) are unreliable for diagnosing VITT, and a negative result does not exclude the diagnosis.
+3. The recommended initial serologic test for suspected VITT is a PF4/polyanion enzyme-linked immunosorbent assay (ELISA).
+</summary>
+</answer>
+<answer>
+
+Formatted output
+Question 1--VITT-like disorder diagnosis, assay selection
+A 34-year-old woman presents to the emergency department with a severe, persistent headache and blurred vision that began 4 days ago. Ten days prior, she was diagnosed with an adenovirus infection after presenting with fever and pharyngitis. Her physical examination is notable for papilledema. An initial head CT is unremarkable. Laboratory studies show a platelet count of 45,000/microL, D-dimer of 12,500 ng/mL, and fibrinogen of 110 mg/dL. A rapid latex-enhanced immunoassay for HIT antibodies is performed and returns negative. An MR venogram is pending. Given the high suspicion for a VITT-like disorder, which of the following is the most appropriate next step in establishing the diagnosis?
+A. Order ADAMTS13 activity level
+B. Repeat the rapid HIT assay
+C. Order a PF4/polyanion ELISA
+D. Assume ITP and start glucocorticoids
+E. Perform a bone marrow biopsy
+Correct Answer: C
+Explanation of the Correct Answer:
+C) Order a PF4/polyanion ELISA is the most appropriate next step. The patient presents with a classic clinical picture for a VITT-like disorder: a recent adenoviral infection trigger, thrombosis in an unusual site (suspected cerebral venous thrombosis given headache and papilledema), thrombocytopenia, and a markedly elevated D-dimer. Rapid HIT assays are unreliable for diagnosing VITT and VITT-like disorders. Specifically, Rapid HIT assays are generally negative in VITT and VITT-like disorders and should not be used to confirm or exclude the diagnosis due to their poor sensitivity. The negative rapid test (e.g., latex-enhanced immunoassay) is therefore expected and does not rule out the diagnosis. Enzyme-linked immunosorbent assay (ELISA) testing is the recommended initial test, and commercial PF4/polyanion ELISA tests are usually positive in either HIT or VITT. Ordering the correct assay is the critical next diagnostic step.
+Analysis of Other Options (Distractors):
+A) Order ADAMTS13 activity level is not the best choice because this test is used to diagnose thrombotic thrombocytopenic purpura (TTP). While TTP is in the differential for thrombotic microangiopathies, in TTP, the D-dimer is not greatly elevated because platelets alone (not coagulation factors) are consumed. This patient's markedly elevated D-dimer and low fibrinogen point away from TTP and towards a consumptive coagulopathy like VITT or DIC, making the ELISA a more direct and higher-yield test.
+B) Repeat the rapid HIT assay is not the best choice because repeating a test that is known to have poor sensitivity for the suspected condition is inappropriate and will only delay the correct diagnosis. These rapid assays are designed to detect HIT antibodies, which have different binding characteristics than VITT antibodies.
+D) Assume ITP and start glucocorticoids is not the best choice because Immune thrombocytopenia (ITP) generally causes thrombocytopenia without thrombosis. The greatly elevated D-dimer is a key feature distinguishing VITT from ITP, in which the D-dimer is normal or only mildly elevated.
+E) Perform a bone marrow biopsy is not the best choice because a bone marrow biopsy is used to evaluate for primary bone marrow failure or infiltrative processes as a cause of thrombocytopenia. In this acute setting with clear evidence of a consumptive process (thrombosis, high D-dimer), a bone marrow biopsy is not indicated and would not be the most appropriate next step.
+Key Insights: VITT and VITT-like disorders should be suspected in patients with thrombosis (especially at unusual sites) and thrombocytopenia following a trigger like an adenovirus infection. Rapid HIT immunoassays (e.g., latex-enhanced) are unreliable for diagnosing VITT, and a negative result does not exclude the diagnosis. The recommended initial serologic test for suspected VITT is a PF4/polyanion enzyme-linked immunosorbent assay (ELISA).
+
