@@ -1,6 +1,6 @@
 # Cloud Run Deployment Guide
 
-This guide covers deploying the Microlearning Content Generator to Google Cloud Run.
+This application is designed to run as a **single container on Google Cloud Run**, serving both the UI and API as specified in Milestone 2 requirements.
 
 ## Prerequisites
 
@@ -11,35 +11,34 @@ This guide covers deploying the Microlearning Content Generator to Google Cloud 
    - Secret Manager API
    - Container Registry API
 3. gcloud CLI installed and configured
-4. Required secrets created in Secret Manager
 
 ## Setup Secrets
 
-First, create the required secrets in Google Secret Manager:
-
-```bash
-# Create API key secrets
-echo -n "your-google-api-key" | gcloud secrets create google-api-key --data-file=-
-echo -n "your-anthropic-api-key" | gcloud secrets create anthropic-api-key --data-file=-
-echo -n "your-editor-password" | gcloud secrets create editor-password --data-file=-
-```
-
-## Deploy Using Cloud Build
-
-### 1. One-time setup
+Create required secrets in Google Secret Manager:
 
 ```bash
 # Set your project ID
 export PROJECT_ID=your-project-id
 gcloud config set project $PROJECT_ID
 
+# Create API key secrets
+echo -n "your-google-api-key" | gcloud secrets create google-api-key --data-file=-
+echo -n "your-anthropic-api-key" | gcloud secrets create anthropic-api-key --data-file=-
+echo -n "your-editor-password" | gcloud secrets create editor-password --data-file=-
+```
+
+## Deploy with Cloud Build
+
+### One-time setup
+
+```bash
 # Enable required APIs
 gcloud services enable cloudbuild.googleapis.com
 gcloud services enable run.googleapis.com
 gcloud services enable secretmanager.googleapis.com
 gcloud services enable containerregistry.googleapis.com
 
-# Create a service account for Cloud Run
+# Create service account for Cloud Run
 gcloud iam service-accounts create microlearning-sa \
   --display-name="Microlearning Generator Service Account"
 
@@ -49,10 +48,10 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --role="roles/secretmanager.secretAccessor"
 ```
 
-### 2. Deploy with Cloud Build
+### Deploy
 
 ```bash
-# Submit build (replace with your values)
+# Submit build and deploy
 gcloud builds submit \
   --config=cloudbuild.yaml \
   --substitutions=_REGION=us-central1,_SERVICE_ACCOUNT=microlearning-sa@$PROJECT_ID.iam.gserviceaccount.com
@@ -60,19 +59,17 @@ gcloud builds submit \
 
 ## Manual Deployment
 
-If you prefer to deploy manually:
-
-### 1. Build and push Docker image
+### Build and push Docker image
 
 ```bash
-# Build the image
+# Build the single container image
 docker build -t gcr.io/$PROJECT_ID/microlearning-generator:latest .
 
 # Push to Container Registry
 docker push gcr.io/$PROJECT_ID/microlearning-generator:latest
 ```
 
-### 2. Deploy to Cloud Run
+### Deploy to Cloud Run
 
 ```bash
 gcloud run deploy microlearning-generator \
@@ -85,7 +82,7 @@ gcloud run deploy microlearning-generator \
   --concurrency 100 \
   --min-instances 0 \
   --max-instances 10 \
-  --port 8000 \
+  --port 8080 \
   --allow-unauthenticated \
   --set-secrets="GOOGLE_API_KEY=google-api-key:latest" \
   --set-secrets="ANTHROPIC_API_KEY=anthropic-api-key:latest" \
@@ -94,77 +91,87 @@ gcloud run deploy microlearning-generator \
   --set-env-vars="MAX_FORMATTER_RETRIES=1" \
   --set-env-vars="MODEL_TEMPERATURE=0.51" \
   --set-env-vars="MODEL_TOP_P=0.95" \
-  --set-env-vars="MAX_REQUEST_SIZE_MB=10" \
+  --set-env-vars="PORT=4000" \
+  --set-env-vars="NEXT_PUBLIC_API_URL=http://localhost:4000" \
   --service-account=microlearning-sa@$PROJECT_ID.iam.gserviceaccount.com
 ```
 
 ## Configure Identity-Aware Proxy (IAP)
 
-For production, enable IAP instead of password authentication:
-
-### 1. Reserve external IP and configure domain
+For production, enable IAP as mentioned in requirements:
 
 ```bash
-# Reserve a static IP
-gcloud compute addresses create microlearning-ip --global
+# Enable IAP API
+gcloud services enable iap.googleapis.com
 
-# Get the IP address
-gcloud compute addresses describe microlearning-ip --global
-```
+# Configure OAuth consent screen
+# (Must be done in Cloud Console)
 
-### 2. Configure Cloud Load Balancer with IAP
-
-```bash
-# Create backend service
-gcloud compute backend-services create microlearning-backend \
-  --global \
-  --load-balancing-scheme=EXTERNAL \
-  --protocol=HTTP
-
-# Add Cloud Run service as backend
-gcloud compute backend-services add-backend microlearning-backend \
-  --global \
-  --network-endpoint-group=microlearning-generator-neg \
-  --network-endpoint-group-region=us-central1
-```
-
-### 3. Enable IAP
-
-```bash
-# Enable IAP for the backend service
+# Enable IAP for Cloud Run service
 gcloud iap web enable \
   --resource-type=backend-services \
-  --service=microlearning-backend
+  --oauth2-client-id=YOUR_CLIENT_ID \
+  --oauth2-client-secret=YOUR_CLIENT_SECRET
 
-# Add IAP users
-gcloud iap web add-iam-policy-binding \
-  --resource-type=backend-services \
-  --service=microlearning-backend \
-  --member='user:editor@example.com' \
-  --role='roles/iap.httpsResourceAccessor'
+# Add authorized users
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="user:editor@example.com" \
+  --role="roles/iap.httpsResourceAccessor"
+
+# Update Cloud Run to require authentication
+gcloud run services update microlearning-generator \
+  --no-allow-unauthenticated \
+  --region us-central1
 ```
-
-### 4. Update application configuration
-
-Once IAP is enabled:
-1. Remove `EDITOR_PASSWORD` from environment variables
-2. Update frontend to remove password login
-3. Set `--no-allow-unauthenticated` flag in Cloud Run
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GOOGLE_API_KEY` | Google AI Studio API key | Required |
-| `ANTHROPIC_API_KEY` | Anthropic Claude API key | Required |
-| `APP_SECRET` | Secret for session cookies | Required |
-| `EDITOR_PASSWORD` | Password for basic auth | Optional (use IAP instead) |
-| `MAX_FORMATTER_RETRIES` | Max retries for formatter | 1 |
-| `MODEL_TEMPERATURE` | LLM temperature parameter | 0.51 |
-| `MODEL_TOP_P` | LLM top_p parameter | 0.95 |
-| `MODEL_MAX_TOKENS` | Max tokens for generation | 8000 |
-| `MAX_REQUEST_SIZE_MB` | Max request size in MB | 10 |
-| `MAX_INPUT_CHARS` | Max input text characters | 150000 |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GOOGLE_API_KEY` | Google AI Studio API key | Yes |
+| `ANTHROPIC_API_KEY` | Anthropic Claude API key | Yes |
+| `APP_SECRET` | Secret for session cookies | Yes |
+| `EDITOR_PASSWORD` | Password for basic auth | Yes (until IAP) |
+| `MAX_FORMATTER_RETRIES` | Max formatter retries | No (default: 1) |
+| `MODEL_TEMPERATURE` | LLM temperature | No (default: 0.51) |
+| `MODEL_TOP_P` | LLM top_p parameter | No (default: 0.95) |
+
+## Local Testing
+
+### With Docker
+
+```bash
+# Build the container
+docker build -t microlearning-generator .
+
+# Run locally
+docker run -p 8080:8080 \
+  -e GOOGLE_API_KEY="your-key" \
+  -e ANTHROPIC_API_KEY="your-key" \
+  -e EDITOR_PASSWORD="password" \
+  -e APP_SECRET="secret" \
+  microlearning-generator
+```
+
+### With Docker Compose
+
+```bash
+# Copy environment file
+cp backend/env.example .env
+# Edit .env with your keys
+
+# Run with docker-compose
+docker-compose up
+```
+
+## Access the Application
+
+After deployment, the application will be available at:
+- Cloud Run URL: `https://microlearning-generator-xxxxx-uc.a.run.app`
+- Frontend UI: Main URL
+- API Docs: `/docs`
+- Health Check: `/healthz`
+- Version Info: `/version`
 
 ## Monitoring
 
@@ -174,42 +181,15 @@ View logs and metrics:
 # View logs
 gcloud logging read "resource.type=cloud_run_revision \
   AND resource.labels.service_name=microlearning-generator" \
-  --limit 50 \
-  --format json
+  --limit 50
 
 # View metrics in Cloud Console
 open https://console.cloud.google.com/run/detail/us-central1/microlearning-generator/metrics
 ```
 
-## Rollback
+## Security Notes
 
-If needed, rollback to a previous revision:
-
-```bash
-# List revisions
-gcloud run revisions list --service microlearning-generator --region us-central1
-
-# Rollback to specific revision
-gcloud run services update-traffic microlearning-generator \
-  --to-revisions=microlearning-generator-00001-abc=100 \
-  --region us-central1
-```
-
-## Security Best Practices
-
-1. **Never commit secrets** - Use Secret Manager
-2. **Enable IAP** for production environments
-3. **Use least-privilege service accounts**
-4. **Enable VPC Service Controls** for additional security
-5. **Set up monitoring alerts** for suspicious activity
-6. **Regular security audits** of dependencies
-7. **Configure CORS strictly** for production
-8. **Enable Cloud Armor** for DDoS protection
-
-## Cost Optimization
-
-1. Set minimum instances to 0 for development
-2. Use Cloud Scheduler to warm up instances before peak hours
-3. Monitor and adjust memory/CPU based on actual usage
-4. Enable request logging sampling to reduce logging costs
-5. Use Cloud CDN for static assets if traffic increases
+1. **Secrets**: Always use Secret Manager, never hardcode
+2. **IAP**: Enable for production environments
+3. **CORS**: Automatically handled since UI and API are in same container
+4. **Rate Limiting**: Configured in application (10 requests/minute)

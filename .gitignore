@@ -1,45 +1,56 @@
-# Environment
+# Dependencies
+node_modules/
+*.pyc
+__pycache__/
+.Python
+env/
+venv/
+.venv/
+
+# Environment files
 .env
 .env.local
+.env.*.local
 *.env
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-ENV/
-.venv/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 .DS_Store
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-*.cover
+# Build outputs
+dist/
+build/
+*.egg-info/
+.next/
+out/
 
 # Logs
 *.log
-logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-# Output files
-output_*.txt
-partial_*.txt
+# Testing
+.pytest_cache/
+coverage/
+.coverage
+*.cover
+.hypothesis/
+.pytest_cache/
 
-# OS
-Thumbs.db
-Desktop.ini
+# Docker
+docker-compose.override.yml
 
-# Temporary
+# Temporary files
 tmp/
 temp/
-.tmp/
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store

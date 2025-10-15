@@ -1,264 +1,174 @@
 # Microlearning Content Generator
 
-A professional web application for generating high-quality educational content using AI. Features a modern **Next.js/React frontend** with a FastAPI backend for converting curated notes into Multiple Choice Questions (MCQ) and Clinical Vignettes (Non-MCQ).
+Secure internal tool that converts curated notes into finalized microlearning content using a two-step LangGraph pipeline with Claude and Gemini models.
+
+## Architecture
+
+Single container deployment serving both UI and API as required in specifications:
+- **Backend**: FastAPI with LangGraph orchestration
+- **Frontend**: Next.js/React single-page application
+- **Deployment**: Google Cloud Run (single container)
 
 ## Features
 
-- **Next.js/React Frontend**: Modern, responsive single-page application
-- **Dual Content Types**: Generate MCQ and Non-MCQ educational materials
-- **AI Model Selection**: Choose between Claude 4.5 (Anthropic) or Gemini Pro (Google)
-- **Smart Pipeline**: Automated generation → formatting → validation with retry logic
-- **Quality Assurance**: Deterministic validators ensure output meets strict format requirements
-- **Production Ready**: Secure authentication, rate limiting, and containerization
-
-## Tech Stack
-
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Backend**: FastAPI, Python 3.11+
-- **AI Models**: Anthropic Claude, Google Gemini
-- **Deployment**: Docker, Google Cloud Run
+- **Content Types**: MCQ and Non-MCQ generation
+- **AI Models**: 
+  - Generator: Claude Sonnet 4.5 or Gemini 2.5 Pro (toggle)
+  - Formatter: Gemini 2.5 Flash (always)
+- **Validation**: Deterministic code-based validators
+- **Security**: Password authentication with path to Google IAP
+- **Plain Text**: All prompts and outputs are plain text (no JSON)
 
 ## Quick Start
 
 ### Prerequisites
+- Docker installed
+- Google Cloud SDK (for deployment)
+- API Keys:
+  - Google AI Studio API key
+  - Anthropic API key
 
-- Python 3.11+
-- Node.js 18+
-- API Keys from:
-  - [Google AI Studio](https://makersuite.google.com/app/apikey)
-  - [Anthropic Console](https://console.anthropic.com/)
+### Local Development
 
-### Installation
+1. **Setup environment:**
+```bash
+# Copy environment template
+cp env.example .env
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository>
-   cd microlearning-generator
-   ```
+# Edit .env with your API keys
+```
 
-2. **Set up backend**
-   ```bash
-   # Install Python dependencies
-   pip install -r requirements.txt
-   
-   # Configure environment
-   cp env.example .env
-   # Edit .env with your API keys
-   ```
+2. **Run with Docker:**
+```bash
+# Build and run single container
+docker-compose up
+```
 
-3. **Set up frontend**
-   ```bash
-   cd frontend
-   npm install
-   cd ..
-   ```
+3. **Access application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000
+- API Docs: http://localhost:4000/docs
 
-4. **Run the application**
+### For Development (Separate Services)
 
-   **Option 1: Run both frontend and backend together**
-   ```bash
-   # Windows
-   run-frontend.bat
-   
-   # Mac/Linux
-   chmod +x run-frontend.sh
-   ./run-frontend.sh
-   ```
+**Backend:**
+```bash
+cd backend
+pip install -r requirements.txt
+python run.py
+```
 
-   **Option 2: Run separately**
-   ```bash
-   # Terminal 1: Backend
-   python run.py
-   
-   # Terminal 2: Frontend
-   cd frontend
-   npm run dev
-   ```
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-5. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:4000
+## Cloud Run Deployment
+
+### Deploy with Cloud Build (Recommended)
+
+```bash
+# Set project ID
+export PROJECT_ID=your-project-id
+gcloud config set project $PROJECT_ID
+
+# Create secrets
+echo -n "your-api-key" | gcloud secrets create google-api-key --data-file=-
+echo -n "your-api-key" | gcloud secrets create anthropic-api-key --data-file=-
+echo -n "password" | gcloud secrets create editor-password --data-file=-
+
+# Deploy
+gcloud builds submit --config=cloudbuild.yaml
+```
+
+### Manual Docker Deployment
+
+```bash
+# Build
+docker build -t gcr.io/$PROJECT_ID/microlearning-generator .
+
+# Push
+docker push gcr.io/$PROJECT_ID/microlearning-generator
+
+# Deploy
+gcloud run deploy microlearning-generator \
+  --image gcr.io/$PROJECT_ID/microlearning-generator \
+  --region us-central1 \
+  --port 8080 \
+  --set-secrets="GOOGLE_API_KEY=google-api-key:latest" \
+  --set-secrets="ANTHROPIC_API_KEY=anthropic-api-key:latest" \
+  --set-secrets="EDITOR_PASSWORD=editor-password:latest"
+```
 
 ## Project Structure
 
 ```
-microlearning-generator/
-├── frontend/              # Next.js React application
-│   ├── pages/            # Next.js pages
-│   ├── components/       # React components
-│   ├── services/         # API services
-│   ├── styles/           # CSS styles
-│   └── package.json      # Node dependencies
-├── app.py                # FastAPI backend
-├── pipeline.py           # Content generation pipeline
-├── validators.py         # Format validators
-├── config.py            # Application configuration
-├── prompts/             # AI prompt templates
-├── static/              # Legacy static files
-├── Dockerfile           # Container configuration
-├── requirements.txt     # Python dependencies
-└── README.md           # Documentation
+.
+├── backend/              # Python FastAPI backend
+│   ├── app.py           # Main API application  
+│   ├── pipeline.py      # LangGraph orchestration
+│   ├── validators.py    # Content validators
+│   ├── prompts/         # Plain text prompt templates
+│   └── tests/           # Unit tests
+├── frontend/            # Next.js React frontend
+│   ├── pages/          # Application pages
+│   ├── components/     # React components
+│   └── services/       # API services
+├── Dockerfile          # Single container for Cloud Run
+├── docker-compose.yml  # Local development
+└── cloudbuild.yaml     # Cloud Build configuration
 ```
 
-## Frontend Development
+## API Endpoints
 
-The frontend is built with Next.js and React, providing:
-
-### Components
-- **LoginModal**: Secure authentication interface
-- **GeneratorForm**: Configuration and input controls
-- **OutputPanel**: Display generated content with actions
-- **Toast**: User notifications
-
-### Services
-- **authService**: Handle authentication
-- **generationService**: API calls for content generation
-
-### Running Frontend Only
-```bash
-cd frontend
-npm run dev        # Development mode with hot reload
-npm run build      # Production build
-npm run start      # Production server
-```
-
-## Backend API
-
-### Endpoints
-
-- `GET /` - API documentation
 - `POST /run` - Generate content
 - `GET /healthz` - Health check
-- `GET /version` - Version info
+- `GET /version` - Version info with prompt hashes
 - `POST /api/auth/login` - Authentication
-- `GET /api/auth/check` - Check auth status
-- `POST /api/auth/logout` - Logout
+- `GET /docs` - API documentation
 
-### API Request Example
+## Environment Variables
 
-```json
-POST /run
-{
-  "content_type": "MCQ",
-  "generator_model": "claude",
-  "input_text": "Your educational content here...",
-  "num_questions": 3,
-  "focus_areas": "Optional focus areas"
-}
-```
+Required:
+- `GOOGLE_API_KEY` - Google AI Studio API key
+- `ANTHROPIC_API_KEY` - Anthropic API key
+- `EDITOR_PASSWORD` - Editor password
+- `APP_SECRET` - Session secret
 
-## Configuration
+Optional:
+- `MAX_FORMATTER_RETRIES` - Max formatter retries (default: 1)
+- `MODEL_TEMPERATURE` - Model temperature (default: 0.51)
+- `MODEL_TOP_P` - Model top_p (default: 0.95)
 
-Key environment variables in `.env`:
+## Testing
 
-```env
-# API Keys (Required)
-GOOGLE_API_KEY=your_key_here
-ANTHROPIC_API_KEY=your_key_here
-
-# Authentication
-EDITOR_PASSWORD=secure_password
-
-# Server Configuration
-PORT=4000  # Backend port
-
-# Models (Optional)
-CLAUDE_MODEL=claude-3-5-sonnet-20241022
-GEMINI_PRO=gemini-2.0-flash-exp
-```
-
-## Deployment
-
-### Docker Deployment
-
-```bash
-# Build image
-docker build -t microlearning .
-
-# Run container
-docker run -p 4000:4000 --env-file .env microlearning
-```
-
-### Production Build
-
-```bash
-# Build frontend for production
-cd frontend
-npm run build
-npm run export  # Creates static export
-
-# The backend can serve the static frontend
-# Place the 'out' folder contents in 'static' directory
-```
-
-### Google Cloud Run
-
-```bash
-# Deploy to Cloud Run
-./deploy.sh
-```
-
-## Development
-
-### Frontend Development
-```bash
-cd frontend
-npm run dev  # Runs on http://localhost:3000
-```
-
-### Backend Development
-```bash
-# Run with auto-reload
-RELOAD=True python run.py
-```
-
-### Running Tests
 ```bash
 # Backend tests
-pytest
+cd backend
+pytest tests/
 
-# Frontend linting
-cd frontend
-npm run lint
+# Test CLI
+python test_cli.py generate
 ```
-
-## Content Formats
-
-### MCQ Format
-- Clinical vignette/question stem
-- 4-5 answer options (A-E)
-- Correct answer with detailed explanation
-- Analysis of incorrect options
-- Key learning insights
-
-### Non-MCQ Format
-- Clinical vignette scenario
-- Mixed question types:
-  - True/False questions
-  - Yes/No questions
-  - Multiple choice dropdowns
-- Detailed explanations for each answer
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Port conflicts**: Change ports in `.env` and `frontend/package.json`
-2. **API connection errors**: Ensure backend is running on port 4000
-3. **Build errors**: Check Node.js and Python versions
-4. **CORS issues**: Backend CORS is configured for localhost:3000 and 4000
 
 ## Security
 
-- Session-based authentication with HttpOnly cookies
+- Password authentication (basic)
+- Path to Google IAP for production
+- HttpOnly session cookies
 - Rate limiting (10 requests/minute)
-- Environment-based secrets management
-- Ready for Google IAP integration
+- CORS handled automatically (single container)
+- Secrets in Google Secret Manager
+
+## Monitoring
+
+View Cloud Run logs:
+```bash
+gcloud logging read "resource.type=cloud_run_revision"
+```
 
 ## License
 
-Proprietary and confidential. Internal use only.
-
-## Support
-
-For issues or questions, contact the development team.
+Internal use only - proprietary software
