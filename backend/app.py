@@ -19,6 +19,8 @@ from slowapi.errors import RateLimitExceeded
 import secrets
 import time
 from pathlib import Path
+import jwt
+from datetime import timedelta
 
 from pipeline import ContentPipeline
 from config import settings
@@ -32,8 +34,10 @@ logger = structlog.get_logger()
 # Initialize pipeline
 pipeline = ContentPipeline()
 
-# Session storage (in production, use Redis or similar)
-sessions = {}
+# JWT configuration
+JWT_SECRET_KEY = settings.app_secret
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_DELTA = timedelta(days=1)
 
 # Rate limiter
 limiter = Limiter(
@@ -173,65 +177,44 @@ class LoginRequest(BaseModel):
     password: str
 
 
-def create_session(response: Response) -> str:
-    """Create a new session and set cookie."""
-    session_id = secrets.token_urlsafe(32)
-    sessions[session_id] = {
-        "created_at": time.time(),
-        "last_accessed": time.time()
+def create_jwt_token() -> str:
+    """Create a JWT token."""
+    expiration = datetime.utcnow() + JWT_EXPIRATION_DELTA
+    payload = {
+        "exp": expiration,
+        "iat": datetime.utcnow(),
+        "authorized": True
     }
-    
-    # Set HttpOnly cookie
-    response.set_cookie(
-        key="session_id",
-        value=session_id,
-        httponly=True,
-        secure=False,  # Set to True in production with HTTPS
-        samesite="lax",
-        max_age=86400  # 24 hours
-    )
-    
-    return session_id
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-def verify_session(request: Request) -> bool:
-    """Verify session from cookie."""
-    session_id = request.cookies.get("session_id")
-    
-    if not session_id or session_id not in sessions:
+def verify_jwt_token(token: str) -> bool:
+    """Verify JWT token."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return payload.get("authorized", False)
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.DecodeError):
         return False
-    
-    # Check session expiry (24 hours)
-    session = sessions[session_id]
-    if time.time() - session["created_at"] > 86400:
-        del sessions[session_id]
-        return False
-    
-    # Update last accessed time
-    session["last_accessed"] = time.time()
-    return True
 
 
 def verify_auth(request: Request, authorization: Optional[str] = Header(None)) -> bool:
     """
-    Verify authentication via session or Bearer token.
+    Verify authentication via JWT Bearer token.
     """
-    # First check session cookie
-    if verify_session(request):
-        return True
-    
-    # Fall back to Bearer token for API access
+    # No password required - allow access
     if not settings.editor_password:
         return True
     
+    # Check Bearer token
     if authorization and authorization.startswith("Bearer "):
         token = authorization[7:]
-        if token == settings.editor_password:
+        if verify_jwt_token(token):
             return True
     
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authentication required"
+        detail="Authentication required",
+        headers={"WWW-Authenticate": "Bearer"}
     )
 
 
@@ -369,12 +352,16 @@ async def root():
 
 
 @app.post("/api/auth/login")
-async def login(login_request: LoginRequest, response: Response):
-    """Handle login and create session."""
+async def login(login_request: LoginRequest):
+    """Handle login and return JWT token."""
     if not settings.editor_password:
-        # No password set, create session anyway (dev mode)
-        create_session(response)
-        return {"success": True, "message": "Logged in (dev mode)"}
+        # No password set, return token anyway (dev mode)
+        token = create_jwt_token()
+        return {
+            "success": True,
+            "message": "Logged in (dev mode)",
+            "token": token
+        }
     
     if login_request.password != settings.editor_password:
         raise HTTPException(
@@ -382,31 +369,38 @@ async def login(login_request: LoginRequest, response: Response):
             detail="Invalid password"
         )
     
-    create_session(response)
-    return {"success": True, "message": "Logged in successfully"}
+    token = create_jwt_token()
+    return {
+        "success": True,
+        "message": "Logged in successfully",
+        "token": token
+    }
 
 
 @app.get("/api/auth/check")
-async def check_auth(request: Request):
+async def check_auth(authorization: Optional[str] = Header(None)):
     """Check if user is authenticated."""
-    if verify_session(request):
+    # No password required - always authenticated
+    if not settings.editor_password:
         return {"authenticated": True}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
-        )
+    
+    # Check Bearer token
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+        if verify_jwt_token(token):
+            return {"authenticated": True}
+    
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
 
 
 @app.post("/api/auth/logout")
-async def logout(request: Request, response: Response):
-    """Handle logout and clear session."""
-    session_id = request.cookies.get("session_id")
-    
-    if session_id and session_id in sessions:
-        del sessions[session_id]
-    
-    response.delete_cookie(key="session_id")
+async def logout():
+    """Handle logout (JWT tokens are stateless, so just return success)."""
+    # With JWT, logout is handled client-side by removing the token
     return {"success": True, "message": "Logged out"}
 
 

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 interface GenerationParams {
   content_type: string;
@@ -11,13 +12,18 @@ interface GenerationParams {
 class GenerationService {
   private baseURL = process.env.NEXT_PUBLIC_API_URL || '';
 
+  private getAuthHeader(): Record<string, string> {
+    const token = Cookies.get('auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   async generateContent(params: GenerationParams): Promise<any> {
     try {
       const response = await axios.post(
         `${this.baseURL}/run`,
         params,
         { 
-          withCredentials: true,
+          headers: this.getAuthHeader(),
           timeout: 120000 // 2 minutes timeout
         }
       );

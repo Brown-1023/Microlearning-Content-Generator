@@ -17,6 +17,7 @@ langgraph
 
 # Security & Rate Limiting
 slowapi
+pyjwt
 
 # Utilities
 python-dotenv
