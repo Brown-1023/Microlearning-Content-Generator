@@ -36,6 +36,12 @@ class PipelineState(TypedDict):
     input_text: str
     num_questions: int
     focus_areas: Optional[str]
+    temperature: Optional[float]
+    top_p: Optional[float]
+    custom_mcq_generator: Optional[str]
+    custom_mcq_formatter: Optional[str]
+    custom_nmcq_generator: Optional[str]
+    custom_nmcq_formatter: Optional[str]
     
     # Pipeline state
     prompts: Dict[str, str]
@@ -59,6 +65,15 @@ class ModelConfig:
     top_p: float = float(os.getenv("MODEL_TOP_P", "0.95"))
     max_tokens: int = int(os.getenv("MODEL_MAX_TOKENS", "8000"))
     timeout: int = int(os.getenv("MODEL_TIMEOUT", "60"))
+    
+    def with_overrides(self, temperature: Optional[float] = None, top_p: Optional[float] = None) -> 'ModelConfig':
+        """Create a new ModelConfig with overridden values."""
+        return ModelConfig(
+            temperature=temperature if temperature is not None else self.temperature,
+            top_p=top_p if top_p is not None else self.top_p,
+            max_tokens=self.max_tokens,
+            timeout=self.timeout
+        )
 
 
 class PromptLoader:
@@ -69,7 +84,7 @@ class PromptLoader:
         """Load prompt templates from files."""
         prompts = {}
         prompt_files = {
-            "mcq_generator": "prompts/mcq.generator.template.txt",
+            "mcq_generator": "prompts/mcq.generator.txt",
             "mcq_formatter": "prompts/mcq.formatter.txt",
             "nmcq_generator": "prompts/nonmcq.generator.txt",
             "nmcq_formatter": "prompts/nonmcq.formatter.txt"
@@ -113,17 +128,19 @@ class ModelCaller:
         wait=wait_exponential(multiplier=1, min=4, max=10),
         retry=retry_if_exception_type((anthropic.RateLimitError, Exception))
     )
-    def call_claude(self, prompt: str) -> Tuple[str, str, float]:
+    def call_claude(self, prompt: str, temperature: Optional[float] = None, top_p: Optional[float] = None) -> Tuple[str, str, float]:
         """Call Claude API with retry logic."""
         start = time.time()
         
+        # Use custom temperature/top_p if provided
+        config = self.model_config.with_overrides(temperature, top_p)
+        
         message = self.anthropic_client.messages.create(
             model=self.claude_model,
-            max_tokens=self.model_config.max_tokens,
-            temperature=self.model_config.temperature,
-            top_p=self.model_config.top_p,
+            max_tokens=config.max_tokens,
+            temperature=config.temperature,
             messages=[{"role": "user", "content": prompt}],
-            timeout=self.model_config.timeout
+            timeout=config.timeout
         )
         
         latency = time.time() - start
@@ -134,15 +151,18 @@ class ModelCaller:
         wait=wait_exponential(multiplier=1, min=4, max=10),
         retry=retry_if_exception_type(Exception)
     )
-    def call_gemini(self, prompt: str, model_name: str) -> Tuple[str, str, float]:
+    def call_gemini(self, prompt: str, model_name: str, temperature: Optional[float] = None, top_p: Optional[float] = None) -> Tuple[str, str, float]:
         """Call Gemini API with retry logic."""
         start = time.time()
         
+        # Use custom temperature/top_p if provided
+        config = self.model_config.with_overrides(temperature, top_p)
+        
         model = genai.GenerativeModel(model_name)
         generation_config = genai.types.GenerationConfig(
-            temperature=self.model_config.temperature,
-            top_p=self.model_config.top_p,
-            max_output_tokens=self.model_config.max_tokens,
+            temperature=config.temperature,
+            top_p=config.top_p,
+            max_output_tokens=config.max_tokens,
         )
         
         response = model.generate_content(
@@ -152,7 +172,7 @@ class ModelCaller:
         )
         
         latency = time.time() - start
-        return response.text, model_name, latency
+        return response.parts[0].text, model_name, latency
 
 
 def load_prompts_node(state: PipelineState) -> PipelineState:
@@ -179,29 +199,51 @@ def generator_node(state: PipelineState) -> PipelineState:
             state["error_message"] = f"Input text exceeds {max_input_chars} character limit"
             return state
         
-        # Select and populate prompt template
+        # Select appropriate custom prompt based on content type
         if state["content_type"].upper() == "MCQ":
-            template = state["prompts"]["mcq_generator"]
+            custom_prompt = state.get("custom_mcq_generator")
+            default_template = state["prompts"]["mcq_generator"]
         else:
-            template = state["prompts"]["nmcq_generator"]
+            custom_prompt = state.get("custom_nmcq_generator")
+            default_template = state["prompts"]["nmcq_generator"]
+        
+        # Use custom prompt if provided, otherwise use default
+        template = custom_prompt if custom_prompt else default_template
         
         # Replace placeholders
         prompt = template.replace("{{TEXT_TO_ANALYZE}}", state["input_text"])
         prompt = prompt.replace("{{NUM_QUESTIONS}}", str(state["num_questions"]))
         prompt = prompt.replace("{{FOCUS_AREAS}}", state.get("focus_areas") or "Not specified")
         
-        # Call appropriate model
-        if state["generator_model"].lower() == "claude":
+        # Get temperature and top_p from state
+        temperature = state.get("temperature")
+        top_p = state.get("top_p")
+        
+        # Determine which model to use
+        model_name = state["generator_model"]
+        
+        # Direct model name mapping - frontend sends the actual API model names now
+        if "claude" in model_name.lower():
             if not model_caller.anthropic_key:
                 raise ValueError("ANTHROPIC_API_KEY not set")
-            content, model_id, latency = model_caller.call_claude(prompt)
-        else:  # gemini
+            # Use the model name directly if it's a full model ID, otherwise map it
+            model_caller.claude_model = model_name
+            content, model_id, latency = model_caller.call_claude(prompt, temperature, top_p)
+        elif "gemini" in model_name.lower():
             if not model_caller.google_key:
                 raise ValueError("GOOGLE_API_KEY not set")
+            # Use the model name directly if it's a full model ID
+            gemini_model = model_name
+            
             content, model_id, latency = model_caller.call_gemini(
                 prompt, 
-                model_caller.gemini_pro_model
+                gemini_model,
+                temperature,
+                top_p
             )
+        else:
+            # Unknown model, raise error
+            raise ValueError(f"Unknown model: {model_name}")
         
         # Store the original draft (DRAFT_1)
         state["draft_1"] = content
@@ -228,11 +270,16 @@ def formatter_node(state: PipelineState) -> PipelineState:
     model_caller = ModelCaller()
     
     try:
-        # Select formatter prompt
+        # Select appropriate custom formatter prompt based on content type
         if state["content_type"].upper() == "MCQ":
-            prompt_template = state["prompts"]["mcq_formatter"]
+            custom_prompt = state.get("custom_mcq_formatter")
+            default_template = state["prompts"]["mcq_formatter"]
         else:
-            prompt_template = state["prompts"]["nmcq_formatter"]
+            custom_prompt = state.get("custom_nmcq_formatter")
+            default_template = state["prompts"]["nmcq_formatter"]
+        
+        # Use custom prompt if provided, otherwise use default
+        prompt_template = custom_prompt if custom_prompt else default_template
         
         # On retry, use original DRAFT_1 as per requirements
         content_to_format = state["draft_1"]
@@ -244,9 +291,15 @@ def formatter_node(state: PipelineState) -> PipelineState:
         if not model_caller.google_key:
             raise ValueError("GOOGLE_API_KEY not set")
         
+        # Get temperature and top_p from state (can be used for formatter too)
+        temperature = state.get("temperature")
+        top_p = state.get("top_p")
+        
         content, model_id, latency = model_caller.call_gemini(
             full_prompt,
-            model_caller.gemini_flash_model
+            model_caller.gemini_flash_model,
+            temperature,
+            top_p
         )
         
         state["formatted_output"] = content
@@ -420,7 +473,13 @@ class ContentPipeline:
         generator_model: str,
         input_text: str,
         num_questions: int,
-        focus_areas: Optional[str] = None
+        focus_areas: Optional[str] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        custom_mcq_generator: Optional[str] = None,
+        custom_mcq_formatter: Optional[str] = None,
+        custom_nmcq_generator: Optional[str] = None,
+        custom_nmcq_formatter: Optional[str] = None
     ) -> Dict:
         """
         Run the LangGraph pipeline.
@@ -431,10 +490,16 @@ class ContentPipeline:
         # Initialize state
         initial_state: PipelineState = {
             "content_type": content_type.upper(),
-            "generator_model": generator_model.lower(),
+            "generator_model": generator_model,  # Keep original casing for model mapping
             "input_text": input_text,
             "num_questions": num_questions,
             "focus_areas": focus_areas,
+            "temperature": temperature,
+            "top_p": top_p,
+            "custom_mcq_generator": custom_mcq_generator,
+            "custom_mcq_formatter": custom_mcq_formatter,
+            "custom_nmcq_generator": custom_nmcq_generator,
+            "custom_nmcq_formatter": custom_nmcq_formatter,
             "prompts": {},
             "draft_1": None,
             "formatted_output": None,

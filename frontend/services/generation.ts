@@ -7,6 +7,19 @@ interface GenerationParams {
   input_text: string;
   num_questions: number;
   focus_areas: string | null;
+  temperature?: number;
+  top_p?: number;
+  custom_mcq_generator?: string | null;
+  custom_mcq_formatter?: string | null;
+  custom_nmcq_generator?: string | null;
+  custom_nmcq_formatter?: string | null;
+}
+
+interface DefaultPrompts {
+  mcq_generator: string;
+  mcq_formatter: string;
+  nmcq_generator: string;
+  nmcq_formatter: string;
 }
 
 class GenerationService {
@@ -53,6 +66,17 @@ class GenerationService {
       return null;
     }
   }
+
+  async getDefaultPrompts(): Promise<DefaultPrompts | null> {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/prompts`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch default prompts:', error);
+      return null;
+    }
+  }
 }
 
 export const generationService = new GenerationService();
+export type { DefaultPrompts, GenerationParams };

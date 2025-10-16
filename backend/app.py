@@ -115,9 +115,9 @@ class RunRequest(BaseModel):
         ...,
         description="Type of content to generate"
     )
-    generator_model: Literal["claude", "gemini"] = Field(
+    generator_model: str = Field(
         ...,
-        description="AI model to use for generation"
+        description="AI model to use for generation (e.g., claude-sonnet-3.5, gemini-2.5-pro)"
     )
     input_text: str = Field(
         ...,
@@ -134,6 +134,34 @@ class RunRequest(BaseModel):
     focus_areas: Optional[str] = Field(
         None,
         description="Optional areas to focus on when generating questions"
+    )
+    temperature: Optional[float] = Field(
+        None,
+        description="Temperature for model generation (0.0 to 1.0)",
+        ge=0.0,
+        le=1.0
+    )
+    top_p: Optional[float] = Field(
+        None,
+        description="Top-p sampling parameter (0.0 to 1.0)",
+        ge=0.0,
+        le=1.0
+    )
+    custom_mcq_generator: Optional[str] = Field(
+        None,
+        description="Custom MCQ generator prompt"
+    )
+    custom_mcq_formatter: Optional[str] = Field(
+        None,
+        description="Custom MCQ formatter prompt"
+    )
+    custom_nmcq_generator: Optional[str] = Field(
+        None,
+        description="Custom Non-MCQ generator prompt"
+    )
+    custom_nmcq_formatter: Optional[str] = Field(
+        None,
+        description="Custom Non-MCQ formatter prompt"
     )
     
     @validator("input_text")
@@ -233,7 +261,7 @@ async def health_check():
     
     # Check prompt files exist
     prompt_files = [
-        "prompts/mcq.generator.template.txt",
+        "prompts/mcq.generator.txt",
         "prompts/mcq.formatter.txt",
         "prompts/nonmcq.generator.txt",
         "prompts/nonmcq.formatter.txt"
@@ -303,7 +331,13 @@ async def run_pipeline(
             generator_model=run_request.generator_model,
             input_text=run_request.input_text,
             num_questions=run_request.num_questions,
-            focus_areas=run_request.focus_areas
+            focus_areas=run_request.focus_areas,
+            temperature=run_request.temperature,
+            top_p=run_request.top_p,
+            custom_mcq_generator=run_request.custom_mcq_generator,
+            custom_mcq_formatter=run_request.custom_mcq_formatter,
+            custom_nmcq_generator=run_request.custom_nmcq_generator,
+            custom_nmcq_formatter=run_request.custom_nmcq_formatter
         )
         
         # Log result
@@ -404,6 +438,31 @@ async def logout():
     return {"success": True, "message": "Logged out"}
 
 
+@app.get("/api/prompts")
+async def get_prompts():
+    """Get all default prompt templates."""
+    prompts = {}
+    prompt_files = {
+        "mcq_generator": "prompts/mcq.generator.txt",
+        "mcq_formatter": "prompts/mcq.formatter.txt", 
+        "nmcq_generator": "prompts/nonmcq.generator.txt",
+        "nmcq_formatter": "prompts/nonmcq.formatter.txt"
+    }
+    
+    for key, filepath in prompt_files.items():
+        try:
+            file_path = Path(filepath)
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    prompts[key] = f.read()
+            else:
+                prompts[key] = f"Error: {filepath} not found"
+        except Exception as e:
+            prompts[key] = f"Error loading prompt: {str(e)}"
+    
+    return prompts
+
+
 @app.get("/api/info")
 async def api_info():
     """API information endpoint."""
@@ -414,7 +473,8 @@ async def api_info():
             "health": "/healthz",
             "version": "/version",
             "generate": "/run (POST)",
-            "auth": "/api/auth/*"
+            "auth": "/api/auth/*",
+            "prompts": "/api/prompts"
         }
     }
 
