@@ -15,7 +15,7 @@ interface GeneratorFormProps {
 
 const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) => {
   const [contentType, setContentType] = useState('MCQ');
-  const [generatorModel, setGeneratorModel] = useState('Claude 4.5');
+  const [generatorModel, setGeneratorModel] = useState('claude-sonnet-4-5-20250929');
   const [inputText, setInputText] = useState('');
   const [numQuestions, setNumQuestions] = useState(3);
   const [focusAreas, setFocusAreas] = useState('');
