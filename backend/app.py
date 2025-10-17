@@ -326,6 +326,22 @@ async def run_pipeline(
     
     try:
         # Run the pipeline
+        prompts = {
+            'generator': "",
+            'formatter': ""
+        }
+
+        if run_request.content_type.upper() == 'MCQ':
+            if run_request.custom_mcq_generator:
+                prompts['generator'] = prompts['generator']
+            if run_request.custom_mcq_formatter:
+                prompts['formatter'] = prompts['formatter']
+        else:
+            if run_request.custom_nmcq_generator:
+                prompts['generator'] = prompts['generator']
+            if run_request.custom_nmcq_formatter:
+                prompts['formatter'] = prompts['formatter']
+
         result = pipeline.run(
             content_type=run_request.content_type,
             generator_model=run_request.generator_model,
@@ -334,10 +350,7 @@ async def run_pipeline(
             focus_areas=run_request.focus_areas,
             temperature=run_request.temperature,
             top_p=run_request.top_p,
-            custom_mcq_generator=run_request.custom_mcq_generator,
-            custom_mcq_formatter=run_request.custom_mcq_formatter,
-            custom_nmcq_generator=run_request.custom_nmcq_generator,
-            custom_nmcq_formatter=run_request.custom_nmcq_formatter
+            prompts=prompts
         )
         
         # Log result

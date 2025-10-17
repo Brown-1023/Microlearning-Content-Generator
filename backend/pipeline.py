@@ -183,7 +183,19 @@ def load_prompts_node(state: PipelineState) -> PipelineState:
         generator_model=state["generator_model"]
     )
     
-    state["prompts"] = PromptLoader.load_prompts()
+    prompts = PromptLoader.load_prompts()
+    
+    if state['content_type'].upper()=='MCQ':
+        if state["prompts"]["generator"] == "":
+            state["prompts"]["generator"] = prompts["mcq_generator"]
+        if state["prompts"]["formatter"] == "":
+            state["prompts"]["formatter"] = prompts["mcq_formatter"]
+    else:
+        if state["prompts"]["generator"] == "":
+            state["prompts"]["generator"] = prompts["nmcq_generator"]
+        if state["prompts"]["formatter"] == "":
+            state["prompts"]["formatter"] = prompts["nmcq_formatter"]
+
     return state
 
 
@@ -198,23 +210,17 @@ def generator_node(state: PipelineState) -> PipelineState:
             state["success"] = False
             state["error_message"] = f"Input text exceeds {max_input_chars} character limit"
             return state
-        
-        # Select appropriate custom prompt based on content type
-        if state["content_type"].upper() == "MCQ":
-            custom_prompt = state.get("custom_mcq_generator")
-            default_template = state["prompts"]["mcq_generator"]
-        else:
-            custom_prompt = state.get("custom_nmcq_generator")
-            default_template = state["prompts"]["nmcq_generator"]
-        
+ 
         # Use custom prompt if provided, otherwise use default
-        template = custom_prompt if custom_prompt else default_template
+        template = state['prompts']['generator']
         
         # Replace placeholders
         prompt = template.replace("{{TEXT_TO_ANALYZE}}", state["input_text"])
         prompt = prompt.replace("{{NUM_QUESTIONS}}", str(state["num_questions"]))
         prompt = prompt.replace("{{FOCUS_AREAS}}", state.get("focus_areas") or "Not specified")
         
+        print(prompt)
+
         # Get temperature and top_p from state
         temperature = state.get("temperature")
         top_p = state.get("top_p")
@@ -271,15 +277,10 @@ def formatter_node(state: PipelineState) -> PipelineState:
     
     try:
         # Select appropriate custom formatter prompt based on content type
-        if state["content_type"].upper() == "MCQ":
-            custom_prompt = state.get("custom_mcq_formatter")
-            default_template = state["prompts"]["mcq_formatter"]
-        else:
-            custom_prompt = state.get("custom_nmcq_formatter")
-            default_template = state["prompts"]["nmcq_formatter"]
+        
         
         # Use custom prompt if provided, otherwise use default
-        prompt_template = custom_prompt if custom_prompt else default_template
+        prompt_template = state['prompts']["formatter"]
         
         # On retry, use original DRAFT_1 as per requirements
         content_to_format = state["draft_1"]
@@ -287,6 +288,7 @@ def formatter_node(state: PipelineState) -> PipelineState:
         # Add the draft content to format
         full_prompt = f"{prompt_template}\n\nContent to format:\n\n{content_to_format}"
         
+        print(full_prompt)
         # Always use Gemini Flash for formatting
         if not model_caller.google_key:
             raise ValueError("GOOGLE_API_KEY not set")
@@ -476,10 +478,7 @@ class ContentPipeline:
         focus_areas: Optional[str] = None,
         temperature: Optional[float] = None,
         top_p: Optional[float] = None,
-        custom_mcq_generator: Optional[str] = None,
-        custom_mcq_formatter: Optional[str] = None,
-        custom_nmcq_generator: Optional[str] = None,
-        custom_nmcq_formatter: Optional[str] = None
+        prompts: Optional[Dict[str, str]] = None
     ) -> Dict:
         """
         Run the LangGraph pipeline.
@@ -496,11 +495,7 @@ class ContentPipeline:
             "focus_areas": focus_areas,
             "temperature": temperature,
             "top_p": top_p,
-            "custom_mcq_generator": custom_mcq_generator,
-            "custom_mcq_formatter": custom_mcq_formatter,
-            "custom_nmcq_generator": custom_nmcq_generator,
-            "custom_nmcq_formatter": custom_nmcq_formatter,
-            "prompts": {},
+            "prompts": prompts,
             "draft_1": None,
             "formatted_output": None,
             "validation_errors": [],
@@ -555,7 +550,7 @@ class ContentPipeline:
                 logger.warning("LangGraph invoke failed, falling back to direct execution")
                 return self._run_direct(
                     content_type, generator_model, input_text, 
-                    num_questions, focus_areas
+                    num_questions, focus_areas, prompts
                 )
             
             logger.error(f"Pipeline execution failed: {e}")
@@ -581,7 +576,8 @@ class ContentPipeline:
         generator_model: str,
         input_text: str,
         num_questions: int,
-        focus_areas: Optional[str] = None
+        focus_areas: Optional[str] = None,
+        prompts: Optional[Dict[str, str]] = None
     ) -> Dict:
         """
         Direct execution of pipeline nodes in sequence (fallback).
@@ -594,7 +590,7 @@ class ContentPipeline:
             "input_text": input_text,
             "num_questions": num_questions,
             "focus_areas": focus_areas,
-            "prompts": {},
+            "prompts": prompts,
             "draft_1": None,
             "formatted_output": None,
             "validation_errors": [],
@@ -614,7 +610,6 @@ class ContentPipeline:
             state = load_prompts_node(state)
             if state.get("error_message"):
                 raise Exception(state["error_message"])
-            
             # 2. Generator
             state = generator_node(state)
             if state.get("error_message"):
