@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { isNgrok } from '../utils/axios-config';
 
 const TOKEN_KEY = 'auth_token';
 
@@ -12,12 +13,14 @@ class AuthService {
   }
 
   private setupAxiosInterceptor() {
-    // Add a request interceptor to include the token and ngrok header in all requests
+    // Add a request interceptor to include the token and ngrok header (if needed) in all requests
     axios.interceptors.request.use(
       (config) => {
         const token = this.getToken();
-        // Always add ngrok-skip-browser-warning header
-        config.headers['ngrok-skip-browser-warning'] = 'true';
+        // Only add ngrok-skip-browser-warning header if using ngrok
+        if (isNgrok) {
+          config.headers['ngrok-skip-browser-warning'] = 'true';
+        }
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -49,12 +52,13 @@ class AuthService {
         return false;
       }
 
-      const response = await axios.get(`${this.baseURL}/api/auth/check`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'ngrok-skip-browser-warning': 'true'
-        }
-      });
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${token}`
+      };
+      if (isNgrok) {
+        headers['ngrok-skip-browser-warning'] = 'true';
+      }
+      const response = await axios.get(`${this.baseURL}/api/auth/check`, { headers });
       return response.status === 200;
     } catch {
       // Token is invalid or expired
@@ -65,14 +69,14 @@ class AuthService {
 
   async login(password: string): Promise<boolean> {
     try {
+      const headers: Record<string, string> = {};
+      if (isNgrok) {
+        headers['ngrok-skip-browser-warning'] = 'true';
+      }
       const response = await axios.post(
         `${this.baseURL}/api/auth/login`,
         { password },
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        }
+        { headers }
       );
       
       if (response.status === 200 && response.data.token) {
@@ -87,14 +91,14 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
+      const headers: Record<string, string> = {};
+      if (isNgrok) {
+        headers['ngrok-skip-browser-warning'] = 'true';
+      }
       await axios.post(
         `${this.baseURL}/api/auth/logout`,
         {},
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        }
+        { headers }
       );
     } catch {
       // Ignore errors

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { isNgrok } from '../utils/axios-config';
 
 interface GenerationParams {
   content_type: string;
@@ -27,9 +28,13 @@ class GenerationService {
 
   private getHeaders(): Record<string, string> {
     const token = Cookies.get('auth_token');
-    const headers: Record<string, string> = {
-      'ngrok-skip-browser-warning': 'true'  // Skip ngrok interstitial page
-    };
+    const headers: Record<string, string> = {};
+    
+    // Only add ngrok header if we're using ngrok
+    if (isNgrok) {
+      headers['ngrok-skip-browser-warning'] = 'true';
+    }
+    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -57,9 +62,11 @@ class GenerationService {
 
   async checkHealth(): Promise<boolean> {
     try {
-      const response = await axios.get(`${this.baseURL}/healthz`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      });
+      const headers: Record<string, string> = {};
+      if (isNgrok) {
+        headers['ngrok-skip-browser-warning'] = 'true';
+      }
+      const response = await axios.get(`${this.baseURL}/healthz`, { headers });
       return response.status === 200;
     } catch {
       return false;
@@ -68,9 +75,11 @@ class GenerationService {
 
   async getVersion(): Promise<any> {
     try {
-      const response = await axios.get(`${this.baseURL}/version`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      });
+      const headers: Record<string, string> = {};
+      if (isNgrok) {
+        headers['ngrok-skip-browser-warning'] = 'true';
+      }
+      const response = await axios.get(`${this.baseURL}/version`, { headers });
       return response.data;
     } catch {
       return null;
@@ -79,9 +88,11 @@ class GenerationService {
 
   async getDefaultPrompts(): Promise<DefaultPrompts | null> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/prompts`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      });
+      const headers: Record<string, string> = {};
+      if (isNgrok) {
+        headers['ngrok-skip-browser-warning'] = 'true';
+      }
+      const response = await axios.get(`${this.baseURL}/api/prompts`, { headers });
       return response.data;
     } catch (error) {
       console.error('Failed to fetch default prompts:', error);
