@@ -12,10 +12,12 @@ class AuthService {
   }
 
   private setupAxiosInterceptor() {
-    // Add a request interceptor to include the token in all requests
+    // Add a request interceptor to include the token and ngrok header in all requests
     axios.interceptors.request.use(
       (config) => {
         const token = this.getToken();
+        // Always add ngrok-skip-browser-warning header
+        config.headers['ngrok-skip-browser-warning'] = 'true';
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -49,7 +51,8 @@ class AuthService {
 
       const response = await axios.get(`${this.baseURL}/api/auth/check`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true'
         }
       });
       return response.status === 200;
@@ -64,7 +67,12 @@ class AuthService {
     try {
       const response = await axios.post(
         `${this.baseURL}/api/auth/login`,
-        { password }
+        { password },
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        }
       );
       
       if (response.status === 200 && response.data.token) {
@@ -81,7 +89,12 @@ class AuthService {
     try {
       await axios.post(
         `${this.baseURL}/api/auth/logout`,
-        {}
+        {},
+        {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        }
       );
     } catch {
       // Ignore errors

@@ -25,9 +25,15 @@ interface DefaultPrompts {
 class GenerationService {
   private baseURL = process.env.NEXT_PUBLIC_API_URL || '';
 
-  private getAuthHeader(): Record<string, string> {
+  private getHeaders(): Record<string, string> {
     const token = Cookies.get('auth_token');
-    return token ? { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true'  } : {'ngrok-skip-browser-warning': 'true'};
+    const headers: Record<string, string> = {
+      'ngrok-skip-browser-warning': 'true'  // Skip ngrok interstitial page
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
   }
 
   async generateContent(params: GenerationParams): Promise<any> {
@@ -36,7 +42,7 @@ class GenerationService {
         `${this.baseURL}/run`,
         params,
         { 
-          headers: this.getAuthHeader(),
+          headers: this.getHeaders(),
           timeout: 120000 // 2 minutes timeout
         }
       );
@@ -51,7 +57,9 @@ class GenerationService {
 
   async checkHealth(): Promise<boolean> {
     try {
-      const response = await axios.get(`${this.baseURL}/healthz`);
+      const response = await axios.get(`${this.baseURL}/healthz`, {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
       return response.status === 200;
     } catch {
       return false;
@@ -60,7 +68,9 @@ class GenerationService {
 
   async getVersion(): Promise<any> {
     try {
-      const response = await axios.get(`${this.baseURL}/version`);
+      const response = await axios.get(`${this.baseURL}/version`, {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
       return response.data;
     } catch {
       return null;
@@ -69,7 +79,9 @@ class GenerationService {
 
   async getDefaultPrompts(): Promise<DefaultPrompts | null> {
     try {
-      const response = await axios.get(`${this.baseURL}/api/prompts`);
+      const response = await axios.get(`${this.baseURL}/api/prompts`, {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to fetch default prompts:', error);
