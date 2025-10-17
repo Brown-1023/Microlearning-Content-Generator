@@ -27,7 +27,7 @@ class GenerationService {
 
   private getAuthHeader(): Record<string, string> {
     const token = Cookies.get('auth_token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return token ? { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true'  } : {'ngrok-skip-browser-warning': 'true'};
   }
 
   async generateContent(params: GenerationParams): Promise<any> {

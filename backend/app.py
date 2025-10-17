@@ -438,8 +438,9 @@ async def logout():
     return {"success": True, "message": "Logged out"}
 
 
-@app.get("/api/prompts")
+@app.get("/s")
 async def get_prompts():
+    print("heloheleooeoeoeeoeo")
     """Get all default prompt templates."""
     prompts = {}
     prompt_files = {

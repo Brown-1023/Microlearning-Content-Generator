@@ -63,6 +63,7 @@ class Settings(BaseSettings):
         "http://localhost:4000",
         "https://microlearning-content-generator-frontend-4ui6bm2vf.vercel.app",
         "https://microlearning-content-generator-f-git-7602dd-content-generation.vercel.app"
+        
     ]
     
     # Rate Limiting
