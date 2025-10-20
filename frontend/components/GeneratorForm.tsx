@@ -1,12 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { generationService } from '../services/generation';
 
-const SAMPLE_INPUT = `The cardiovascular system consists of the heart, blood vessels, and blood. 
-The heart is a muscular pump that circulates blood throughout the body. 
-Blood vessels include arteries, veins, and capillaries. 
-Arteries carry oxygenated blood away from the heart, while veins return 
-deoxygenated blood to the heart. Capillaries are the smallest blood vessels 
-where gas exchange occurs.`;
+const SAMPLE_INPUT = `INTRODUCTION
+The term VITT (vaccine-induced immune thrombotic thrombocytopenia) was introduced during the coronavirus disease 2019 (COVID-19) pandemic to refer to a rare autoimmune thrombosis syndrome caused by adenoviral-vectored COVID-19 vaccines. This syndrome, similar to heparin-induced thrombocytopenia (HIT) but without heparin exposure, was subsequently understood to be caused by autoantibodies generated in response to adenoviral antigens.
+
+PATHOPHYSIOLOGY
+VITT and VITT-like disorders are caused by antibodies that recognize platelet factor 4 (PF4, also called CXCL4). The antibodies form multimolecular complexes on platelet surfaces containing PF4 and immunoglobulin G (IgG). These complexes activate platelets via low affinity platelet FcγIIa receptors. Ultimately, platelet activation markedly stimulates the coagulation system and causes clinically significant thromboembolic complications.
+
+CLINICAL FEATURES
+For VITT from a COVID-19 vaccination, the window between vaccination and development of symptoms was approximately 5 to 10 days in most cases. The typical platelet count range of patients with definite VITT was 10,000 to 100,000/microL. Median platelet counts were generally <50,000/microL. 
+
+Thrombosis was the presenting feature in most initial cases, with both venous and arterial thromboses described, often at multiple sites and in unusual locations including:
+- Cerebral venous sinus thrombosis (CVT)
+- Splanchnic vein thrombosis
+- Deep vein thrombosis and pulmonary embolism
+- Arterial thrombosis including stroke
+
+DIAGNOSIS
+Laboratory testing for VITT includes:
+- Complete blood count showing thrombocytopenia
+- Elevated D-dimer (often greatly elevated, >10 mg/L)
+- Decreased fibrinogen in approximately one-third to 50 percent of cases
+- PF4 antibody testing using ELISA (enzyme-linked immunosorbent assay)
+- Functional assays such as serotonin release assay (SRA)
+
+Important: Rapid HIT assays are generally negative in VITT and should not be used to confirm or exclude the diagnosis due to poor sensitivity.
+
+MANAGEMENT
+Treatment of VITT includes:
+1. Anticoagulation - All patients should receive therapeutic-dose anticoagulation unless contraindicated
+2. IVIG (Intravenous Immune Globulin) - 1 g/kg daily for two days to interrupt antibody-induced platelet activation
+3. Avoid platelet transfusions except for critical bleeding
+4. Consider plasma exchange for refractory disease
+
+The choice of anticoagulant includes direct oral anticoagulants (DOACs), fondaparinux, or direct thrombin inhibitors. Heparin can be used if HIT has been definitively excluded.
+`;
 
 interface GeneratorFormProps {
   onGenerate: (params: any) => void;
