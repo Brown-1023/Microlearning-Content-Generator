@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     
     # Pipeline Configuration
     max_formatter_retries: int = Field(default=1, env="MAX_FORMATTER_RETRIES")
-    max_input_chars: int = Field(default=150000, env="MAX_INPUT_CHARS")
+    max_input_chars: int = Field(default=500000, env="MAX_INPUT_CHARS")
     
     # Model parameters (configurable as per requirements)
     model_temperature: float = Field(default=0.51, env="MODEL_TEMPERATURE")

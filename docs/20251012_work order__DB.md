@@ -24,7 +24,7 @@ Build a secure, internal tool for our editors that converts curated notes into f
   - **Anthropic** (Claude Sonnet 4.5) via official SDK.
   - **Google AI Studio** (Gemini 2.5 Pro & 2.5 Flash) via @google/generative-ai/google-generativeai SDKs.
   - Gemini 2.5 PRO calls temperature=0.51, top_p=0.95; Flash temperature=.51, top_p=.95; timeouts & basic retry on 429/5xx.
-  - Input size guard: e.g., 150k chars; return a friendly error if exceeded.
+  - Input size guard: e.g., 500k chars; return a friendly error if exceeded.
   - Cap tokens to avoid misuse
 - **Config / Secrets:**
   - Env vars: GOOGLE_API_KEY, ANTHROPIC_API_KEY, APP_SECRET, optional EDITOR_PASSWORD, MAX_FORMATTER_RETRIES=1 (default 1), optional GEMINI_PRO, GEMINI_FLASH, CLAUDE_MODEL.

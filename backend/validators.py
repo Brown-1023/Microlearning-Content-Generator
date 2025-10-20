@@ -27,8 +27,9 @@ class MCQValidator:
         self.explanation_header_pattern = re.compile(
             r'^(?:Explanation of the Correct Answer|Explanation):?\s*$', re.IGNORECASE
         )
+        # Match various forms of the analysis header with optional "the" and parentheses content
         self.analysis_header_pattern = re.compile(
-            r'^(?:Analysis of the Other Options \(Distractors\)|Analysis of Other Options|Distractors):?\s*$', 
+            r'^(?:Analysis of (?:the )?Other Options(?:\s*\([^)]*\))?|Distractors):?\s*$', 
             re.IGNORECASE
         )
         self.key_insights_pattern = re.compile(r'^Key Insights:?\s*', re.IGNORECASE)
@@ -61,28 +62,38 @@ class MCQValidator:
             if i >= len(lines):
                 break
                 
+            # Check if this line is a question title
+            if not self.title_pattern.match(lines[i].strip()):
+                # If we haven't found any questions yet, this is an error
+                if question_count == 0:
+                    errors.append(ValidationError(
+                        i + 1, 
+                        "Invalid format: Content must start with a question title",
+                        "Format"
+                    ))
+                    return False, errors
+                else:
+                    # Otherwise, we're done processing questions
+                    break
+                    
             question_start = i
             question_count += 1
             
-            # 1. Check title line
-            if not self.title_pattern.match(lines[i].strip()):
-                errors.append(ValidationError(
-                    i + 1, 
-                    f"Question {question_count}: Invalid title format. Expected 'Question N - Title'",
-                    "Title"
-                ))
+            # 1. Process title line
             i += 1
             
-            # 2. Check vignette (at least one non-empty line before options)
+            # 2. Find and validate vignette (everything before options)
             vignette_found = False
-            vignette_lines = 0
+            vignette_lines = []
             while i < len(lines):
                 line = lines[i].strip()
+                # Check if we've reached the options section
                 if self.option_pattern.match(line):
                     break
+                # Collect non-empty lines as part of vignette
                 if line:
                     vignette_found = True
-                    vignette_lines += 1
+                    vignette_lines.append(line)
                 i += 1
             
             if not vignette_found:
@@ -92,7 +103,7 @@ class MCQValidator:
                     "Vignette"
                 ))
             
-            # 3. Check options (4-5 required)
+            # 3. Check options (4-5 required, must be consecutive)
             options_found = []
             option_start = i
             while i < len(lines) and self.option_pattern.match(lines[i].strip()):
@@ -121,9 +132,11 @@ class MCQValidator:
                 i += 1
             
             # 4. Check correct answer
+            correct_answer_found = False
             if i < len(lines) and self.correct_answer_pattern.match(lines[i].strip()):
+                correct_answer_found = True
                 answer_letter = lines[i].strip()[-1]
-                if answer_letter not in options_found:
+                if options_found and answer_letter not in options_found:
                     errors.append(ValidationError(
                         i + 1,
                         f"Question {question_count}: Correct answer '{answer_letter}' not in options",
@@ -141,16 +154,22 @@ class MCQValidator:
             while i < len(lines) and not lines[i].strip():
                 i += 1
             
-            # 5. Check explanation header and content
+            # 5. Check explanation section
             explanation_found = False
             if i < len(lines) and self.explanation_header_pattern.match(lines[i].strip()):
                 i += 1
-                # Check for explanation content
+                # Skip blank lines after header
+                while i < len(lines) and not lines[i].strip():
+                    i += 1
+                # Check for explanation content (multi-paragraph allowed)
                 if i < len(lines) and lines[i].strip():
                     explanation_found = True
-                    # Skip explanation lines
-                    while i < len(lines) and lines[i].strip() and \
-                          not self.analysis_header_pattern.match(lines[i].strip()):
+                    # Skip all explanation content until we find Analysis header or Key Insights
+                    while i < len(lines):
+                        line = lines[i].strip()
+                        if line and (self.analysis_header_pattern.match(line) or 
+                                    self.key_insights_pattern.match(line)):
+                            break
                         i += 1
             
             if not explanation_found:
@@ -169,9 +188,12 @@ class MCQValidator:
             if i < len(lines) and self.analysis_header_pattern.match(lines[i].strip()):
                 i += 1
                 analysis_found = True
-                # Skip analysis content
-                while i < len(lines) and lines[i].strip() and \
-                      not self.key_insights_pattern.match(lines[i].strip()):
+                # Skip all analysis content until we find Key Insights or next question
+                while i < len(lines):
+                    line = lines[i].strip()
+                    if line and (self.key_insights_pattern.match(line) or 
+                                self.title_pattern.match(line)):
+                        break
                     i += 1
             
             if not analysis_found:
@@ -190,9 +212,12 @@ class MCQValidator:
             if i < len(lines) and self.key_insights_pattern.match(lines[i].strip()):
                 key_insights_found = True
                 i += 1
-                # Skip key insights content
-                while i < len(lines) and lines[i].strip() and \
-                      not self.title_pattern.match(lines[i].strip()):
+                # Skip all key insights content until we find next question or end of content
+                while i < len(lines):
+                    line = lines[i].strip()
+                    # If we find a new question title, stop here
+                    if line and self.title_pattern.match(line):
+                        break
                     i += 1
             
             if not key_insights_found:

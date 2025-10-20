@@ -421,7 +421,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
           </div>
           <h2>Input Text</h2>
           <div className={`char-counter ${charCountColor}`}>
-            <span>{charCount.toLocaleString()}</span> / 150,000 characters
+            <span>{charCount.toLocaleString()}</span> / 500,000 characters
           </div>
         </div>
         
@@ -429,7 +429,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder="Paste or type your educational content here..."
-          maxLength={150000}
+          maxLength={500000}
           disabled={isLoading}
         />
         

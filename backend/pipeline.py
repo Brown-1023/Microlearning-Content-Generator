@@ -202,7 +202,7 @@ def load_prompts_node(state: PipelineState) -> PipelineState:
 def generator_node(state: PipelineState) -> PipelineState:
     """Generator node - uses Claude or Gemini Pro."""
     model_caller = ModelCaller()
-    max_input_chars = 150000
+    max_input_chars = 500000
     
     try:
         # Check input size
@@ -413,7 +413,7 @@ class ContentPipeline:
     
     def __init__(self):
         self.max_formatter_retries = int(os.getenv("MAX_FORMATTER_RETRIES", "1"))
-        self.max_input_chars = 150000
+        self.max_input_chars = 500000
         
         # Build the LangGraph workflow
         self.workflow = self._build_workflow()

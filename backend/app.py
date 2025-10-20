@@ -123,7 +123,7 @@ class RunRequest(BaseModel):
         ...,
         description="Text to analyze and generate questions from",
         min_length=1,
-        max_length=150000
+        max_length=500000
     )
     num_questions: int = Field(
         ...,
