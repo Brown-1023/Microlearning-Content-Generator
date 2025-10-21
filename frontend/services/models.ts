@@ -1,4 +1,6 @@
-import axios from '../utils/axios-config';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { isNgrok } from '../utils/axios-config';
 
 export interface ModelInfo {
   name: string;
@@ -18,19 +20,38 @@ export interface ModelsResponse {
   restrictions?: ModelRestrictions;
 }
 
-export const modelService = {
+class ModelService {
+  private baseURL = process.env.NEXT_PUBLIC_API_URL || '';
+
+  private getHeaders(): Record<string, string> {
+    const token = Cookies.get('auth_token');
+    const headers: Record<string, string> = {};
+    
+    // Only add ngrok header if we're using ngrok
+    if (isNgrok) {
+      headers['ngrok-skip-browser-warning'] = 'true';
+    }
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
   /**
    * Get available models for the current user
    */
   async getAvailableModels(): Promise<ModelsResponse | null> {
     try {
-      const response = await axios.get('/api/models');
+      const response = await axios.get(`${this.baseURL}/api/models`, {
+        headers: this.getHeaders()
+      });
       return response.data;
     } catch (error: any) {
       console.error('Failed to get models:', error);
       return null;
     }
-  },
+  }
 
   /**
    * Update model restrictions (admin only)
@@ -41,10 +62,14 @@ export const modelService = {
     restrictions?: ModelRestrictions;
   }> {
     try {
-      const response = await axios.post('/api/models/restrictions', {
-        enabled,
-        allowed_models: allowedModels
-      });
+      const response = await axios.post(
+        `${this.baseURL}/api/models/restrictions`,
+        {
+          enabled,
+          allowed_models: allowedModels
+        },
+        { headers: this.getHeaders() }
+      );
       return {
         success: true,
         message: response.data.message,
@@ -58,4 +83,6 @@ export const modelService = {
       };
     }
   }
-};
+}
+
+export const modelService = new ModelService();
