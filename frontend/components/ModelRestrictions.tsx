@@ -20,28 +20,26 @@ const ModelRestrictionsPanel: React.FC<ModelRestrictionsProps> = ({ userRole }) 
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [initialRestrictions, setInitialRestrictions] = useState<ModelRestrictions | null>(null);
 
-  // Only show for admins
-  if (userRole !== 'admin') {
-    return null;
-  }
-
   // Fetch models and current restrictions on mount
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const response = await modelService.getAvailableModels();
-      if (response) {
-        setAllModels(response.all_models || {});
-        if (response.restrictions) {
-          setInitialRestrictions(response.restrictions);
-          setRestrictionsEnabled(response.restrictions.enabled);
-          setSelectedModels(response.restrictions.allowed_models);
+    // Only fetch if user is admin
+    if (userRole === 'admin') {
+      const fetchData = async () => {
+        setIsLoading(true);
+        const response = await modelService.getAvailableModels();
+        if (response) {
+          setAllModels(response.all_models || {});
+          if (response.restrictions) {
+            setInitialRestrictions(response.restrictions);
+            setRestrictionsEnabled(response.restrictions.enabled);
+            setSelectedModels(response.restrictions.allowed_models);
+          }
         }
-      }
-      setIsLoading(false);
-    };
-    fetchData();
-  }, []);
+        setIsLoading(false);
+      };
+      fetchData();
+    }
+  }, [userRole]);
 
   // Hide save status after 3 seconds
   useEffect(() => {
@@ -52,6 +50,11 @@ const ModelRestrictionsPanel: React.FC<ModelRestrictionsProps> = ({ userRole }) 
       return () => clearTimeout(timer);
     }
   }, [saveStatus.show]);
+
+  // Only show for admins
+  if (userRole !== 'admin') {
+    return null;
+  }
 
   const handleToggleModel = (modelId: string) => {
     setSelectedModels(prev => {
@@ -230,7 +233,7 @@ const ModelRestrictionsPanel: React.FC<ModelRestrictionsProps> = ({ userRole }) 
 
                 {restrictionsEnabled && selectedModels.length === 0 && (
                   <div className="warning-message">
-                    ⚠️ No models selected. Users won't be able to generate content. Please select at least one model.
+                    ⚠️ No models selected. Users won&apos;t be able to generate content. Please select at least one model.
                   </div>
                 )}
 
