@@ -961,9 +961,38 @@ textarea {
 
 .prompts-footer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
+}
+
+.prompts-footer > div:last-child {
+  display: flex;
+  gap: 1rem;
+}
+
+.save-status {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.save-status.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.save-status.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 /* Responsive Design */

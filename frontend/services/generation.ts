@@ -10,10 +10,6 @@ interface GenerationParams {
   focus_areas: string | null;
   temperature?: number;
   top_p?: number;
-  custom_mcq_generator?: string | null;
-  custom_mcq_formatter?: string | null;
-  custom_nmcq_generator?: string | null;
-  custom_nmcq_formatter?: string | null;
 }
 
 interface DefaultPrompts {
@@ -88,15 +84,30 @@ class GenerationService {
 
   async getDefaultPrompts(): Promise<DefaultPrompts | null> {
     try {
-      const headers: Record<string, string> = {};
-      if (isNgrok) {
-        headers['ngrok-skip-browser-warning'] = 'true';
-      }
-      const response = await axios.get(`${this.baseURL}/api/prompts`, { headers });
+      const response = await axios.get(`${this.baseURL}/api/prompts`, { 
+        headers: this.getHeaders() 
+      });
       return response.data;
     } catch (error) {
       console.error('Failed to fetch default prompts:', error);
       return null;
+    }
+  }
+
+  async savePrompts(prompts: DefaultPrompts): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await axios.post(
+        `${this.baseURL}/api/prompts`,
+        prompts,
+        { headers: this.getHeaders() }
+      );
+      return { success: true, message: 'Prompts saved successfully' };
+    } catch (error: any) {
+      console.error('Failed to save prompts:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.detail || 'Failed to save prompts' 
+      };
     }
   }
 }

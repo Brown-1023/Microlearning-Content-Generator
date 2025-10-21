@@ -147,22 +147,6 @@ class RunRequest(BaseModel):
         ge=0.0,
         le=1.0
     )
-    custom_mcq_generator: Optional[str] = Field(
-        None,
-        description="Custom MCQ generator prompt"
-    )
-    custom_mcq_formatter: Optional[str] = Field(
-        None,
-        description="Custom MCQ formatter prompt"
-    )
-    custom_nmcq_generator: Optional[str] = Field(
-        None,
-        description="Custom Non-MCQ generator prompt"
-    )
-    custom_nmcq_formatter: Optional[str] = Field(
-        None,
-        description="Custom Non-MCQ formatter prompt"
-    )
     
     @validator("input_text")
     def validate_input_text(cls, v):
@@ -335,23 +319,8 @@ async def run_pipeline(
     )
     
     try:
-        # Run the pipeline
-        prompts = {
-            'generator': "",
-            'formatter': ""
-        }
-
-        if run_request.content_type.upper() == 'MCQ':
-            if run_request.custom_mcq_generator:
-                prompts['generator'] = prompts['generator']
-            if run_request.custom_mcq_formatter:
-                prompts['formatter'] = prompts['formatter']
-        else:
-            if run_request.custom_nmcq_generator:
-                prompts['generator'] = prompts['generator']
-            if run_request.custom_nmcq_formatter:
-                prompts['formatter'] = prompts['formatter']
-
+        # Run the pipeline with current saved prompts
+        # No longer accepting custom prompts from the request
         result = pipeline.run(
             content_type=run_request.content_type,
             generator_model=run_request.generator_model,
@@ -360,7 +329,7 @@ async def run_pipeline(
             focus_areas=run_request.focus_areas,
             temperature=run_request.temperature,
             top_p=run_request.top_p,
-            prompts=prompts
+            prompts=None  # Use saved prompts from files
         )
         
         # Log result

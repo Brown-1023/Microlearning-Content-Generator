@@ -53,6 +53,8 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
   const [topP, setTopP] = useState(0.95);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showPrompts, setShowPrompts] = useState(false);
+  const [isSavingPrompts, setIsSavingPrompts] = useState(false);
+  const [promptsSaveStatus, setPromptsSaveStatus] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
   
   // All 4 prompts state
   const [mcqGeneratorPrompt, setMcqGeneratorPrompt] = useState('');
@@ -85,6 +87,40 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     }
   }, [userRole]);
 
+  // Hide save status after 3 seconds
+  useEffect(() => {
+    if (promptsSaveStatus.show) {
+      const timer = setTimeout(() => {
+        setPromptsSaveStatus({ show: false, message: '', type: 'success' });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [promptsSaveStatus.show]);
+
+  const handleSavePrompts = async () => {
+    if (!userRole || userRole !== 'admin') return;
+    
+    setIsSavingPrompts(true);
+    const promptsToSave = {
+      mcq_generator: mcqGeneratorPrompt,
+      mcq_formatter: mcqFormatterPrompt,
+      nmcq_generator: nmcqGeneratorPrompt,
+      nmcq_formatter: nmcqFormatterPrompt
+    };
+    
+    const result = await generationService.savePrompts(promptsToSave);
+    
+    if (result.success) {
+      setPromptsSaveStatus({ show: true, message: result.message || 'Prompts saved successfully!', type: 'success' });
+      // Update default prompts to the newly saved ones
+      setDefaultPrompts(promptsToSave);
+    } else {
+      setPromptsSaveStatus({ show: true, message: result.message || 'Failed to save prompts', type: 'error' });
+    }
+    
+    setIsSavingPrompts(false);
+  };
+
   const handleSubmit = () => {
     if (!inputText.trim()) {
       alert('Please enter some text to analyze');
@@ -105,13 +141,10 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     };
 
     // Only include advanced settings if user is admin
+    // Note: We no longer send custom prompts since they're saved on the backend
     if (userRole === 'admin') {
       params.temperature = temperature;
       params.top_p = topP;
-      params.custom_mcq_generator = mcqGeneratorPrompt !== defaultPrompts.mcq_generator ? mcqGeneratorPrompt : null;
-      params.custom_mcq_formatter = mcqFormatterPrompt !== defaultPrompts.mcq_formatter ? mcqFormatterPrompt : null;
-      params.custom_nmcq_generator = nmcqGeneratorPrompt !== defaultPrompts.nmcq_generator ? nmcqGeneratorPrompt : null;
-      params.custom_nmcq_formatter = nmcqFormatterPrompt !== defaultPrompts.nmcq_formatter ? nmcqFormatterPrompt : null;
     } else {
       // Use default values for non-admin users
       params.temperature = 0.51;
@@ -131,11 +164,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     }
     setInputText('');
     setFocusAreas('');
-    // Reset prompts to defaults
-    setMcqGeneratorPrompt(defaultPrompts.mcq_generator);
-    setMcqFormatterPrompt(defaultPrompts.mcq_formatter);
-    setNmcqGeneratorPrompt(defaultPrompts.nmcq_generator);
-    setNmcqFormatterPrompt(defaultPrompts.nmcq_formatter);
+    // Note: We don't reset prompts anymore since they're saved on the backend
   };
 
   const charCount = inputText.length;
@@ -436,18 +465,32 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
             </div>
             
             <div className="prompts-footer">
-              <button 
-                className="btn btn-outline"
-                onClick={() => {
-                  setMcqGeneratorPrompt(defaultPrompts.mcq_generator);
-                  setMcqFormatterPrompt(defaultPrompts.mcq_formatter);
-                  setNmcqGeneratorPrompt(defaultPrompts.nmcq_generator);
-                  setNmcqFormatterPrompt(defaultPrompts.nmcq_formatter);
-                }}
-                disabled={isLoading}
-              >
-                Reset All to Defaults
-              </button>
+              {promptsSaveStatus.show && (
+                <div className={`save-status ${promptsSaveStatus.type}`}>
+                  {promptsSaveStatus.message}
+                </div>
+              )}
+              <div>
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setMcqGeneratorPrompt(defaultPrompts.mcq_generator);
+                    setMcqFormatterPrompt(defaultPrompts.mcq_formatter);
+                    setNmcqGeneratorPrompt(defaultPrompts.nmcq_generator);
+                    setNmcqFormatterPrompt(defaultPrompts.nmcq_formatter);
+                  }}
+                  disabled={isLoading || isSavingPrompts}
+                >
+                  Reset All to Defaults
+                </button>
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleSavePrompts}
+                  disabled={isLoading || isSavingPrompts}
+                >
+                  {isSavingPrompts ? 'Saving...' : 'Save All Prompts'}
+                </button>
+              </div>
             </div>
           </div>
         )}
