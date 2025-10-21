@@ -36,8 +36,11 @@ class PipelineState(TypedDict):
     input_text: str
     num_questions: int
     focus_areas: Optional[str]
-    temperature: Optional[float]
-    top_p: Optional[float]
+    # Separate temperature and top-p for generator and formatter
+    generator_temperature: Optional[float]
+    generator_top_p: Optional[float]
+    formatter_temperature: Optional[float]
+    formatter_top_p: Optional[float]
     custom_mcq_generator: Optional[str]
     custom_mcq_formatter: Optional[str]
     custom_nmcq_generator: Optional[str]
@@ -185,17 +188,28 @@ def load_prompts_node(state: PipelineState) -> PipelineState:
     
     prompts = PromptLoader.load_prompts()
     
-    if state['content_type'].upper()=='MCQ':
-        if state["prompts"]["generator"] == "":
-            state["prompts"]["generator"] = prompts["mcq_generator"]
-        if state["prompts"]["formatter"] == "":
-            state["prompts"]["formatter"] = prompts["mcq_formatter"]
-    else:
-        if state["prompts"]["generator"] == "":
-            state["prompts"]["generator"] = prompts["nmcq_generator"]
-        if state["prompts"]["formatter"] == "":
-            state["prompts"]["formatter"] = prompts["nmcq_formatter"]
+    # if state['content_type'].upper()=='MCQ':
+    #     if state["prompts"]["generator"] == "":
+    #         state["prompts"]["generator"] = prompts["mcq_generator"]
+    #     if state["prompts"]["formatter"] == "":
+    #         state["prompts"]["formatter"] = prompts["mcq_formatter"]
+    # else:
+    #     if state["prompts"]["generator"] == "":
+    #         state["prompts"]["generator"] = prompts["nmcq_generator"]
+    #     if state["prompts"]["formatter"] == "":
+    #         state["prompts"]["formatter"] = prompts["nmcq_formatter"]
 
+    if state['content_type'].upper()=='MCQ':
+        state["prompts"]={
+            "generator": prompts["mcq_generator"],
+            "formatter": prompts["mcq_formatter"]
+        }
+    else:
+        state["prompts"]={
+            "generator": prompts["nmcq_generator"],
+            "formatter": prompts["nmcq_formatter"]
+        }
+    
     return state
 
 
@@ -221,9 +235,9 @@ def generator_node(state: PipelineState) -> PipelineState:
         
         print(prompt)
 
-        # Get temperature and top_p from state
-        temperature = state.get("temperature")
-        top_p = state.get("top_p")
+        # Get generator-specific temperature and top_p from state
+        temperature = state.get("generator_temperature")
+        top_p = state.get("generator_top_p")
         
         # Determine which model to use
         model_name = state["generator_model"]
@@ -293,9 +307,9 @@ def formatter_node(state: PipelineState) -> PipelineState:
         if not model_caller.google_key:
             raise ValueError("GOOGLE_API_KEY not set")
         
-        # Get temperature and top_p from state (can be used for formatter too)
-        temperature = state.get("temperature")
-        top_p = state.get("top_p")
+        # Get formatter-specific temperature and top_p from state
+        temperature = state.get("formatter_temperature")
+        top_p = state.get("formatter_top_p")
         
         content, model_id, latency = model_caller.call_gemini(
             full_prompt,
@@ -476,8 +490,10 @@ class ContentPipeline:
         input_text: str,
         num_questions: int,
         focus_areas: Optional[str] = None,
-        temperature: Optional[float] = None,
-        top_p: Optional[float] = None,
+        generator_temperature: Optional[float] = None,
+        generator_top_p: Optional[float] = None,
+        formatter_temperature: Optional[float] = None,
+        formatter_top_p: Optional[float] = None,
         prompts: Optional[Dict[str, str]] = None
     ) -> Dict:
         """
@@ -493,8 +509,10 @@ class ContentPipeline:
             "input_text": input_text,
             "num_questions": num_questions,
             "focus_areas": focus_areas,
-            "temperature": temperature,
-            "top_p": top_p,
+            "generator_temperature": generator_temperature,
+            "generator_top_p": generator_top_p,
+            "formatter_temperature": formatter_temperature,
+            "formatter_top_p": formatter_top_p,
             "prompts": prompts,
             "draft_1": None,
             "formatted_output": None,

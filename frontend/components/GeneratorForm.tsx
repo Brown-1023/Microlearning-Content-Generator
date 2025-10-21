@@ -49,8 +49,11 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
   const [inputText, setInputText] = useState('');
   const [numQuestions, setNumQuestions] = useState(1);
   const [focusAreas, setFocusAreas] = useState('');
-  const [temperature, setTemperature] = useState(0.51);
-  const [topP, setTopP] = useState(0.95);
+  // Separate temperature and top-p for generator and formatter
+  const [generatorTemperature, setGeneratorTemperature] = useState(0.51);
+  const [generatorTopP, setGeneratorTopP] = useState(0.95);
+  const [formatterTemperature, setFormatterTemperature] = useState(0.51);
+  const [formatterTopP, setFormatterTopP] = useState(0.95);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showPrompts, setShowPrompts] = useState(false);
   const [isSavingPrompts, setIsSavingPrompts] = useState(false);
@@ -143,12 +146,16 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     // Only include advanced settings if user is admin
     // Note: We no longer send custom prompts since they're saved on the backend
     if (userRole === 'admin') {
-      params.temperature = temperature;
-      params.top_p = topP;
+      params.generator_temperature = generatorTemperature;
+      params.generator_top_p = generatorTopP;
+      params.formatter_temperature = formatterTemperature;
+      params.formatter_top_p = formatterTopP;
     } else {
       // Use default values for non-admin users
-      params.temperature = 0.51;
-      params.top_p = 0.95;
+      params.generator_temperature = 0.51;
+      params.generator_top_p = 0.95;
+      params.formatter_temperature = 0.51;
+      params.formatter_top_p = 0.95;
     }
 
     onGenerate(params);
@@ -282,64 +289,134 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
 
         {userRole === 'admin' && showAdvanced && (
         <div className="advanced-settings">
-          <div className="config-group">
-            <label htmlFor="temperature">
-              <span className="label-icon">🌡️</span>
-              Temperature
-            </label>
-            <div className="slider-container">
-              <input
-                type="range"
-                id="temperature"
-                min="0"
-                max="1"
-                step="0.01"
-                value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                disabled={isLoading}
-              />
-              <input
-                type="number"
-                min="0"
-                max="1"
-                step="0.01"
-                value={temperature}
-                onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                disabled={isLoading}
-                className="slider-value"
-              />
+          <div className="settings-section">
+            <h3>🤖 Generator Settings</h3>
+            <div className="settings-grid">
+              <div className="config-group">
+                <label htmlFor="generator-temperature">
+                  <span className="label-icon">🌡️</span>
+                  Generator Temperature
+                </label>
+                <div className="slider-container">
+                  <input
+                    type="range"
+                    id="generator-temperature"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={generatorTemperature}
+                    onChange={(e) => setGeneratorTemperature(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={generatorTemperature}
+                    onChange={(e) => setGeneratorTemperature(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="slider-value"
+                  />
+                </div>
+                <small>Controls randomness in generation (0 = focused, 1 = creative)</small>
+              </div>
+
+              <div className="config-group">
+                <label htmlFor="generator-topP">
+                  <span className="label-icon">🎯</span>
+                  Generator Top-P
+                </label>
+                <div className="slider-container">
+                  <input
+                    type="range"
+                    id="generator-topP"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={generatorTopP}
+                    onChange={(e) => setGeneratorTopP(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={generatorTopP}
+                    onChange={(e) => setGeneratorTopP(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="slider-value"
+                  />
+                </div>
+                <small>Nucleus sampling for generation</small>
+              </div>
             </div>
-            <small>Controls randomness (0 = focused, 1 = creative)</small>
           </div>
 
-          <div className="config-group">
-            <label htmlFor="topP">
-              <span className="label-icon">🎯</span>
-              Top P (Nucleus Sampling)
-            </label>
-            <div className="slider-container">
-              <input
-                type="range"
-                id="topP"
-                min="0"
-                max="1"
-                step="0.01"
-                value={topP}
-                onChange={(e) => setTopP(parseFloat(e.target.value))}
-                disabled={isLoading}
-              />
-              <input
-                type="number"
-                min="0"
-                max="1"
-                step="0.01"
-                value={topP}
-                onChange={(e) => setTopP(parseFloat(e.target.value))}
-                disabled={isLoading}
-                className="slider-value"
-              />
+          <div className="settings-section">
+            <h3>📝 Formatter Settings</h3>
+            <div className="settings-grid">
+              <div className="config-group">
+                <label htmlFor="formatter-temperature">
+                  <span className="label-icon">🌡️</span>
+                  Formatter Temperature
+                </label>
+                <div className="slider-container">
+                  <input
+                    type="range"
+                    id="formatter-temperature"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={formatterTemperature}
+                    onChange={(e) => setFormatterTemperature(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={formatterTemperature}
+                    onChange={(e) => setFormatterTemperature(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="slider-value"
+                  />
+                </div>
+                <small>Controls randomness in formatting (0 = consistent, 1 = varied)</small>
+              </div>
+
+              <div className="config-group">
+                <label htmlFor="formatter-topP">
+                  <span className="label-icon">🎯</span>
+                  Formatter Top-P
+                </label>
+                <div className="slider-container">
+                  <input
+                    type="range"
+                    id="formatter-topP"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={formatterTopP}
+                    onChange={(e) => setFormatterTopP(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={formatterTopP}
+                    onChange={(e) => setFormatterTopP(parseFloat(e.target.value))}
+                    disabled={isLoading}
+                    className="slider-value"
+                  />
+                </div>
+                <small>Nucleus sampling for formatting</small>
+              </div>
             </div>
-            <small>Nucleus sampling threshold</small>
           </div>
         </div>
         )}

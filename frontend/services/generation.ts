@@ -8,8 +8,10 @@ interface GenerationParams {
   input_text: string;
   num_questions: number;
   focus_areas: string | null;
-  temperature?: number;
-  top_p?: number;
+  generator_temperature?: number;
+  generator_top_p?: number;
+  formatter_temperature?: number;
+  formatter_top_p?: number;
 }
 
 interface DefaultPrompts {

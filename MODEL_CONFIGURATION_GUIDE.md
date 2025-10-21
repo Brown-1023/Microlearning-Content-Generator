@@ -14,14 +14,35 @@ This guide provides instructions for configuring and updating AI models in the M
 
 ## Model Parameters
 
+### Separate Controls for Generator and Formatter
+
+The system now provides **separate temperature and top-p controls** for the generator and formatter models:
+
 | Parameter | Environment Variable | Default | Range | Description |
 |-----------|---------------------|---------|-------|-------------|
-| Temperature | `MODEL_TEMPERATURE` | 0.51 | 0.0-1.0 | Controls randomness (lower = more focused) |
-| Top-P | `MODEL_TOP_P` | 0.95 | 0.0-1.0 | Controls diversity (nucleus sampling) |
+| **Generator Settings** | | | | |
+| Generator Temperature | `MODEL_TEMPERATURE` | 0.51 | 0.0-1.0 | Controls randomness in content generation |
+| Generator Top-P | `MODEL_TOP_P` | 0.95 | 0.0-1.0 | Nucleus sampling for generation |
+| **Formatter Settings** | | | | |
+| Formatter Temperature | `MODEL_TEMPERATURE` | 0.51 | 0.0-1.0 | Controls randomness in formatting |
+| Formatter Top-P | `MODEL_TOP_P` | 0.95 | 0.0-1.0 | Nucleus sampling for formatting |
+| **Other Settings** | | | | |
 | Max Tokens | `MODEL_MAX_TOKENS` | 8000 | 1-32000 | Maximum output length |
 | Timeout | `MODEL_TIMEOUT` | 60 | 10-300 | API timeout in seconds |
 | Max Input | `MAX_INPUT_CHARS` | 500000 | 1-1000000 | Maximum input characters |
 | Formatter Retries | `MAX_FORMATTER_RETRIES` | 1 | 0-3 | Retry attempts on validation failure |
+
+### Why Separate Controls?
+
+- **Generator Temperature/Top-P**: Controls how creative and varied the initial content generation is
+  - Higher values (0.7-0.9) for more creative, diverse questions
+  - Lower values (0.3-0.5) for more focused, predictable content
+
+- **Formatter Temperature/Top-P**: Controls how the content is formatted
+  - Lower values (0.1-0.3) for consistent, strict formatting
+  - Higher values (0.5-0.7) for more varied formatting styles
+
+This separation allows you to have creative content generation while maintaining strict formatting standards.
 
 ## Configuration Methods
 

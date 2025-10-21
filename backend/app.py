@@ -135,15 +135,28 @@ class RunRequest(BaseModel):
         None,
         description="Optional areas to focus on when generating questions"
     )
-    temperature: Optional[float] = Field(
+    # Separate temperature and top-p for generator and formatter
+    generator_temperature: Optional[float] = Field(
         None,
-        description="Temperature for model generation (0.0 to 1.0)",
+        description="Temperature for generator model (0.0 to 1.0)",
         ge=0.0,
         le=1.0
     )
-    top_p: Optional[float] = Field(
+    generator_top_p: Optional[float] = Field(
         None,
-        description="Top-p sampling parameter (0.0 to 1.0)",
+        description="Top-p sampling for generator model (0.0 to 1.0)",
+        ge=0.0,
+        le=1.0
+    )
+    formatter_temperature: Optional[float] = Field(
+        None,
+        description="Temperature for formatter model (0.0 to 1.0)",
+        ge=0.0,
+        le=1.0
+    )
+    formatter_top_p: Optional[float] = Field(
+        None,
+        description="Top-p sampling for formatter model (0.0 to 1.0)",
         ge=0.0,
         le=1.0
     )
@@ -319,17 +332,17 @@ async def run_pipeline(
     )
     
     try:
-        # Run the pipeline with current saved prompts
-        # No longer accepting custom prompts from the request
+        # Run the pipeline with current saved prompts and separate temperature/top-p settings
         result = pipeline.run(
             content_type=run_request.content_type,
             generator_model=run_request.generator_model,
             input_text=run_request.input_text,
             num_questions=run_request.num_questions,
             focus_areas=run_request.focus_areas,
-            temperature=run_request.temperature,
-            top_p=run_request.top_p,
-            prompts=None  # Use saved prompts from files
+            generator_temperature=run_request.generator_temperature,
+            generator_top_p=run_request.generator_top_p,
+            formatter_temperature=run_request.formatter_temperature,
+            formatter_top_p=run_request.formatter_top_p
         )
         
         # Log result
