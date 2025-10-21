@@ -74,7 +74,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Revi</title>
+        <title>ReviewBytes</title>
         <meta name="description" content="Generate educational content with AI" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
