@@ -4,11 +4,12 @@ import LoginModal from '../components/LoginModal';
 import GeneratorForm from '../components/GeneratorForm';
 import OutputPanel from '../components/OutputPanel';
 import Toast from '../components/Toast';
-import { authService } from '../services/auth';
+import { authService, UserRole } from '../services/auth';
 import { generationService } from '../services/generation';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [output, setOutput] = useState<any>(null);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
@@ -18,15 +19,17 @@ export default function Home() {
   }, []);
 
   const checkAuth = async () => {
-    const authenticated = await authService.checkAuth();
+    const { authenticated, role } = await authService.checkAuth();
     setIsAuthenticated(authenticated);
+    setUserRole(role);
   };
 
   const handleLogin = async (password: string) => {
-    const success = await authService.login(password);
+    const { success, role } = await authService.login(password);
     if (success) {
       setIsAuthenticated(true);
-      showToast('Successfully logged in', 'success');
+      setUserRole(role);
+      showToast(`Successfully logged in as ${role}`, 'success');
     } else {
       showToast('Invalid password', 'error');
     }
@@ -36,6 +39,7 @@ export default function Home() {
   const handleLogout = async () => {
     await authService.logout();
     setIsAuthenticated(false);
+    setUserRole(null);
     setOutput(null);
     showToast('Logged out successfully', 'info');
   };
@@ -70,7 +74,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Microlearning Content Generator</title>
+        <title>Revi</title>
         <meta name="description" content="Generate educational content with AI" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -84,10 +88,15 @@ export default function Home() {
             <div className="container">
               <div className="header-content">
                 <div className="logo">
-                  <h1>📚 Microlearning Content Generator</h1>
+                  <h1>📚 ReviewBytes Internal Content Generator</h1>
                   <p className="subtitle">Transform educational content into interactive questions</p>
                 </div>
                 <div className="header-actions">
+                  {userRole && (
+                    <span className="user-role">
+                      {userRole === 'admin' ? '👑' : '✍️'} {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                    </span>
+                  )}
                   <button onClick={handleLogout} className="btn btn-outline">
                     Logout
                   </button>
@@ -101,6 +110,7 @@ export default function Home() {
               <GeneratorForm 
                 onGenerate={handleGenerate} 
                 isLoading={isLoading}
+                userRole={userRole}
               />
               
               {output && (

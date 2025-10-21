@@ -16,8 +16,26 @@ Single container deployment serving both UI and API as required in specification
   - Generator: Claude Sonnet 4.5 or Gemini 2.5 Pro (toggle)
   - Formatter: Gemini 2.5 Flash (always)
 - **Validation**: Deterministic code-based validators
-- **Security**: Password authentication with path to Google IAP
+- **Security**: Role-based access control (Admin/Editor roles)
 - **Plain Text**: All prompts and outputs are plain text (no JSON)
+
+### Role-Based Access Control
+
+Two user roles with different permissions:
+
+| Feature | Admin | Editor |
+|---------|-------|--------|
+| Generate Content | ✅ | ✅ |
+| Select Model | ✅ | ✅ |
+| Set Number of Questions | ✅ | ✅ |
+| Set Focus Areas | ✅ | ✅ |
+| View/Edit Prompt Templates | ✅ | ❌ |
+| Adjust Temperature/Top-P | ✅ | ❌ |
+| View Advanced Settings | ✅ | ❌ |
+
+Users are identified by their login password:
+- **Admin**: Uses `ADMIN_PASSWORD` environment variable
+- **Editor**: Uses `EDITOR_PASSWORD` environment variable
 
 ## Quick Start
 
@@ -139,7 +157,8 @@ gcloud run deploy microlearning-generator \
 Required:
 - `GOOGLE_API_KEY` - Google AI Studio API key
 - `ANTHROPIC_API_KEY` - Anthropic API key
-- `EDITOR_PASSWORD` - Editor password
+- `ADMIN_PASSWORD` - Admin user password (full access)
+- `EDITOR_PASSWORD` - Editor user password (limited access)
 - `APP_SECRET` - Session secret
 
 Optional:

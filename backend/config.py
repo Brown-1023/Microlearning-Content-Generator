@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # Authentication
     app_secret: str = Field(default="development-secret", env="APP_SECRET")
     editor_password: str = Field(default="", env="EDITOR_PASSWORD")
+    admin_password: str = Field(default="", env="ADMIN_PASSWORD")
     
     # Model Configuration
     # Using the correct model names as specified in requirements:

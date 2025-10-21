@@ -205,39 +205,49 @@ class LoginRequest(BaseModel):
     password: str
 
 
-def create_jwt_token() -> str:
-    """Create a JWT token."""
+class UserRole(str):
+    """User role enumeration."""
+    ADMIN = "admin"
+    EDITOR = "editor"
+
+
+def create_jwt_token(role: str = "editor") -> str:
+    """Create a JWT token with role."""
     expiration = datetime.utcnow() + JWT_EXPIRATION_DELTA
     payload = {
         "exp": expiration,
         "iat": datetime.utcnow(),
-        "authorized": True
+        "authorized": True,
+        "role": role
     }
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-def verify_jwt_token(token: str) -> bool:
-    """Verify JWT token."""
+def verify_jwt_token(token: str) -> dict:
+    """Verify JWT token and return payload."""
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        return payload.get("authorized", False)
+        if payload.get("authorized", False):
+            return {"authorized": True, "role": payload.get("role", "editor")}
+        return {"authorized": False, "role": None}
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.DecodeError):
-        return False
+        return {"authorized": False, "role": None}
 
 
-def verify_auth(request: Request, authorization: Optional[str] = Header(None)) -> bool:
+def verify_auth(request: Request, authorization: Optional[str] = Header(None)) -> dict:
     """
-    Verify authentication via JWT Bearer token.
+    Verify authentication via JWT Bearer token and return user info.
     """
-    # No password required - allow access
-    if not settings.editor_password:
-        return True
+    # No password required - allow access as admin in dev mode
+    if not settings.editor_password and not settings.admin_password:
+        return {"authorized": True, "role": "admin"}
     
     # Check Bearer token
     if authorization and authorization.startswith("Bearer "):
         token = authorization[7:]
-        if verify_jwt_token(token):
-            return True
+        auth_info = verify_jwt_token(token)
+        if auth_info["authorized"]:
+            return auth_info
     
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -304,14 +314,14 @@ async def version_info():
 async def run_pipeline(
     request: Request,
     run_request: RunRequest,
-    authorized: bool = Depends(verify_auth)
+    auth_info: dict = Depends(verify_auth)
 ):
     """
     Main endpoint to run the content generation pipeline.
     
     Args:
         request: The run request with input parameters
-        authorized: Authorization check dependency
+        auth_info: Authorization info with user role
         
     Returns:
         RunResponse with generated content or error details
@@ -400,42 +410,57 @@ async def root():
 
 @app.post("/api/auth/login")
 async def login(login_request: LoginRequest):
-    """Handle login and return JWT token."""
-    if not settings.editor_password:
-        # No password set, return token anyway (dev mode)
-        token = create_jwt_token()
+    """Handle login and return JWT token with role."""
+    # Development mode - no passwords set
+    if not settings.editor_password and not settings.admin_password:
+        token = create_jwt_token("admin")
         return {
             "success": True,
             "message": "Logged in (dev mode)",
-            "token": token
+            "token": token,
+            "role": "admin"
         }
     
-    if login_request.password != settings.editor_password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid password"
-        )
+    # Check if admin password
+    if settings.admin_password and login_request.password == settings.admin_password:
+        token = create_jwt_token("admin")
+        return {
+            "success": True,
+            "message": "Logged in successfully",
+            "token": token,
+            "role": "admin"
+        }
     
-    token = create_jwt_token()
-    return {
-        "success": True,
-        "message": "Logged in successfully",
-        "token": token
-    }
+    # Check if editor password
+    if settings.editor_password and login_request.password == settings.editor_password:
+        token = create_jwt_token("editor")
+        return {
+            "success": True,
+            "message": "Logged in successfully",
+            "token": token,
+            "role": "editor"
+        }
+    
+    # Invalid password
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid password"
+    )
 
 
 @app.get("/api/auth/check")
 async def check_auth(authorization: Optional[str] = Header(None)):
-    """Check if user is authenticated."""
-    # No password required - always authenticated
-    if not settings.editor_password:
-        return {"authenticated": True}
+    """Check if user is authenticated and return role."""
+    # No password required - authenticated as admin in dev mode
+    if not settings.editor_password and not settings.admin_password:
+        return {"authenticated": True, "role": "admin"}
     
     # Check Bearer token
     if authorization and authorization.startswith("Bearer "):
         token = authorization[7:]
-        if verify_jwt_token(token):
-            return {"authenticated": True}
+        auth_info = verify_jwt_token(token)
+        if auth_info["authorized"]:
+            return {"authenticated": True, "role": auth_info["role"]}
     
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -452,9 +477,15 @@ async def logout():
 
 
 @app.get("/api/prompts")
-async def get_prompts():
-    print("heloheleooeoeoeeoeo")
-    """Get all default prompt templates."""
+async def get_prompts(auth_info: dict = Depends(verify_auth)):
+    """Get all default prompt templates (admin only)."""
+    # Only admins can view prompts
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can view prompt templates"
+        )
+    
     prompts = {}
     prompt_files = {
         "mcq_generator": "prompts/mcq.generator.txt",
@@ -475,6 +506,69 @@ async def get_prompts():
             prompts[key] = f"Error loading prompt: {str(e)}"
     
     return prompts
+
+
+@app.post("/api/prompts")
+async def update_prompts(
+    prompts: dict,
+    auth_info: dict = Depends(verify_auth)
+):
+    """Update prompt templates (admin only)."""
+    # Only admins can update prompts
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can update prompt templates"
+        )
+    
+    prompt_files = {
+        "mcq_generator": "prompts/mcq.generator.txt",
+        "mcq_formatter": "prompts/mcq.formatter.txt", 
+        "nmcq_generator": "prompts/nonmcq.generator.txt",
+        "nmcq_formatter": "prompts/nonmcq.formatter.txt"
+    }
+    
+    updated = []
+    errors = []
+    
+    for key, content in prompts.items():
+        if key in prompt_files:
+            try:
+                file_path = Path(prompt_files[key])
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                updated.append(key)
+            except Exception as e:
+                errors.append({"key": key, "error": str(e)})
+    
+    return {
+        "success": len(errors) == 0,
+        "updated": updated,
+        "errors": errors
+    }
+
+
+@app.get("/api/settings")
+async def get_settings(auth_info: dict = Depends(verify_auth)):
+    """Get advanced settings (admin only)."""
+    # Only admins can view settings
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can view advanced settings"
+        )
+    
+    return {
+        "temperature": settings.model_temperature,
+        "top_p": settings.model_top_p,
+        "max_tokens": settings.model_max_tokens,
+        "max_formatter_retries": settings.max_formatter_retries,
+        "models": {
+            "claude": settings.claude_model,
+            "gemini_pro": settings.gemini_pro,
+            "gemini_flash": settings.gemini_flash
+        }
+    }
 
 
 @app.get("/api/info")

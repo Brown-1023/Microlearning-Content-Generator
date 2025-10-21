@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { generationService } from '../services/generation';
+import { UserRole } from '../services/auth';
 
 const SAMPLE_INPUT = `INTRODUCTION
 The term VITT (vaccine-induced immune thrombotic thrombocytopenia) was introduced during the coronavirus disease 2019 (COVID-19) pandemic to refer to a rare autoimmune thrombosis syndrome caused by adenoviral-vectored COVID-19 vaccines. This syndrome, similar to heparin-induced thrombocytopenia (HIT) but without heparin exposure, was subsequently understood to be caused by autoantibodies generated in response to adenoviral antigens.
@@ -39,9 +40,10 @@ The choice of anticoagulant includes direct oral anticoagulants (DOACs), fondapa
 interface GeneratorFormProps {
   onGenerate: (params: any) => void;
   isLoading: boolean;
+  userRole?: UserRole;
 }
 
-const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) => {
+const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, userRole }) => {
   const [contentType, setContentType] = useState('MCQ');
   const [generatorModel, setGeneratorModel] = useState('claude-sonnet-4-5-20250929');
   const [inputText, setInputText] = useState('');
@@ -66,20 +68,22 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
     nmcq_formatter: ''
   });
 
-  // Fetch default prompts on component mount
+  // Fetch default prompts on component mount (admin only)
   useEffect(() => {
-    const fetchPrompts = async () => {
-      const prompts = await generationService.getDefaultPrompts();
-      if (prompts) {
-        setDefaultPrompts(prompts);
-        setMcqGeneratorPrompt(prompts.mcq_generator);
-        setMcqFormatterPrompt(prompts.mcq_formatter);
-        setNmcqGeneratorPrompt(prompts.nmcq_generator);
-        setNmcqFormatterPrompt(prompts.nmcq_formatter);
-      }
-    };
-    fetchPrompts();
-  }, []);
+    if (userRole === 'admin') {
+      const fetchPrompts = async () => {
+        const prompts = await generationService.getDefaultPrompts();
+        if (prompts) {
+          setDefaultPrompts(prompts);
+          setMcqGeneratorPrompt(prompts.mcq_generator);
+          setMcqFormatterPrompt(prompts.mcq_formatter);
+          setNmcqGeneratorPrompt(prompts.nmcq_generator);
+          setNmcqFormatterPrompt(prompts.nmcq_formatter);
+        }
+      };
+      fetchPrompts();
+    }
+  }, [userRole]);
 
   const handleSubmit = () => {
     if (!inputText.trim()) {
@@ -92,19 +96,29 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
       return;
     }
 
-    onGenerate({
+    const params: any = {
       content_type: contentType,
       generator_model: generatorModel,
       input_text: inputText,
       num_questions: numQuestions,
       focus_areas: focusAreas || null,
-      temperature: temperature,
-      top_p: topP,
-      custom_mcq_generator: mcqGeneratorPrompt !== defaultPrompts.mcq_generator ? mcqGeneratorPrompt : null,
-      custom_mcq_formatter: mcqFormatterPrompt !== defaultPrompts.mcq_formatter ? mcqFormatterPrompt : null,
-      custom_nmcq_generator: nmcqGeneratorPrompt !== defaultPrompts.nmcq_generator ? nmcqGeneratorPrompt : null,
-      custom_nmcq_formatter: nmcqFormatterPrompt !== defaultPrompts.nmcq_formatter ? nmcqFormatterPrompt : null
-    });
+    };
+
+    // Only include advanced settings if user is admin
+    if (userRole === 'admin') {
+      params.temperature = temperature;
+      params.top_p = topP;
+      params.custom_mcq_generator = mcqGeneratorPrompt !== defaultPrompts.mcq_generator ? mcqGeneratorPrompt : null;
+      params.custom_mcq_formatter = mcqFormatterPrompt !== defaultPrompts.mcq_formatter ? mcqFormatterPrompt : null;
+      params.custom_nmcq_generator = nmcqGeneratorPrompt !== defaultPrompts.nmcq_generator ? nmcqGeneratorPrompt : null;
+      params.custom_nmcq_formatter = nmcqFormatterPrompt !== defaultPrompts.nmcq_formatter ? nmcqFormatterPrompt : null;
+    } else {
+      // Use default values for non-admin users
+      params.temperature = 0.51;
+      params.top_p = 0.95;
+    }
+
+    onGenerate(params);
   };
 
   const handleLoadSample = () => {
@@ -219,6 +233,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
 
         </div>
         
+        {userRole === 'admin' && (
         <div className="advanced-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
           <span className="toggle-text">
             {showAdvanced ? 'Hide' : 'Show'} Advanced Settings
@@ -234,8 +249,9 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </div>
+        )}
 
-        {showAdvanced && (
+        {userRole === 'admin' && showAdvanced && (
         <div className="advanced-settings">
           <div className="config-group">
             <label htmlFor="temperature">
@@ -300,6 +316,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
         )}
       </div>
 
+      {userRole === 'admin' && (
       <div className="prompts-panel elegant-panel">
         <div className="prompts-header" onClick={() => setShowPrompts(!showPrompts)}>
           <div className="header-left">
@@ -435,6 +452,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading }) 
           </div>
         )}
       </div>
+      )}
 
       <div className="input-panel elegant-panel">
         <div className="panel-header">

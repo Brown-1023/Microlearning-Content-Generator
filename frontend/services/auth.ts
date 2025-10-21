@@ -3,6 +3,9 @@ import Cookies from 'js-cookie';
 import { isNgrok } from '../utils/axios-config';
 
 const TOKEN_KEY = 'auth_token';
+const ROLE_KEY = 'user_role';
+
+export type UserRole = 'admin' | 'editor' | null;
 
 class AuthService {
   private baseURL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -45,11 +48,26 @@ class AuthService {
     Cookies.remove(TOKEN_KEY);
   }
 
-  async checkAuth(): Promise<boolean> {
+  private setRole(role: UserRole): void {
+    if (role) {
+      Cookies.set(ROLE_KEY, role, { expires: 1, sameSite: 'strict' });
+    }
+  }
+
+  private removeRole(): void {
+    Cookies.remove(ROLE_KEY);
+  }
+
+  getRole(): UserRole {
+    const role = Cookies.get(ROLE_KEY);
+    return (role as UserRole) || null;
+  }
+
+  async checkAuth(): Promise<{ authenticated: boolean; role: UserRole }> {
     try {
       const token = this.getToken();
       if (!token) {
-        return false;
+        return { authenticated: false, role: null };
       }
 
       const headers: Record<string, string> = {
@@ -59,15 +77,21 @@ class AuthService {
         headers['ngrok-skip-browser-warning'] = 'true';
       }
       const response = await axios.get(`${this.baseURL}/api/auth/check`, { headers });
-      return response.status === 200;
+      if (response.status === 200 && response.data) {
+        const role = response.data.role as UserRole;
+        this.setRole(role);
+        return { authenticated: true, role };
+      }
+      return { authenticated: false, role: null };
     } catch {
       // Token is invalid or expired
       this.removeToken();
-      return false;
+      this.removeRole();
+      return { authenticated: false, role: null };
     }
   }
 
-  async login(password: string): Promise<boolean> {
+  async login(password: string): Promise<{ success: boolean; role: UserRole }> {
     try {
       const headers: Record<string, string> = {};
       if (isNgrok) {
@@ -81,11 +105,13 @@ class AuthService {
       
       if (response.status === 200 && response.data.token) {
         this.setToken(response.data.token);
-        return true;
+        const role = response.data.role as UserRole;
+        this.setRole(role);
+        return { success: true, role };
       }
-      return false;
+      return { success: false, role: null };
     } catch {
-      return false;
+      return { success: false, role: null };
     }
   }
 
@@ -103,8 +129,9 @@ class AuthService {
     } catch {
       // Ignore errors
     }
-    // Always remove token on logout
+    // Always remove token and role on logout
     this.removeToken();
+    this.removeRole();
   }
 }
 
