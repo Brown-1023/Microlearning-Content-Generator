@@ -24,6 +24,7 @@ from datetime import timedelta
 
 from pipeline import ContentPipeline
 from config import settings
+from model_manager import ModelManager, ALL_MODELS
 
 # Configure structured logging
 logger = structlog.get_logger()
@@ -331,6 +332,19 @@ async def run_pipeline(
         input_length=len(run_request.input_text)
     )
     
+    # Validate that the selected model is allowed for this user
+    user_role = auth_info.get("role", "editor")
+    if not ModelManager.is_model_allowed(run_request.generator_model, user_role):
+        logger.warning(
+            "model_access_denied",
+            model=run_request.generator_model,
+            user_role=user_role
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Model '{run_request.generator_model}' is not available for your role"
+        )
+    
     try:
         # Run the pipeline with current saved prompts and separate temperature/top-p settings
         result = pipeline.run(
@@ -564,9 +578,77 @@ async def api_info():
             "version": "/version",
             "generate": "/run (POST)",
             "auth": "/api/auth/*",
-            "prompts": "/api/prompts"
+            "prompts": "/api/prompts",
+            "models": "/api/models"
         }
     }
+
+
+@app.get("/api/models")
+async def get_models(auth_info: dict = Depends(verify_auth)):
+    """
+    Get available models based on user role and restrictions.
+    """
+    # Get available API keys
+    api_keys = {
+        "GOOGLE_API_KEY": settings.google_api_key,
+        "ANTHROPIC_API_KEY": settings.anthropic_api_key
+    }
+    
+    # Get models available to this user
+    available_models = ModelManager.get_available_models(
+        user_role=auth_info.get("role", "editor"),
+        api_keys=api_keys
+    )
+    
+    # Get current restrictions (for admin view)
+    restrictions = ModelManager.load_restrictions() if auth_info.get("role") == "admin" else None
+    
+    return {
+        "models": available_models,
+        "all_models": ALL_MODELS if auth_info.get("role") == "admin" else None,
+        "restrictions": restrictions
+    }
+
+
+class ModelRestrictionsRequest(BaseModel):
+    """Request body for updating model restrictions."""
+    enabled: bool = Field(..., description="Whether model restrictions are enabled")
+    allowed_models: list[str] = Field(default=[], description="List of allowed model IDs for non-admin users")
+
+
+@app.post("/api/models/restrictions")
+async def update_model_restrictions(
+    request: ModelRestrictionsRequest,
+    auth_info: dict = Depends(verify_auth)
+):
+    """
+    Update model restrictions (admin only).
+    """
+    # Check if user is admin
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can update model restrictions"
+        )
+    
+    # Update restrictions
+    success = ModelManager.update_restrictions(
+        enabled=request.enabled,
+        allowed_models=request.allowed_models
+    )
+    
+    if success:
+        return {
+            "success": True,
+            "message": "Model restrictions updated successfully",
+            "restrictions": ModelManager.load_restrictions()
+        }
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update model restrictions"
+        )
 
 
 # Error handlers

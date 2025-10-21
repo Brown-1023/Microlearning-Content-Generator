@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { generationService } from '../services/generation';
 import { UserRole } from '../services/auth';
+import { modelService, ModelInfo } from '../services/models';
 
 const SAMPLE_INPUT = `INTRODUCTION
 The term VITT (vaccine-induced immune thrombotic thrombocytopenia) was introduced during the coronavirus disease 2019 (COVID-19) pandemic to refer to a rare autoimmune thrombosis syndrome caused by adenoviral-vectored COVID-19 vaccines. This syndrome, similar to heparin-induced thrombocytopenia (HIT) but without heparin exposure, was subsequently understood to be caused by autoantibodies generated in response to adenoviral antigens.
@@ -45,7 +46,9 @@ interface GeneratorFormProps {
 
 const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, userRole }) => {
   const [contentType, setContentType] = useState('MCQ');
-  const [generatorModel, setGeneratorModel] = useState('claude-sonnet-4-5-20250929');
+  const [generatorModel, setGeneratorModel] = useState('');
+  const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(true);
   const [inputText, setInputText] = useState('');
   const [numQuestions, setNumQuestions] = useState(1);
   const [focusAreas, setFocusAreas] = useState('');
@@ -72,6 +75,23 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     nmcq_generator: '',
     nmcq_formatter: ''
   });
+
+  // Fetch available models on component mount
+  useEffect(() => {
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      const response = await modelService.getAvailableModels();
+      if (response && response.models) {
+        setAvailableModels(response.models);
+        // Set default model if available
+        if (response.models.length > 0 && !generatorModel) {
+          setGeneratorModel(response.models[0].name);
+        }
+      }
+      setModelsLoading(false);
+    };
+    fetchModels();
+  }, [userRole]);
 
   // Fetch default prompts on component mount (admin only)
   useEffect(() => {
@@ -132,6 +152,16 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
 
     if (inputText.length < 50) {
       alert('Input text is too short. Please provide more content.');
+      return;
+    }
+
+    if (!generatorModel) {
+      alert('Please select a model');
+      return;
+    }
+
+    if (availableModels.length === 0) {
+      alert('No models are available. Please contact your administrator.');
       return;
     }
 
@@ -221,23 +251,57 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
 
           <div className="config-group">
             <label htmlFor="generatorModel">Generator Model</label>
-            <select
-              id="generatorModel"
-              value={generatorModel}
-              onChange={(e) => setGeneratorModel(e.target.value)}
-              disabled={isLoading}
-              className="model-select"
-            >
-              <optgroup label="Anthropic Claude">
-                <option value="claude-sonnet-4-5-20250929">claude-sonnet-4-5-20250929</option>
-                <option value="claude-opus-4-1-20250805">claude-opus-4-1-20250805</option>
-              </optgroup>
-              <optgroup label="Google Gemini">
-                <option value="gemini-2.5-pro">gemini-2.5-pro</option>
-                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-              </optgroup>
-            </select>
-            <small>Select the AI model for content generation</small>
+            {modelsLoading ? (
+              <div className="loading-models">Loading available models...</div>
+            ) : availableModels.length === 0 ? (
+              <div className="no-models-warning">
+                ⚠️ No models available. Please contact your administrator.
+              </div>
+            ) : (
+              <>
+                <select
+                  id="generatorModel"
+                  value={generatorModel}
+                  onChange={(e) => setGeneratorModel(e.target.value)}
+                  disabled={isLoading || modelsLoading}
+                  className="model-select"
+                >
+                  {availableModels.length === 1 ? (
+                    // If only one model is available, show it directly without optgroup
+                    <option value={availableModels[0].name}>
+                      {availableModels[0].display_name || availableModels[0].name}
+                    </option>
+                  ) : (
+                    // Group models by category if multiple are available
+                    (() => {
+                      const modelsByCategory = availableModels.reduce((acc, model) => {
+                        if (!acc[model.category]) {
+                          acc[model.category] = [];
+                        }
+                        acc[model.category].push(model);
+                        return acc;
+                      }, {} as Record<string, ModelInfo[]>);
+                      
+                      return Object.entries(modelsByCategory).map(([category, models]) => (
+                        <optgroup key={category} label={category}>
+                          {models.map(model => (
+                            <option key={model.name} value={model.name}>
+                              {model.display_name || model.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ));
+                    })()
+                  )}
+                </select>
+                <small>
+                  {availableModels.length === 1 
+                    ? 'Only one model is available for your account'
+                    : 'Select the AI model for content generation'
+                  }
+                </small>
+              </>
+            )}
           </div>
 
           <div className="config-group">

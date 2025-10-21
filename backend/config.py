@@ -51,6 +51,11 @@ class Settings(BaseSettings):
     # Request size limit (in MB)
     max_request_size_mb: int = Field(default=10, env="MAX_REQUEST_SIZE_MB")
     
+    # Model Restrictions (admin can lock models visible to users)
+    # This is a comma-separated list of allowed models for non-admin users
+    # If empty or not set, all models are available
+    allowed_models: str = Field(default="", env="ALLOWED_MODELS")
+    
     # Server Configuration
     host: str = Field(default="0.0.0.0", env="HOST")
     # Use PORT env var (Cloud Run sets this) or default to 4000
@@ -85,3 +90,10 @@ PROJECT_ROOT = Path(__file__).parent
 STATIC_DIR = PROJECT_ROOT / "static"
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 SAMPLES_DIR = PROJECT_ROOT / "samples"
+CONFIG_DIR = PROJECT_ROOT / "config"
+
+# Create config directory if it doesn't exist
+CONFIG_DIR.mkdir(exist_ok=True)
+
+# Model restrictions config file
+MODEL_RESTRICTIONS_FILE = CONFIG_DIR / "model_restrictions.json"

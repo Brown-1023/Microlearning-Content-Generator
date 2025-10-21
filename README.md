@@ -15,6 +15,7 @@ Single container deployment serving both UI and API as required in specification
 - **AI Models**: 
   - Generator: Claude Sonnet 4.5 or Gemini 2.5 Pro (toggle)
   - Formatter: Gemini 2.5 Flash (always)
+- **Model Restrictions**: Admins can lock/restrict which models are visible to users
 - **Validation**: Deterministic code-based validators
 - **Security**: Role-based access control (Admin/Editor roles)
 - **Plain Text**: All prompts and outputs are plain text (no JSON)
@@ -26,12 +27,16 @@ Two user roles with different permissions:
 | Feature | Admin | Editor |
 |---------|-------|--------|
 | Generate Content | ✅ | ✅ |
-| Select Model | ✅ | ✅ |
+| Select Model | ✅ | ✅* |
 | Set Number of Questions | ✅ | ✅ |
 | Set Focus Areas | ✅ | ✅ |
 | View/Edit Prompt Templates | ✅ | ❌ |
 | Adjust Temperature/Top-P | ✅ | ❌ |
 | View Advanced Settings | ✅ | ❌ |
+| Configure Model Restrictions | ✅ | ❌ |
+| View All Available Models | ✅ | ❌ |
+
+*Editors can only select from models allowed by admin restrictions
 
 Users are identified by their login password:
 - **Admin**: Uses `ADMIN_PASSWORD` environment variable

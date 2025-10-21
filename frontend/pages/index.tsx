@@ -4,6 +4,7 @@ import LoginModal from '../components/LoginModal';
 import GeneratorForm from '../components/GeneratorForm';
 import OutputPanel from '../components/OutputPanel';
 import Toast from '../components/Toast';
+import ModelRestrictionsPanel from '../components/ModelRestrictions';
 import { authService, UserRole } from '../services/auth';
 import { generationService } from '../services/generation';
 
@@ -107,6 +108,8 @@ export default function Home() {
 
           <main className="main">
             <div className="container">
+              <ModelRestrictionsPanel userRole={userRole} />
+              
               <GeneratorForm 
                 onGenerate={handleGenerate} 
                 isLoading={isLoading}
