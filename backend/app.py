@@ -112,7 +112,7 @@ app.add_middleware(LimitUploadSize, max_upload_size=max_request_size)
 
 class RunRequest(BaseModel):
     """Request model for the /run endpoint."""
-    content_type: Literal["MCQ", "NMCQ"] = Field(
+    content_type: Literal["MCQ", "NMCQ", "SUMMARY"] = Field(
         ...,
         description="Type of content to generate"
     )
@@ -487,7 +487,9 @@ async def get_prompts(auth_info: dict = Depends(verify_auth)):
         "mcq_generator": "prompts/mcq.generator.txt",
         "mcq_formatter": "prompts/mcq.formatter.txt", 
         "nmcq_generator": "prompts/nonmcq.generator.txt",
-        "nmcq_formatter": "prompts/nonmcq.formatter.txt"
+        "nmcq_formatter": "prompts/nonmcq.formatter.txt",
+        "summary_generator": "prompts/summarybytes.generator.txt",
+        "summary_formatter": "prompts/summarybytes.formatter.txt"
     }
     
     for key, filepath in prompt_files.items():
@@ -521,7 +523,9 @@ async def update_prompts(
         "mcq_generator": "prompts/mcq.generator.txt",
         "mcq_formatter": "prompts/mcq.formatter.txt", 
         "nmcq_generator": "prompts/nonmcq.generator.txt",
-        "nmcq_formatter": "prompts/nonmcq.formatter.txt"
+        "nmcq_formatter": "prompts/nonmcq.formatter.txt",
+        "summary_generator": "prompts/summarybytes.generator.txt",
+        "summary_formatter": "prompts/summarybytes.formatter.txt"
     }
     
     updated = []

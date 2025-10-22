@@ -90,7 +90,9 @@ class PromptLoader:
             "mcq_generator": "prompts/mcq.generator.txt",
             "mcq_formatter": "prompts/mcq.formatter.txt",
             "nmcq_generator": "prompts/nonmcq.generator.txt",
-            "nmcq_formatter": "prompts/nonmcq.formatter.txt"
+            "nmcq_formatter": "prompts/nonmcq.formatter.txt",
+            "summary_generator": "prompts/summarybytes.generator.txt",
+            "summary_formatter": "prompts/summarybytes.formatter.txt"
         }
         
         for key, filepath in prompt_files.items():
@@ -203,6 +205,11 @@ def load_prompts_node(state: PipelineState) -> PipelineState:
         state["prompts"]={
             "generator": prompts["mcq_generator"],
             "formatter": prompts["mcq_formatter"]
+        }
+    elif state['content_type'].upper()=='SUMMARY':
+        state["prompts"]={
+            "generator": prompts["summary_generator"],
+            "formatter": prompts["summary_formatter"]
         }
     else:
         state["prompts"]={

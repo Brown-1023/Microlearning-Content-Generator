@@ -1,6 +1,6 @@
 {
   "enabled": true,
   "allowed_models": [
-    "claude-sonnet-4-5-20250929"
+    "gemini-2.5-pro"
   ]
 }

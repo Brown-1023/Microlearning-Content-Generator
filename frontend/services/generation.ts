@@ -19,6 +19,8 @@ interface DefaultPrompts {
   mcq_formatter: string;
   nmcq_generator: string;
   nmcq_formatter: string;
+  summary_generator: string;
+  summary_formatter: string;
 }
 
 class GenerationService {

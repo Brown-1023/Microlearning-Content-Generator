@@ -62,18 +62,22 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
   const [isSavingPrompts, setIsSavingPrompts] = useState(false);
   const [promptsSaveStatus, setPromptsSaveStatus] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
   
-  // All 4 prompts state
+  // All 6 prompts state (MCQ, NMCQ, and Summary)
   const [mcqGeneratorPrompt, setMcqGeneratorPrompt] = useState('');
   const [mcqFormatterPrompt, setMcqFormatterPrompt] = useState('');
   const [nmcqGeneratorPrompt, setNmcqGeneratorPrompt] = useState('');
   const [nmcqFormatterPrompt, setNmcqFormatterPrompt] = useState('');
+  const [summaryGeneratorPrompt, setSummaryGeneratorPrompt] = useState('');
+  const [summaryFormatterPrompt, setSummaryFormatterPrompt] = useState('');
   
   // Default prompts for reset functionality
   const [defaultPrompts, setDefaultPrompts] = useState({
     mcq_generator: '',
     mcq_formatter: '',
     nmcq_generator: '',
-    nmcq_formatter: ''
+    nmcq_formatter: '',
+    summary_generator: '',
+    summary_formatter: ''
   });
 
   // Fetch available models on component mount
@@ -104,6 +108,8 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
           setMcqFormatterPrompt(prompts.mcq_formatter);
           setNmcqGeneratorPrompt(prompts.nmcq_generator);
           setNmcqFormatterPrompt(prompts.nmcq_formatter);
+          setSummaryGeneratorPrompt(prompts.summary_generator || '');
+          setSummaryFormatterPrompt(prompts.summary_formatter || '');
         }
       };
       fetchPrompts();
@@ -128,7 +134,9 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
       mcq_generator: mcqGeneratorPrompt,
       mcq_formatter: mcqFormatterPrompt,
       nmcq_generator: nmcqGeneratorPrompt,
-      nmcq_formatter: nmcqFormatterPrompt
+      nmcq_formatter: nmcqFormatterPrompt,
+      summary_generator: summaryGeneratorPrompt,
+      summary_formatter: summaryFormatterPrompt
     };
     
     const result = await generationService.savePrompts(promptsToSave);
@@ -245,8 +253,19 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                 disabled={isLoading}
               />
               <label htmlFor="nmcq" className="toggle-label">Non-MCQ</label>
+              
+              <input
+                type="radio"
+                id="summary"
+                name="contentType"
+                value="SUMMARY"
+                checked={contentType === 'SUMMARY'}
+                onChange={(e) => setContentType(e.target.value)}
+                disabled={isLoading}
+              />
+              <label htmlFor="summary" className="toggle-label">Summary Bytes</label>
             </div>
-            <small>MCQ: Multiple Choice | Non-MCQ: Clinical Vignettes</small>
+            <small>MCQ: Multiple Choice | Non-MCQ: Clinical Vignettes | Summary: Clinical Summaries</small>
           </div>
 
           <div className="config-group">
@@ -499,7 +518,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
               </svg>
             </div>
             <h2>Prompt Templates</h2>
-            <span className="prompt-subtitle">(Click to view and edit all 4 prompts)</span>
+            <span className="prompt-subtitle">(Click to view and edit all 6 prompts)</span>
           </div>
           <svg 
             className={`toggle-arrow ${showPrompts ? 'rotated' : ''}`}
@@ -603,6 +622,50 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                 />
                 <small>Template for formatting Non-MCQ output</small>
               </div>
+
+              <div className="prompt-box">
+                <div className="prompt-header">
+                  <h4>📊 Summary Bytes Generator Prompt</h4>
+                  <button 
+                    className="reset-btn"
+                    onClick={() => setSummaryGeneratorPrompt(defaultPrompts.summary_generator)}
+                    disabled={isLoading}
+                    title="Reset to default"
+                  >
+                    ↻
+                  </button>
+                </div>
+                <textarea
+                  value={summaryGeneratorPrompt}
+                  onChange={(e) => setSummaryGeneratorPrompt(e.target.value)}
+                  disabled={isLoading}
+                  rows={8}
+                  className="prompt-textarea"
+                />
+                <small>Template for generating Summary Bytes</small>
+              </div>
+
+              <div className="prompt-box">
+                <div className="prompt-header">
+                  <h4>✏️ Summary Bytes Formatter Prompt</h4>
+                  <button 
+                    className="reset-btn"
+                    onClick={() => setSummaryFormatterPrompt(defaultPrompts.summary_formatter)}
+                    disabled={isLoading}
+                    title="Reset to default"
+                  >
+                    ↻
+                  </button>
+                </div>
+                <textarea
+                  value={summaryFormatterPrompt}
+                  onChange={(e) => setSummaryFormatterPrompt(e.target.value)}
+                  disabled={isLoading}
+                  rows={8}
+                  className="prompt-textarea"
+                />
+                <small>Template for formatting Summary Bytes output</small>
+              </div>
             </div>
             
             <div className="prompts-footer">
@@ -619,6 +682,8 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                     setMcqFormatterPrompt(defaultPrompts.mcq_formatter);
                     setNmcqGeneratorPrompt(defaultPrompts.nmcq_generator);
                     setNmcqFormatterPrompt(defaultPrompts.nmcq_formatter);
+                    setSummaryGeneratorPrompt(defaultPrompts.summary_generator);
+                    setSummaryFormatterPrompt(defaultPrompts.summary_formatter);
                   }}
                   disabled={isLoading || isSavingPrompts}
                 >

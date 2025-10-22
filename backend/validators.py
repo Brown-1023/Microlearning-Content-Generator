@@ -439,13 +439,163 @@ class NMCQValidator:
         return len(errors) == 0, errors
 
 
+class SummaryValidator:
+    """Validator for Summary Bytes content."""
+    
+    def __init__(self):
+        # More flexible patterns to match various formats
+        # Pattern to match numbered headers - can be "1. Summary Block:" or just "1." followed by title
+        self.header_pattern = re.compile(r'^\d+\..*', re.IGNORECASE)
+        # Pattern to match "High Yield Points:" with or without bullets
+        self.high_yield_pattern = re.compile(r'^[•\-\s]*High\s+Yield\s+Points\s*:?', re.IGNORECASE)
+        # Pattern to match "Additional Concepts:" with or without bullets
+        self.additional_pattern = re.compile(r'^[•\-\s]*Additional\s+Concepts\s*:?', re.IGNORECASE)
+        # Pattern to match "Key Insights:" with or without bullets
+        self.key_insights_pattern = re.compile(r'^[•\-\s]*Key\s+Insights\s*:?', re.IGNORECASE)
+    
+    def validate(self, content: str) -> Tuple[bool, List[ValidationError]]:
+        """
+        Validate Summary Bytes format.
+        More flexible validation to handle various formatter outputs.
+        Expected format (flexible):
+        1. [Some title or Summary Block: Title]
+        High Yield Points:
+          - [points]
+        Additional Concepts:
+          - [concepts]  
+        Key Insights:
+          [paragraph]
+        """
+        if not content or not content.strip():
+            return False, [ValidationError(0, "Empty content", "Content")]
+        
+        lines = content.strip().split('\n')
+        errors = []
+        summary_count = 0
+        
+        # Convert content to lowercase for searching
+        content_lower = content.lower()
+        
+        # Check if we have any numbered items (indicates summary blocks)
+        has_numbered_items = any(re.match(r'^\s*\d+\.', line) for line in lines)
+        
+        # Check for the presence of key sections in the entire content
+        has_high_yield = 'high yield' in content_lower
+        has_key_insights = 'key insight' in content_lower
+        
+        # If we have the key sections, consider it valid structure
+        if has_high_yield and has_key_insights:
+            # Count how many summary blocks we have by looking for numbered items
+            for line in lines:
+                if re.match(r'^\s*\d+\.', line):
+                    summary_count += 1
+            
+            # If no numbered items but we have the sections, still count as at least one
+            if summary_count == 0 and has_high_yield:
+                summary_count = 1
+            
+            # Do a more detailed check for each block
+            i = 0
+            current_block = 0
+            
+            while i < len(lines):
+                line = lines[i].strip()
+                
+                # Check for numbered header
+                if re.match(r'^\s*\d+\.', line):
+                    current_block += 1
+                    header_line = i
+                    
+                    # Look ahead for required sections within this block
+                    block_end = len(lines)
+                    for j in range(i + 1, len(lines)):
+                        if re.match(r'^\s*\d+\.', lines[j]):
+                            block_end = j
+                            break
+                    
+                    # Check for High Yield Points in this block
+                    block_text = '\n'.join(lines[i:block_end])
+                    block_lower = block_text.lower()
+                    
+                    if 'high yield' not in block_lower:
+                        errors.append(ValidationError(
+                            header_line,
+                            f"Summary Block {current_block}: Missing High Yield Points section",
+                            "High Yield Points"
+                        ))
+                    
+                    if 'key insight' not in block_lower:
+                        errors.append(ValidationError(
+                            header_line,
+                            f"Summary Block {current_block}: Missing Key Insights section",
+                            "Key Insights"
+                        ))
+                    
+                    # Check if Key Insights has content
+                    key_insights_index = block_lower.find('key insight')
+                    if key_insights_index != -1:
+                        # Look for content after Key Insights
+                        remaining_text = block_text[key_insights_index + 11:].strip()
+                        # Remove the colon if present
+                        if remaining_text.startswith(':'):
+                            remaining_text = remaining_text[1:].strip()
+                        
+                        # Check if there's meaningful content (more than just whitespace or separators)
+                        if not remaining_text or len(remaining_text) < 20:
+                            errors.append(ValidationError(
+                                header_line,
+                                f"Summary Block {current_block}: Key Insights appears empty or too short",
+                                "Key Insights"
+                            ))
+                
+                i += 1
+        else:
+            # If we don't have the basic structure, report the missing elements
+            if not has_high_yield:
+                errors.append(ValidationError(
+                    0,
+                    "No 'High Yield Points' sections found in content",
+                    "Structure"
+                ))
+            
+            if not has_key_insights:
+                errors.append(ValidationError(
+                    0,
+                    "No 'Key Insights' sections found in content",
+                    "Structure"
+                ))
+            
+            if not has_numbered_items and not has_high_yield:
+                errors.append(ValidationError(
+                    0,
+                    "No Summary Blocks found in content (looking for numbered sections or High Yield Points)",
+                    "Structure"
+                ))
+        
+        # If we found no summary blocks at all, report it
+        if summary_count == 0 and len(errors) == 0:
+            # If there are no errors yet but no blocks found, be more lenient
+            # Just check if the content has the right keywords
+            if has_high_yield and has_key_insights:
+                # Content has the right sections, just not numbered - that's okay
+                pass
+            else:
+                errors.append(ValidationError(
+                    0,
+                    "No properly formatted Summary Blocks found in content",
+                    "Structure"
+                ))
+        
+        return len(errors) == 0, errors
+
+
 def validate_content(content: str, content_type: str) -> Tuple[bool, List[ValidationError]]:
     """
     Main validation function.
     
     Args:
         content: The formatted content to validate
-        content_type: Either 'MCQ' or 'NMCQ'
+        content_type: Either 'MCQ', 'NMCQ', or 'SUMMARY'
         
     Returns:
         Tuple of (is_valid, list_of_errors)
@@ -454,6 +604,8 @@ def validate_content(content: str, content_type: str) -> Tuple[bool, List[Valida
         validator = MCQValidator()
     elif content_type.upper() == 'NMCQ':
         validator = NMCQValidator()
+    elif content_type.upper() == 'SUMMARY':
+        validator = SummaryValidator()
     else:
         return False, [ValidationError(None, f"Invalid content type: {content_type}")]
     

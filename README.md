@@ -11,12 +11,12 @@ Single container deployment serving both UI and API as required in specification
 
 ## Features
 
-- **Content Types**: MCQ and Non-MCQ generation
+- **Content Types**: MCQ, Non-MCQ, and Summary Bytes generation
 - **AI Models**: 
   - Generator: Claude Sonnet 4.5 or Gemini 2.5 Pro (toggle)
   - Formatter: Gemini 2.5 Flash (always)
 - **Model Restrictions**: Admins can lock/restrict which models are visible to users
-- **Validation**: Deterministic code-based validators
+- **Validation**: Deterministic code-based validators for all content types
 - **Security**: Role-based access control (Admin/Editor roles)
 - **Plain Text**: All prompts and outputs are plain text (no JSON)
 
