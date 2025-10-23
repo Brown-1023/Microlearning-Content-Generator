@@ -235,10 +235,44 @@ def generator_node(state: PipelineState) -> PipelineState:
         # Use custom prompt if provided, otherwise use default
         template = state['prompts']['generator']
         
-        # Replace placeholders
-        prompt = template.replace("{{TEXT_TO_ANALYZE}}", state["input_text"])
-        prompt = prompt.replace("{{NUM_QUESTIONS}}", str(state["num_questions"]))
-        prompt = prompt.replace("{{FOCUS_AREAS}}", state.get("focus_areas") or "Not specified")
+        # For Non-MCQ, adjust the number of vignettes based on desired total questions
+        # Since each vignette generates 8-10 questions, calculate appropriate vignette count
+        if state["content_type"].upper() == "NMCQ":
+            # Each vignette creates approximately 8-10 questions
+            # Calculate how many vignettes needed for the requested total
+            questions_per_vignette = 9  # Average of 8-10 questions
+            num_vignettes = max(1, round(state["num_questions"] / questions_per_vignette))
+            
+            # Replace placeholders
+            prompt = template.replace("{{TEXT_TO_ANALYZE}}", state["input_text"])
+            prompt = prompt.replace("{{NUM_QUESTIONS}}", str(num_vignettes))
+            prompt = prompt.replace("{{FOCUS_AREAS}}", state.get("focus_areas") or "Not specified")
+            prompt = prompt.replace("[NUM_QUESTIONS]", str(num_vignettes))
+            prompt = prompt.replace("<FOCUS_AREAS>", state.get("focus_areas") or "Not specified")
+            
+            # Adjust the instruction for questions per vignette to match user request
+            if num_vignettes == 1:
+                # For a single vignette, specify exact number of questions
+                prompt = prompt.replace("create up to 8-10 questions", f"create exactly {state['num_questions']} questions")
+            else:
+                # For multiple vignettes, calculate questions per vignette
+                questions_per_vig = state["num_questions"] // num_vignettes
+                remainder = state["num_questions"] % num_vignettes
+                if remainder > 0:
+                    prompt = prompt.replace("create up to 8-10 questions", 
+                                          f"create approximately {questions_per_vig}-{questions_per_vig+1} questions (total should be {state['num_questions']} questions across all vignettes)")
+                else:
+                    prompt = prompt.replace("create up to 8-10 questions", 
+                                          f"create exactly {questions_per_vig} questions")
+        else:
+            # For MCQ and SUMMARY, use original logic
+            prompt = template.replace("{{TEXT_TO_ANALYZE}}", state["input_text"])
+            prompt = prompt.replace("{{NUM_QUESTIONS}}", str(state["num_questions"]))
+            prompt = prompt.replace("{{FOCUS_AREAS}}", state.get("focus_areas") or "Not specified")
+            
+            # Also replace alternative formats used in some prompts
+            prompt = prompt.replace("[NUM_QUESTIONS]", str(state["num_questions"]))
+            prompt = prompt.replace("<FOCUS_AREAS>", state.get("focus_areas") or "Not specified")
         
         print(prompt)
 
