@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: microlearning-backend
+    ports:
+      - "4000:4000"  # API port
+    env_file:
+      - .env
+    environment:
+      # Override any defaults here
+      - PORT=4000
+      - PYTHONUNBUFFERED=1
+      - MAX_FORMATTER_RETRIES=1
+      - MODEL_TEMPERATURE=0.51
+      - MODEL_TOP_P=0.95
+    volumes:
+      # Mount prompts directory for easy editing during development
+      - ./prompts:/app/prompts:ro
+      - ./config:/app/config:ro
+      # Optional: Mount code for development (comment out for production)
+      # - .:/app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/healthz')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - microlearning-network
+
+networks:
+  microlearning-network:
+    driver: bridge

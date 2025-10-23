@@ -56,6 +56,8 @@ steps:
       - 'ANTHROPIC_API_KEY=anthropic-api-key:latest'
       - '--set-secrets'
       - 'EDITOR_PASSWORD=editor-password:latest'
+      - '--set-secrets'
+      - 'ADMIN_PASSWORD=admin-password:latest'
       - '--set-env-vars'
       - 'APP_SECRET=${_APP_SECRET},MAX_FORMATTER_RETRIES=1,MODEL_TEMPERATURE=0.51,MODEL_TOP_P=0.95,MAX_REQUEST_SIZE_MB=10,RATE_LIMIT_REQUESTS=10,RATE_LIMIT_PERIOD=minute,PORT=4000,NEXT_PUBLIC_API_URL=http://localhost:4000'
       - '--service-account'
