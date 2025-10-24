@@ -31,7 +31,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
           <p>
           Hi Ranjan,
 
-I'm writing to let you know that my Upwork account has suddenly been suspended, and I'm not sure why yet.
+I&apos;m writing to let you know that my Upwork account has suddenly been suspended, and I&apos;m not sure why yet.
 
 Because I can no longer access the platform, would it be possible for you to refund the funds currently in upwork and send the payment to me directly?
 
