@@ -67,7 +67,7 @@ class ModelConfig:
     temperature: float = float(os.getenv("MODEL_TEMPERATURE", "0.51"))
     top_p: float = float(os.getenv("MODEL_TOP_P", "0.95"))
     max_tokens: int = int(os.getenv("MODEL_MAX_TOKENS", "8000"))
-    timeout: int = int(os.getenv("MODEL_TIMEOUT", "60"))
+    timeout: int = int(os.getenv("MODEL_TIMEOUT", "300"))
     
     def with_overrides(self, temperature: Optional[float] = None, top_p: Optional[float] = None) -> 'ModelConfig':
         """Create a new ModelConfig with overridden values."""

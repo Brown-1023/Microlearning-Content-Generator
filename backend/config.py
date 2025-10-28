@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     model_temperature: float = Field(default=0.51, env="MODEL_TEMPERATURE")
     model_top_p: float = Field(default=0.95, env="MODEL_TOP_P")
     model_max_tokens: int = Field(default=8000, env="MODEL_MAX_TOKENS")
-    model_timeout: int = Field(default=60, env="MODEL_TIMEOUT")
+    model_timeout: int = Field(default=300, env="MODEL_TIMEOUT")
     
     # Request size limit (in MB)
     max_request_size_mb: int = Field(default=10, env="MAX_REQUEST_SIZE_MB")
