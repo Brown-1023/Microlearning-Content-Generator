@@ -3,10 +3,11 @@ import Head from 'next/head';
 import LoginModal from '../components/LoginModal';
 import GeneratorForm from '../components/GeneratorForm';
 import OutputPanel from '../components/OutputPanel';
+import StreamingOutputPanel from '../components/StreamingOutputPanel';
 import Toast from '../components/Toast';
 import ModelRestrictionsPanel from '../components/ModelRestrictions';
 import { authService, UserRole } from '../services/auth';
-import { generationService } from '../services/generation';
+import { generationService, StreamProgress } from '../services/generation';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,6 +15,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [output, setOutput] = useState<any>(null);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamProgress, setStreamProgress] = useState<StreamProgress | null>(null);
+  const [streamDraft, setStreamDraft] = useState<string | null>(null);
+  const [useStreaming, setUseStreaming] = useState(true); // Default to streaming mode
 
   useEffect(() => {
     checkAuth();
@@ -48,19 +53,53 @@ export default function Home() {
   const handleGenerate = async (params: any) => {
     setIsLoading(true);
     setOutput(null);
+    setStreamProgress(null);
+    setStreamDraft(null);
     
     try {
-      const result = await generationService.generateContent(params);
-      setOutput(result);
-      
-      if (result.success) {
-        showToast('Content generated successfully!', 'success');
-      } else if (result.validation_errors?.length > 0) {
-        showToast('Generation completed with validation errors', 'warning');
+      if (useStreaming) {
+        // Use streaming mode
+        setIsStreaming(true);
+        
+        await generationService.generateContentStream(params, {
+          onProgress: (data: StreamProgress) => {
+            setStreamProgress(data);
+          },
+          onDraft: (draft: string) => {
+            setStreamDraft(draft);
+          },
+          onComplete: (result: any) => {
+            setOutput(result);
+            setIsStreaming(false);
+            
+            if (result.success) {
+              showToast('Content generated successfully!', 'success');
+            } else if (result.validation_errors?.length > 0) {
+              showToast('Generation completed with validation errors', 'warning');
+            } else {
+              showToast(result.error || 'Generation failed', 'error');
+            }
+          },
+          onError: (error: string) => {
+            setIsStreaming(false);
+            showToast(error, 'error');
+          }
+        });
       } else {
-        showToast(result.error || 'Generation failed', 'error');
+        // Use traditional non-streaming mode
+        const result = await generationService.generateContent(params);
+        setOutput(result);
+        
+        if (result.success) {
+          showToast('Content generated successfully!', 'success');
+        } else if (result.validation_errors?.length > 0) {
+          showToast('Generation completed with validation errors', 'warning');
+        } else {
+          showToast(result.error || 'Generation failed', 'error');
+        }
       }
     } catch (error) {
+      setIsStreaming(false);
       showToast('Network error. Please try again.', 'error');
     } finally {
       setIsLoading(false);
@@ -110,15 +149,39 @@ export default function Home() {
             <div className="container">
               <ModelRestrictionsPanel userRole={userRole} />
               
+              {/* Streaming Mode Toggle */}
+              <div className="streaming-toggle">
+                <label className="toggle-label">
+                  <input
+                    type="checkbox"
+                    checked={useStreaming}
+                    onChange={(e) => setUseStreaming(e.target.checked)}
+                    disabled={isLoading}
+                  />
+                  <span className="toggle-text">
+                    {useStreaming ? '🚀 Streaming Mode (Real-time Progress)' : '📦 Traditional Mode'}
+                  </span>
+                </label>
+                <span className="toggle-description">
+                  {useStreaming 
+                    ? 'Shows real-time progress as content is generated'
+                    : 'Waits for complete response before showing results'}
+                </span>
+              </div>
+              
               <GeneratorForm 
                 onGenerate={handleGenerate} 
                 isLoading={isLoading}
                 userRole={userRole}
               />
               
-              {output && (
-                <OutputPanel 
+              {/* Show streaming panel if streaming, otherwise show regular panel */}
+              {(isStreaming || streamProgress || streamDraft || output) && (
+                <StreamingOutputPanel
+                  progress={streamProgress}
+                  draft={streamDraft}
                   output={output}
+                  isStreaming={isStreaming}
                   onShowToast={showToast}
                 />
               )}

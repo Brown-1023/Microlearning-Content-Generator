@@ -14,6 +14,20 @@ interface GenerationParams {
   formatter_top_p?: number;
 }
 
+interface StreamProgress {
+  stage: string;
+  message: string;
+  progress: number;
+  draft?: string;
+}
+
+interface StreamCallback {
+  onProgress?: (data: StreamProgress) => void;
+  onDraft?: (draft: string) => void;
+  onComplete?: (result: any) => void;
+  onError?: (error: string) => void;
+}
+
 interface DefaultPrompts {
   mcq_generator: string;
   mcq_formatter: string;
@@ -48,7 +62,7 @@ class GenerationService {
         params,
         { 
           headers: this.getHeaders(),
-          timeout: 360000 // 2 minutes timeout
+          timeout: 360000 // 6 minutes timeout
         }
       );
       return response.data;
@@ -57,6 +71,107 @@ class GenerationService {
         return error.response.data;
       }
       throw error;
+    }
+  }
+
+  async generateContentStream(
+    params: GenerationParams,
+    callbacks: StreamCallback
+  ): Promise<void> {
+    const headers = this.getHeaders();
+    headers['Accept'] = 'text/event-stream';
+    
+    const eventSource = new EventSource(
+      `${this.baseURL}/run/stream`,
+      {
+        // @ts-ignore - EventSource doesn't natively support headers, but we'll use a workaround
+        withCredentials: true
+      }
+    );
+
+    // Use fetch with EventSource polyfill for headers support
+    const response = await fetch(`${this.baseURL}/run/stream`, {
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      callbacks.onError?.(`Failed to start streaming: ${error}`);
+      return;
+    }
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    if (!reader) {
+      callbacks.onError?.('Stream reader not available');
+      return;
+    }
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('event:')) {
+            const eventType = line.substring(6).trim();
+            continue;
+          }
+          
+          if (line.startsWith('data:')) {
+            const data = line.substring(5).trim();
+            if (data === '[DONE]') {
+              return;
+            }
+            
+            try {
+              const parsedData = JSON.parse(data);
+              const eventLine = lines[lines.indexOf(line) - 1];
+              const eventType = eventLine?.startsWith('event:') 
+                ? eventLine.substring(6).trim() 
+                : 'message';
+
+              switch (eventType) {
+                case 'progress':
+                  callbacks.onProgress?.(parsedData);
+                  break;
+                case 'draft':
+                  callbacks.onDraft?.(parsedData.draft || '');
+                  callbacks.onProgress?.(parsedData);
+                  break;
+                case 'complete':
+                  callbacks.onComplete?.(parsedData);
+                  break;
+                case 'error':
+                  callbacks.onError?.(parsedData.error);
+                  break;
+                default:
+                  if (parsedData.stage) {
+                    callbacks.onProgress?.(parsedData);
+                  }
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE data:', e);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      callbacks.onError?.(`Stream error: ${error.message}`);
+    } finally {
+      reader.releaseLock();
     }
   }
 
@@ -117,4 +232,4 @@ class GenerationService {
 }
 
 export const generationService = new GenerationService();
-export type { DefaultPrompts, GenerationParams };
+export type { DefaultPrompts, GenerationParams, StreamProgress, StreamCallback };

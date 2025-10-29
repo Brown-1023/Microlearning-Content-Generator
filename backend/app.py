@@ -5,8 +5,10 @@ FastAPI application for microlearning content generation.
 import os
 import hashlib
 from datetime import datetime
-from typing import Optional, Literal
+from typing import Optional, Literal, AsyncGenerator
 from contextlib import asynccontextmanager
+import asyncio
+import json
 
 import structlog
 from fastapi import FastAPI, HTTPException, status, Depends, Header, Request, Response
@@ -16,6 +18,7 @@ from pydantic import BaseModel, Field, validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from sse_starlette.sse import EventSourceResponse
 import secrets
 import time
 from pathlib import Path
@@ -305,6 +308,75 @@ async def version_info():
             "gemini_flash": settings.gemini_flash
         }
     )
+
+
+@app.post("/run/stream")
+@limiter.limit("10 per minute")
+async def run_pipeline_stream(
+    request: Request,
+    run_request: RunRequest,
+    auth_info: dict = Depends(verify_auth)
+):
+    """
+    Streaming endpoint for content generation pipeline.
+    Returns Server-Sent Events with progress updates.
+    """
+    logger.info(
+        "stream_request_received",
+        content_type=run_request.content_type,
+        generator_model=run_request.generator_model,
+        num_questions=run_request.num_questions,
+        input_length=len(run_request.input_text)
+    )
+    
+    # Validate that the selected model is allowed for this user
+    user_role = auth_info.get("role", "editor")
+    if not ModelManager.is_model_allowed(run_request.generator_model, user_role):
+        logger.warning(
+            "model_access_denied",
+            model=run_request.generator_model,
+            user_role=user_role
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Model '{run_request.generator_model}' is not available for your role"
+        )
+    
+    async def generate_events() -> AsyncGenerator:
+        try:
+            # Yield initial event
+            yield {
+                "event": "start",
+                "data": json.dumps({
+                    "message": "Starting content generation...",
+                    "stage": "init"
+                })
+            }
+            
+            # Run the pipeline with streaming
+            async for event in pipeline.run_stream(
+                content_type=run_request.content_type,
+                generator_model=run_request.generator_model,
+                input_text=run_request.input_text,
+                num_questions=run_request.num_questions,
+                focus_areas=run_request.focus_areas,
+                generator_temperature=run_request.generator_temperature,
+                generator_top_p=run_request.generator_top_p,
+                formatter_temperature=run_request.formatter_temperature,
+                formatter_top_p=run_request.formatter_top_p
+            ):
+                yield event
+                
+        except Exception as e:
+            logger.error("stream_request_failed", error=str(e))
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "error": f"Pipeline execution failed: {str(e)}"
+                })
+            }
+    
+    return EventSourceResponse(generate_events())
 
 
 @app.post("/run", response_model=RunResponse)

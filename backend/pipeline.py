@@ -8,8 +8,9 @@ import json
 import hashlib
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Literal, Annotated, TypedDict
+from typing import Dict, List, Tuple, Optional, Literal, Annotated, TypedDict, AsyncGenerator
 from dataclasses import dataclass
+import asyncio
 
 import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -231,6 +232,7 @@ def generator_node(state: PipelineState) -> PipelineState:
             state["success"] = False
             state["error_message"] = f"Input text exceeds {max_input_chars} character limit"
             return state
+ 
  
         # Use custom prompt if provided, otherwise use default
         template = state['prompts']['generator']
@@ -523,6 +525,208 @@ class ContentPipeline:
         for key, content in prompts.items():
             hashes[key] = hashlib.md5(content.encode()).hexdigest()[:8]
         return hashes
+    
+    async def run_stream(
+        self,
+        content_type: str,
+        generator_model: str,
+        input_text: str,
+        num_questions: int,
+        focus_areas: Optional[str] = None,
+        generator_temperature: Optional[float] = None,
+        generator_top_p: Optional[float] = None,
+        formatter_temperature: Optional[float] = None,
+        formatter_top_p: Optional[float] = None,
+        prompts: Optional[Dict[str, str]] = None
+    ) -> AsyncGenerator[Dict, None]:
+        """Stream execution of the pipeline with progress updates."""
+        
+        # Initialize state
+        state = {
+            "content_type": content_type.upper(),
+            "generator_model": generator_model,
+            "input_text": input_text,
+            "num_questions": num_questions,
+            "focus_areas": focus_areas,
+            "generator_temperature": generator_temperature,
+            "generator_top_p": generator_top_p,
+            "formatter_temperature": formatter_temperature,
+            "formatter_top_p": formatter_top_p,
+            "custom_mcq_generator": prompts.get("mcq_generator") if prompts else None,
+            "custom_mcq_formatter": prompts.get("mcq_formatter") if prompts else None,
+            "custom_nmcq_generator": prompts.get("nmcq_generator") if prompts else None,
+            "custom_nmcq_formatter": prompts.get("nmcq_formatter") if prompts else None,
+            "prompts": {},
+            "draft_1": None,
+            "formatted_output": None,
+            "validation_errors": [],
+            "formatter_retries": 0,
+            "start_time": time.time(),
+            "model_latencies": {},
+            "model_ids": {},
+            "success": False,
+            "error_message": None
+        }
+        
+        try:
+            # Stage 1: Loading prompts
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "load_prompts",
+                    "message": "Loading prompts...",
+                    "progress": 10
+                })
+            }
+            
+            state = load_prompts_node(state)
+            if state.get("error_message"):
+                yield {
+                    "event": "error",
+                    "data": json.dumps({
+                        "error": state["error_message"]
+                    })
+                }
+                return
+            
+            # Stage 2: Generating content
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "generator",
+                    "message": f"Generating content using {generator_model}...",
+                    "progress": 30
+                })
+            }
+            
+            # Run generator in thread pool to avoid blocking
+            loop = asyncio.get_event_loop()
+            state = await loop.run_in_executor(None, generator_node, state)
+            
+            if state.get("error_message"):
+                yield {
+                    "event": "error",
+                    "data": json.dumps({
+                        "error": state["error_message"]
+                    })
+                }
+                return
+            
+            # Send draft content
+            yield {
+                "event": "draft",
+                "data": json.dumps({
+                    "stage": "generator",
+                    "message": "Initial draft generated",
+                    "progress": 50,
+                    "draft": state.get("draft_1", "")
+                })
+            }
+            
+            # Stage 3: Formatting content
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "formatter",
+                    "message": "Formatting content...",
+                    "progress": 60
+                })
+            }
+            
+            state = await loop.run_in_executor(None, formatter_node, state)
+            
+            if state.get("error_message"):
+                yield {
+                    "event": "error",
+                    "data": json.dumps({
+                        "error": state["error_message"]
+                    })
+                }
+                return
+            
+            # Stage 4: Validating content
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "validator",
+                    "message": "Validating content...",
+                    "progress": 80
+                })
+            }
+            
+            state = validator_node(state)
+            
+            # Handle retries if needed
+            retry_count = 0
+            while not state.get("success") and state["formatter_retries"] < self.max_formatter_retries:
+                retry_count += 1
+                yield {
+                    "event": "progress",
+                    "data": json.dumps({
+                        "stage": "retry",
+                        "message": f"Retrying formatting (attempt {retry_count})...",
+                        "progress": 85 + (retry_count * 5)
+                    })
+                }
+                
+                state = formatter_retry_node(state)
+                state = validator_node(state)
+            
+            # Final stage
+            if state.get("success"):
+                state = done_node(state)
+                yield {
+                    "event": "progress",
+                    "data": json.dumps({
+                        "stage": "done",
+                        "message": "Content generation complete!",
+                        "progress": 100
+                    })
+                }
+            else:
+                state = fail_node(state)
+                yield {
+                    "event": "progress",
+                    "data": json.dumps({
+                        "stage": "fail",
+                        "message": "Generation completed with errors",
+                        "progress": 100
+                    })
+                }
+            
+            # Send final result
+            response = {
+                "success": state.get("success", False),
+                "output": state.get("formatted_output"),
+                "validation_errors": state.get("validation_errors", []),
+                "metadata": {
+                    "content_type": state["content_type"],
+                    "generator_model": state["generator_model"],
+                    "num_questions": state["num_questions"],
+                    "formatter_retries": state.get("formatter_retries", 0),
+                    "model_ids": state.get("model_ids", {}),
+                    "latencies": state.get("model_latencies", {}),
+                    "total_time": time.time() - state["start_time"]
+                }
+            }
+            
+            # Add partial output if validation failed
+            if not response["success"] and state.get("formatted_output"):
+                response["partial_output"] = state.get("formatted_output")
+            
+            yield {
+                "event": "complete",
+                "data": json.dumps(response)
+            }
+            
+        except Exception as e:
+            logger.error("pipeline_stream_error", error=str(e))
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "error": f"Pipeline execution failed: {str(e)}"
+                })
+            }
     
     def run(
         self,
