@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # Model parameters (configurable as per requirements)
     model_temperature: float = Field(default=0.51, env="MODEL_TEMPERATURE")
     model_top_p: float = Field(default=0.95, env="MODEL_TOP_P")
-    model_max_tokens: int = Field(default=8000, env="MODEL_MAX_TOKENS")
+    model_max_tokens: int = Field(default=32000, env="MODEL_MAX_TOKENS")
     model_timeout: int = Field(default=300, env="MODEL_TIMEOUT")
     
     # Request size limit (in MB)
@@ -69,7 +69,6 @@ class Settings(BaseSettings):
         "http://localhost:4000",
         "https://microlearning-content-generator-frontend-4ui6bm2vf.vercel.app",
         "https://microlearning-content-generator-f-git-7602dd-content-generation.vercel.app"
-        
     ]
     
     # Rate Limiting

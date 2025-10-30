@@ -4,6 +4,7 @@ FastAPI application for microlearning content generation.
 
 import os
 import hashlib
+import shutil
 from datetime import datetime
 from typing import Optional, Literal, AsyncGenerator
 from contextlib import asynccontextmanager
@@ -111,6 +112,34 @@ max_request_size = settings.max_request_size_mb * 1024 * 1024  # Convert MB to b
 app.add_middleware(LimitUploadSize, max_upload_size=max_request_size)
 
 # Static files served by Next.js frontend
+
+# Create backup of original prompts on first run
+def create_prompt_backups():
+    """Create backup copies of original prompts if they don't exist."""
+    prompt_files = {
+        "mcq_generator": "prompts/mcq.generator.txt",
+        "mcq_formatter": "prompts/mcq.formatter.txt", 
+        "nmcq_generator": "prompts/nonmcq.generator.txt",
+        "nmcq_formatter": "prompts/nonmcq.formatter.txt",
+        "summary_generator": "prompts/summarybytes.generator.txt",
+        "summary_formatter": "prompts/summarybytes.formatter.txt"
+    }
+    
+    for key, filepath in prompt_files.items():
+        original_path = Path(filepath)
+        backup_path = Path(filepath.replace('.txt', '.default.txt'))
+        
+        # Create backup if it doesn't exist
+        if original_path.exists() and not backup_path.exists():
+            try:
+                import shutil
+                shutil.copy2(original_path, backup_path)
+                logger.info(f"Created backup for {key} at {backup_path}")
+            except Exception as e:
+                logger.error(f"Failed to create backup for {key}: {e}")
+
+# Create backups on startup
+create_prompt_backups()
 
 
 class RunRequest(BaseModel):
@@ -546,7 +575,7 @@ async def logout():
 
 @app.get("/api/prompts")
 async def get_prompts(auth_info: dict = Depends(verify_auth)):
-    """Get all default prompt templates (admin only)."""
+    """Get all current prompt templates (admin only)."""
     # Only admins can view prompts
     if auth_info.get("role") != "admin":
         raise HTTPException(
@@ -576,6 +605,95 @@ async def get_prompts(auth_info: dict = Depends(verify_auth)):
             prompts[key] = f"Error loading prompt: {str(e)}"
     
     return prompts
+
+
+@app.get("/api/prompts/defaults")
+async def get_default_prompts(auth_info: dict = Depends(verify_auth)):
+    """Get original default prompt templates (admin only)."""
+    # Only admins can view prompts
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can view prompt templates"
+        )
+    
+    prompts = {}
+    # Try to load from backup files first, fallback to current if backup doesn't exist
+    prompt_files = {
+        "mcq_generator": ("prompts/mcq.generator.default.txt", "prompts/mcq.generator.txt"),
+        "mcq_formatter": ("prompts/mcq.formatter.default.txt", "prompts/mcq.formatter.txt"), 
+        "nmcq_generator": ("prompts/nonmcq.generator.default.txt", "prompts/nonmcq.generator.txt"),
+        "nmcq_formatter": ("prompts/nonmcq.formatter.default.txt", "prompts/nonmcq.formatter.txt"),
+        "summary_generator": ("prompts/summarybytes.generator.default.txt", "prompts/summarybytes.generator.txt"),
+        "summary_formatter": ("prompts/summarybytes.formatter.default.txt", "prompts/summarybytes.formatter.txt")
+    }
+    
+    for key, (default_path, fallback_path) in prompt_files.items():
+        try:
+            # Try default backup first
+            file_path = Path(default_path)
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    prompts[key] = f.read()
+            else:
+                # Fallback to current file if backup doesn't exist
+                file_path = Path(fallback_path)
+                if file_path.exists():
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        prompts[key] = f.read()
+                else:
+                    prompts[key] = f"Error: No prompt file found"
+        except Exception as e:
+            prompts[key] = f"Error loading prompt: {str(e)}"
+    
+    return prompts
+
+
+@app.post("/api/prompts/reset")
+async def reset_prompts_to_defaults(auth_info: dict = Depends(verify_auth)):
+    """Reset all prompts to their original defaults (admin only)."""
+    # Only admins can reset prompts
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can reset prompt templates"
+        )
+    
+    prompt_files = {
+        "mcq_generator": ("prompts/mcq.generator.default.txt", "prompts/mcq.generator.txt"),
+        "mcq_formatter": ("prompts/mcq.formatter.default.txt", "prompts/mcq.formatter.txt"), 
+        "nmcq_generator": ("prompts/nonmcq.generator.default.txt", "prompts/nonmcq.generator.txt"),
+        "nmcq_formatter": ("prompts/nonmcq.formatter.default.txt", "prompts/nonmcq.formatter.txt"),
+        "summary_generator": ("prompts/summarybytes.generator.default.txt", "prompts/summarybytes.generator.txt"),
+        "summary_formatter": ("prompts/summarybytes.formatter.default.txt", "prompts/summarybytes.formatter.txt")
+    }
+    
+    reset_count = 0
+    errors = []
+    
+    for key, (default_path, current_path) in prompt_files.items():
+        try:
+            default_file = Path(default_path)
+            current_file = Path(current_path)
+            
+            if default_file.exists():
+                # Copy default back to current
+                import shutil
+                shutil.copy2(default_file, current_file)
+                reset_count += 1
+                logger.info(f"Reset {key} to default")
+            else:
+                errors.append({"key": key, "error": "Default file not found"})
+        except Exception as e:
+            errors.append({"key": key, "error": str(e)})
+            logger.error(f"Failed to reset {key}: {e}")
+    
+    return {
+        "success": len(errors) == 0,
+        "reset_count": reset_count,
+        "errors": errors,
+        "message": f"Successfully reset {reset_count} prompts to defaults" if reset_count > 0 else "No prompts were reset"
+    }
 
 
 @app.post("/api/prompts")

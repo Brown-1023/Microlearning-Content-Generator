@@ -70,8 +70,8 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
   const [summaryGeneratorPrompt, setSummaryGeneratorPrompt] = useState('');
   const [summaryFormatterPrompt, setSummaryFormatterPrompt] = useState('');
   
-  // Default prompts for reset functionality
-  const [defaultPrompts, setDefaultPrompts] = useState({
+  // Original default prompts for reset functionality (never change these)
+  const [originalDefaultPrompts, setOriginalDefaultPrompts] = useState({
     mcq_generator: '',
     mcq_formatter: '',
     nmcq_generator: '',
@@ -97,19 +97,25 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     fetchModels();
   }, [userRole]);
 
-  // Fetch default prompts on component mount (admin only)
+  // Fetch prompts on component mount (admin only)
   useEffect(() => {
     if (userRole === 'admin') {
       const fetchPrompts = async () => {
-        const prompts = await generationService.getDefaultPrompts();
-        if (prompts) {
-          setDefaultPrompts(prompts);
-          setMcqGeneratorPrompt(prompts.mcq_generator);
-          setMcqFormatterPrompt(prompts.mcq_formatter);
-          setNmcqGeneratorPrompt(prompts.nmcq_generator);
-          setNmcqFormatterPrompt(prompts.nmcq_formatter);
-          setSummaryGeneratorPrompt(prompts.summary_generator || '');
-          setSummaryFormatterPrompt(prompts.summary_formatter || '');
+        // Fetch current prompts (may be modified)
+        const currentPrompts = await generationService.getCurrentPrompts();
+        if (currentPrompts) {
+          setMcqGeneratorPrompt(currentPrompts.mcq_generator);
+          setMcqFormatterPrompt(currentPrompts.mcq_formatter);
+          setNmcqGeneratorPrompt(currentPrompts.nmcq_generator);
+          setNmcqFormatterPrompt(currentPrompts.nmcq_formatter);
+          setSummaryGeneratorPrompt(currentPrompts.summary_generator || '');
+          setSummaryFormatterPrompt(currentPrompts.summary_formatter || '');
+        }
+        
+        // Fetch original default prompts for reset functionality
+        const defaultPrompts = await generationService.getDefaultPrompts();
+        if (defaultPrompts) {
+          setOriginalDefaultPrompts(defaultPrompts);
         }
       };
       fetchPrompts();
@@ -143,8 +149,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     
     if (result.success) {
       setPromptsSaveStatus({ show: true, message: result.message || 'Prompts saved successfully!', type: 'success' });
-      // Update default prompts to the newly saved ones
-      setDefaultPrompts(promptsToSave);
+      // Note: We don't update originalDefaultPrompts here - they should always remain the original defaults
     } else {
       setPromptsSaveStatus({ show: true, message: result.message || 'Failed to save prompts', type: 'error' });
     }
@@ -329,12 +334,12 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
               type="number"
               id="numQuestions"
               min="1"
-              max="20"
+              max="10"
               value={numQuestions}
               onChange={(e) => setNumQuestions(parseInt(e.target.value))}
               disabled={isLoading}
             />
-            <small>Generate 1-20 questions</small>
+            <small>Generate 1-10 questions</small>
           </div>
 
           <div className="config-group">
@@ -540,7 +545,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   <h4>📝 MCQ Generator Prompt</h4>
                   <button 
                     className="reset-btn"
-                    onClick={() => setMcqGeneratorPrompt(defaultPrompts.mcq_generator)}
+                    onClick={() => setMcqGeneratorPrompt(originalDefaultPrompts.mcq_generator)}
                     disabled={isLoading}
                     title="Reset to default"
                   >
@@ -562,7 +567,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   <h4>🎨 MCQ Formatter Prompt</h4>
                   <button 
                     className="reset-btn"
-                    onClick={() => setMcqFormatterPrompt(defaultPrompts.mcq_formatter)}
+                    onClick={() => setMcqFormatterPrompt(originalDefaultPrompts.mcq_formatter)}
                     disabled={isLoading}
                     title="Reset to default"
                   >
@@ -584,7 +589,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   <h4>📋 Non-MCQ Generator Prompt</h4>
                   <button 
                     className="reset-btn"
-                    onClick={() => setNmcqGeneratorPrompt(defaultPrompts.nmcq_generator)}
+                    onClick={() => setNmcqGeneratorPrompt(originalDefaultPrompts.nmcq_generator)}
                     disabled={isLoading}
                     title="Reset to default"
                   >
@@ -606,7 +611,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   <h4>🖌️ Non-MCQ Formatter Prompt</h4>
                   <button 
                     className="reset-btn"
-                    onClick={() => setNmcqFormatterPrompt(defaultPrompts.nmcq_formatter)}
+                    onClick={() => setNmcqFormatterPrompt(originalDefaultPrompts.nmcq_formatter)}
                     disabled={isLoading}
                     title="Reset to default"
                   >
@@ -628,7 +633,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   <h4>📊 Summary Bytes Generator Prompt</h4>
                   <button 
                     className="reset-btn"
-                    onClick={() => setSummaryGeneratorPrompt(defaultPrompts.summary_generator)}
+                    onClick={() => setSummaryGeneratorPrompt(originalDefaultPrompts.summary_generator)}
                     disabled={isLoading}
                     title="Reset to default"
                   >
@@ -650,7 +655,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   <h4>✏️ Summary Bytes Formatter Prompt</h4>
                   <button 
                     className="reset-btn"
-                    onClick={() => setSummaryFormatterPrompt(defaultPrompts.summary_formatter)}
+                    onClick={() => setSummaryFormatterPrompt(originalDefaultPrompts.summary_formatter)}
                     disabled={isLoading}
                     title="Reset to default"
                   >
@@ -677,13 +682,29 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
               <div>
                 <button 
                   className="btn btn-outline"
-                  onClick={() => {
-                    setMcqGeneratorPrompt(defaultPrompts.mcq_generator);
-                    setMcqFormatterPrompt(defaultPrompts.mcq_formatter);
-                    setNmcqGeneratorPrompt(defaultPrompts.nmcq_generator);
-                    setNmcqFormatterPrompt(defaultPrompts.nmcq_formatter);
-                    setSummaryGeneratorPrompt(defaultPrompts.summary_generator);
-                    setSummaryFormatterPrompt(defaultPrompts.summary_formatter);
+                  onClick={async () => {
+                    // First reset on backend
+                    const result = await generationService.resetPromptsToDefaults();
+                    if (result.success) {
+                      // Then update UI with original defaults
+                      setMcqGeneratorPrompt(originalDefaultPrompts.mcq_generator);
+                      setMcqFormatterPrompt(originalDefaultPrompts.mcq_formatter);
+                      setNmcqGeneratorPrompt(originalDefaultPrompts.nmcq_generator);
+                      setNmcqFormatterPrompt(originalDefaultPrompts.nmcq_formatter);
+                      setSummaryGeneratorPrompt(originalDefaultPrompts.summary_generator);
+                      setSummaryFormatterPrompt(originalDefaultPrompts.summary_formatter);
+                      setPromptsSaveStatus({ 
+                        show: true, 
+                        message: result.message || 'Prompts reset to defaults successfully!', 
+                        type: 'success' 
+                      });
+                    } else {
+                      setPromptsSaveStatus({ 
+                        show: true, 
+                        message: result.message || 'Failed to reset prompts', 
+                        type: 'error' 
+                      });
+                    }
                   }}
                   disabled={isLoading || isSavingPrompts}
                 >

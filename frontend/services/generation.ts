@@ -201,15 +201,47 @@ class GenerationService {
     }
   }
 
-  async getDefaultPrompts(): Promise<DefaultPrompts | null> {
+  async getCurrentPrompts(): Promise<DefaultPrompts | null> {
     try {
       const response = await axios.get(`${this.baseURL}/api/prompts`, { 
         headers: this.getHeaders() 
       });
       return response.data;
     } catch (error) {
+      console.error('Failed to fetch current prompts:', error);
+      return null;
+    }
+  }
+
+  async getDefaultPrompts(): Promise<DefaultPrompts | null> {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/prompts/defaults`, { 
+        headers: this.getHeaders() 
+      });
+      return response.data;
+    } catch (error) {
       console.error('Failed to fetch default prompts:', error);
       return null;
+    }
+  }
+
+  async resetPromptsToDefaults(): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await axios.post(
+        `${this.baseURL}/api/prompts/reset`,
+        {},
+        { headers: this.getHeaders() }
+      );
+      return { 
+        success: response.data.success, 
+        message: response.data.message || 'Prompts reset to defaults successfully' 
+      };
+    } catch (error: any) {
+      console.error('Failed to reset prompts:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.detail || 'Failed to reset prompts' 
+      };
     }
   }
 
