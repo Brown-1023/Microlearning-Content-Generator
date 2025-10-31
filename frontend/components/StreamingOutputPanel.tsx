@@ -140,8 +140,6 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
       {/* Final Output Section */}
       {output && !isStreaming && (
         <>
-          
-
           {output.success && (
             <div className="status-message success">
               ✅ Content generated successfully!
@@ -151,13 +149,13 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           {!output.success && output.validation_errors?.length > 0 && (
             <>
               <div className="status-message warning">
-                ⚠️ Generation completed with validation errors
+                <span>⚠️ Generation completed with validation errors</span>
                 {onReformat && (
                   <button 
                     onClick={onReformat}
                     disabled={isReformatting}
                     className="btn btn-warning btn-sm"
-                    style={{ marginLeft: '16px' }}
+                    style={{ marginLeft: 'auto' }}
                   >
                     {isReformatting ? '🔄 Reformatting...' : '🔧 Reformat Output'}
                   </button>
@@ -186,53 +184,36 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           )}
 
           {(output.output || output.partial_output) && (
-            <div className="output-content">
-              <pre>{output.output || output.partial_output}</pre>
-            </div>
-          )}
-          
-          <div className="output-actions">
-            <button 
-              onClick={() => handleCopy(output.output || output.partial_output)} 
-              className="btn btn-primary btn-sm"
-            >
-              📋 Copy Final Output
-            </button>
-            <button 
-              onClick={() => handleDownload(output.output || output.partial_output, output?.metadata?.content_type || 'output')} 
-              className="btn btn-primary btn-sm"
-            >
-              💾 Download Final Output
-            </button>
-          </div>
-
-          {output.metadata && (
-            <div className="metadata">
-              <h3>Generation Details</h3>
-              <div className="metadata-content">
-                <div className="metadata-item">
-                  <span className="metadata-label">Content Type:</span>
-                  <span className="metadata-value">{output.metadata.content_type}</span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Generator Model:</span>
-                  <span className="metadata-value">{output.metadata.generator_model}</span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Questions Generated:</span>
-                  <span className="metadata-value">{output.metadata.num_questions}</span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Formatter Retries:</span>
-                  <span className="metadata-value">{output.metadata.formatter_retries}</span>
-                </div>
-                <div className="metadata-item">
-                  <span className="metadata-label">Total Time:</span>
-                  <span className="metadata-value">{output.metadata.total_time?.toFixed(2)}s</span>
-                </div>
+            <div className="output-section">
+              <div className="output-content">
+                <pre>{output.output || output.partial_output}</pre>
+              </div>
+              <div className="output-actions">
+                <button 
+                  onClick={() => handleCopy(output.output || output.partial_output)} 
+                  className="action-button copy-btn"
+                >
+                  <svg className="button-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M10.5 1h-6A1.5 1.5 0 003 2.5v9A1.5 1.5 0 004.5 13h6a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 1zM4.5 2h6a.5.5 0 01.5.5v9a.5.5 0 01-.5.5h-6a.5.5 0 01-.5-.5v-9a.5.5 0 01.5-.5z"/>
+                    <path d="M13 4.5V12a1.5 1.5 0 01-1.5 1.5h-7v1h7A2.5 2.5 0 0014 12V4.5h-1z"/>
+                  </svg>
+                  Copy Final Output
+                </button>
+                <button 
+                  onClick={() => handleDownload(output.output || output.partial_output, output?.metadata?.content_type || 'output')} 
+                  className="action-button download-btn"
+                >
+                  <svg className="button-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 11.5l3.5-3.5L10 6.5 9 7.5V1H7v6.5L6 6.5 4.5 8 8 11.5z"/>
+                    <path d="M13 13v-1h1v1a1 1 0 01-1 1H3a1 1 0 01-1-1v-1h1v1h10z"/>
+                  </svg>
+                  Download Final Output
+                </button>
               </div>
             </div>
           )}
+
+          
         </>
       )}
 
@@ -243,6 +224,7 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           padding: 24px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           margin-top: 24px;
+          padding-bottom: 46px !important;
         }
 
         .panel-header {
@@ -343,10 +325,58 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           word-wrap: break-word;
         }
 
+        .output-section {
+          margin-bottom: 24px;
+        }
+
         .output-actions {
           display: flex;
           gap: 12px;
-          margin-bottom: 16px;
+          margin-top: 16px;
+          justify-content: flex-end;
+          padding: 0 16px;
+        }
+
+        .action-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .action-button.copy-btn {
+          background: #3b82f6;
+          color: white;
+        }
+
+        .action-button.copy-btn:hover {
+          background: #2563eb;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+
+        .action-button.download-btn {
+          background: #10b981;
+          color: white;
+        }
+
+        .action-button.download-btn:hover {
+          background: #059669;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .button-icon {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
         }
 
         .btn {
@@ -415,6 +445,9 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           background: #fed7aa;
           color: #92400e;
           border: 1px solid #fb923c;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
 
         .status-message.error {
@@ -451,54 +484,71 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
         }
 
         .output-content {
-          background: #f9fafb;
+          background: #ffffff;
           border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          padding: 16px;
-          margin-bottom: 16px;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          position: relative;
         }
 
         .output-content pre {
           margin: 0;
-          font-size: 13px;
-          line-height: 1.5;
+          font-size: 14px;
+          line-height: 1.6;
           white-space: pre-wrap;
           word-wrap: break-word;
+          color: #1f2937;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
         }
 
-        .metadata {
-          background: #f3f4f6;
-          border-radius: 6px;
-          padding: 16px;
+        .metadata-panel {
+          background: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        .metadata h3 {
-          font-size: 14px;
+        .metadata-header {
+          background: #f9fafb;
+          padding: 16px 20px;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .metadata-header h3 {
+          font-size: 16px;
           font-weight: 600;
-          color: #374151;
-          margin: 0 0 12px 0;
+          color: #111827;
+          margin: 0;
+          display: flex;
+          align-items: center;
         }
 
-        .metadata-content {
+        .metadata-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 12px;
+          padding: 20px;
+          gap: 24px;
         }
 
         .metadata-item {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
         }
 
         .metadata-label {
           font-size: 12px;
+          font-weight: 500;
           color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
         }
 
         .metadata-value {
-          font-size: 14px;
-          font-weight: 500;
+          font-size: 15px;
+          font-weight: 600;
           color: #111827;
         }
       `}</style>
