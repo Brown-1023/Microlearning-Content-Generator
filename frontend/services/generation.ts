@@ -281,7 +281,7 @@ class GenerationService {
         params,
         { 
           headers: this.getHeaders(),
-          timeout: 60000 // 1 minute timeout
+          timeout: 180000 // 1 minute timeout
         }
       );
       return response.data;

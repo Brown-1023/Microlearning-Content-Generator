@@ -565,12 +565,16 @@ async def reformat_content(
         state = validator_node(state)
         
         # Retry if needed (up to 3 times with decreasing temperature)
-        max_retries = 3
-        while not state.get("success") and state["formatter_retries"] < max_retries:
-            # Decrease temperature on each retry for more deterministic output
-            state["formatter_temperature"] = max(0.1, state["formatter_temperature"] - 0.1)
-            state = formatter_retry_node(state)
-            state = validator_node(state)
+        # max_retries = 3
+        # while not state.get("success") and state["formatter_retries"] < max_retries:
+        #     # Decrease temperature on each retry for more deterministic output
+        #     state["formatter_temperature"] = max(0.1, state["formatter_temperature"] - 0.1)
+        #     state = formatter_retry_node(state)
+        #     state = validator_node(state)
+
+        state["formatter_temperature"] = max(0.1, state["formatter_temperature"] - 0.1)
+        state = formatter_retry_node(state)
+        state = validator_node(state)
         
         # Prepare response
         response = {
