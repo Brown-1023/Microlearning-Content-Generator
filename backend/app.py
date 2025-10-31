@@ -494,6 +494,120 @@ async def run_pipeline(
         )
 
 
+@app.post("/reformat")
+@limiter.limit("10 per minute")
+async def reformat_content(
+    request: Request,
+    reformat_request: dict,
+    auth_info: dict = Depends(verify_auth)
+):
+    """
+    Reformat existing content that has validation errors.
+    Takes the draft_1 content and runs it through formatter again.
+    """
+    logger.info(
+        "reformat_request_received",
+        content_type=reformat_request.get("content_type"),
+        has_draft=bool(reformat_request.get("draft_1")),
+        has_input=bool(reformat_request.get("input_text"))
+    )
+    
+    # Validate required fields
+    if not reformat_request.get("draft_1"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No draft content provided for reformatting"
+        )
+    
+    content_type = reformat_request.get("content_type", "MCQ")
+    generator_model = reformat_request.get("generator_model", "claude-sonnet-3.5")
+    
+    try:
+        # Create a state for reformatting
+        from pipeline import formatter_node, validator_node, formatter_retry_node
+        import time
+        
+        # Use lower temperature for more consistent reformatting
+        formatter_temp = reformat_request.get("formatter_temperature", 0.3)
+        formatter_top_p = reformat_request.get("formatter_top_p", 0.9)
+        
+        state = {
+            "content_type": content_type.upper(),
+            "generator_model": generator_model,
+            "draft_1": reformat_request["draft_1"],
+            "input_text": reformat_request.get("input_text", ""),  # Include original input if available
+            "num_questions": reformat_request.get("num_questions", 1),
+            "focus_areas": reformat_request.get("focus_areas"),  # Include focus areas
+            "formatter_temperature": formatter_temp,  # Lower temp for consistency
+            "formatter_top_p": formatter_top_p,
+            "prompts": {},
+            "formatted_output": None,
+            "validation_errors": [],
+            "formatter_retries": 0,
+            "start_time": time.time(),
+            "model_latencies": {},
+            "model_ids": {},
+            "success": False,
+            "error_message": None
+        }
+        
+        # Load prompts
+        from pipeline import load_prompts_node
+        state = load_prompts_node(state)
+        
+        # Run formatter
+        state = formatter_node(state)
+        
+        if state.get("error_message"):
+            raise Exception(state["error_message"])
+        
+        # Validate
+        state = validator_node(state)
+        
+        # Retry if needed (up to 3 times with decreasing temperature)
+        max_retries = 3
+        while not state.get("success") and state["formatter_retries"] < max_retries:
+            # Decrease temperature on each retry for more deterministic output
+            state["formatter_temperature"] = max(0.1, state["formatter_temperature"] - 0.1)
+            state = formatter_retry_node(state)
+            state = validator_node(state)
+        
+        # Prepare response
+        response = {
+            "success": state.get("success", False),
+            "output": state.get("formatted_output"),
+            "validation_errors": state.get("validation_errors", []),
+            "metadata": {
+                "content_type": state["content_type"],
+                "generator_model": state["generator_model"],
+                "num_questions": state.get("num_questions", 1),
+                "formatter_retries": state.get("formatter_retries", 0),
+                "total_time": time.time() - state["start_time"]
+            }
+        }
+        
+        # Add partial output if validation failed
+        if not response["success"] and state.get("formatted_output"):
+            response["partial_output"] = state.get("formatted_output")
+        
+        logger.info(
+            "reformat_request_completed",
+            success=response["success"],
+            validation_errors=len(response.get("validation_errors", [])),
+            retries=response["metadata"].get("formatter_retries", 0),
+            final_temperature=state.get("formatter_temperature")
+        )
+        
+        return response
+        
+    except Exception as e:
+        logger.error("reformat_request_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Reformatting failed: {str(e)}"
+        )
+
+
 @app.get("/")
 async def root():
     """API root endpoint."""
@@ -693,6 +807,53 @@ async def reset_prompts_to_defaults(auth_info: dict = Depends(verify_auth)):
         "reset_count": reset_count,
         "errors": errors,
         "message": f"Successfully reset {reset_count} prompts to defaults" if reset_count > 0 else "No prompts were reset"
+    }
+
+
+@app.post("/api/prompts/update-defaults")
+async def update_default_prompts(auth_info: dict = Depends(verify_auth)):
+    """Update default prompts with current prompts (admin only)."""
+    # Only admins can update default prompts
+    if auth_info.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can update default prompt templates"
+        )
+    
+    prompt_files = {
+        "mcq_generator": ("prompts/mcq.generator.txt", "prompts/mcq.generator.default.txt"),
+        "mcq_formatter": ("prompts/mcq.formatter.txt", "prompts/mcq.formatter.default.txt"), 
+        "nmcq_generator": ("prompts/nonmcq.generator.txt", "prompts/nonmcq.generator.default.txt"),
+        "nmcq_formatter": ("prompts/nonmcq.formatter.txt", "prompts/nonmcq.formatter.default.txt"),
+        "summary_generator": ("prompts/summarybytes.generator.txt", "prompts/summarybytes.generator.default.txt"),
+        "summary_formatter": ("prompts/summarybytes.formatter.txt", "prompts/summarybytes.formatter.default.txt")
+    }
+    
+    updated_count = 0
+    errors = []
+    
+    for key, (current_path, default_path) in prompt_files.items():
+        try:
+            current_file = Path(current_path)
+            default_file = Path(default_path)
+            
+            if current_file.exists():
+                # Copy current to default
+                import shutil
+                shutil.copy2(current_file, default_file)
+                updated_count += 1
+                logger.info(f"Updated default for {key}")
+            else:
+                errors.append({"key": key, "error": "Current file not found"})
+        except Exception as e:
+            errors.append({"key": key, "error": str(e)})
+            logger.error(f"Failed to update default for {key}: {e}")
+    
+    return {
+        "success": len(errors) == 0,
+        "updated_count": updated_count,
+        "errors": errors,
+        "message": f"Successfully updated {updated_count} default prompts" if updated_count > 0 else "No defaults were updated"
     }
 
 

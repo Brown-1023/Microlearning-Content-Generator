@@ -245,6 +245,54 @@ class GenerationService {
     }
   }
 
+  async updateDefaultPrompts(): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await axios.post(
+        `${this.baseURL}/api/prompts/update-defaults`,
+        {},
+        { headers: this.getHeaders() }
+      );
+      return { 
+        success: response.data.success, 
+        message: response.data.message || 'Default prompts updated successfully' 
+      };
+    } catch (error: any) {
+      console.error('Failed to update default prompts:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.detail || 'Failed to update default prompts' 
+      };
+    }
+  }
+
+  async reformatContent(params: {
+    draft_1: string;
+    input_text?: string;
+    content_type: string;
+    generator_model: string;
+    num_questions: number;
+    focus_areas?: string | null;
+    formatter_temperature?: number;
+    formatter_top_p?: number;
+  }): Promise<any> {
+    try {
+      const response = await axios.post(
+        `${this.baseURL}/reformat`,
+        params,
+        { 
+          headers: this.getHeaders(),
+          timeout: 60000 // 1 minute timeout
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        return error.response.data;
+      }
+      throw error;
+    }
+  }
+
   async savePrompts(prompts: DefaultPrompts): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await axios.post(

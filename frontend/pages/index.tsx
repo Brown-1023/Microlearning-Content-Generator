@@ -19,6 +19,9 @@ export default function Home() {
   const [streamProgress, setStreamProgress] = useState<StreamProgress | null>(null);
   const [streamDraft, setStreamDraft] = useState<string | null>(null);
   const [useStreaming, setUseStreaming] = useState(true); // Default to streaming mode
+  const [isReformatting, setIsReformatting] = useState(false);
+  const [lastGenerationParams, setLastGenerationParams] = useState<any>(null);
+  const [originalInputText, setOriginalInputText] = useState<string>('');  // Store original input
 
   useEffect(() => {
     checkAuth();
@@ -55,6 +58,8 @@ export default function Home() {
     setOutput(null);
     setStreamProgress(null);
     setStreamDraft(null);
+    setLastGenerationParams(params); // Store params for potential reformat
+    setOriginalInputText(params.input_text || ''); // Store original input text
     
     try {
       if (useStreaming) {
@@ -183,6 +188,49 @@ export default function Home() {
                   output={output}
                   isStreaming={isStreaming}
                   onShowToast={showToast}
+                  onReformat={async () => {
+                    if (!output || (!output.output && !output.partial_output && !streamDraft)) {
+                      showToast('No content available to reformat', 'error');
+                      return;
+                    }
+                    
+                    setIsReformatting(true);
+                    
+                    try {
+                      // Use the draft or output for reformatting
+                      const contentToReformat = streamDraft || output.output || output.partial_output;
+                      
+                      const reformatParams = {
+                        draft_1: contentToReformat,
+                        input_text: originalInputText,  // Include original input text
+                        content_type: lastGenerationParams?.content_type || output?.metadata?.content_type || 'MCQ',
+                        generator_model: lastGenerationParams?.generator_model || output?.metadata?.generator_model || 'claude-sonnet-3.5',
+                        num_questions: lastGenerationParams?.num_questions || output?.metadata?.num_questions || 1,
+                        focus_areas: lastGenerationParams?.focus_areas,  // Include focus areas
+                        // Use lower temperature for reformatting (more consistent)
+                        formatter_temperature: 0.3,  // Lower than default
+                        formatter_top_p: 0.9  // Slightly lower for consistency
+                      };
+                      
+                      const result = await generationService.reformatContent(reformatParams);
+                      
+                      // Update the output with reformatted content
+                      setOutput(result);
+                      
+                      if (result.success) {
+                        showToast('Content reformatted successfully!', 'success');
+                      } else if (result.validation_errors?.length > 0) {
+                        showToast(`Reformatting completed with ${result.validation_errors.length} validation errors. Try again or adjust prompts.`, 'warning');
+                      } else {
+                        showToast(result.error || 'Reformatting failed. Consider adjusting formatter prompts.', 'error');
+                      }
+                    } catch (error) {
+                      showToast('Failed to reformat content', 'error');
+                    } finally {
+                      setIsReformatting(false);
+                    }
+                  }}
+                  isReformatting={isReformatting}
                 />
               )}
             </div>

@@ -133,7 +133,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
   }, [promptsSaveStatus.show]);
 
   const handleSavePrompts = async () => {
-    if (!userRole || userRole !== 'admin') return;
+    if (!userRole || userRole !== 'admin') return false;
     
     setIsSavingPrompts(true);
     const promptsToSave = {
@@ -155,6 +155,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     }
     
     setIsSavingPrompts(false);
+    return result.success;
   };
 
   const handleSubmit = () => {
@@ -679,7 +680,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   {promptsSaveStatus.message}
                 </div>
               )}
-              <div>
+              <div className="prompt-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button 
                   className="btn btn-outline"
                   onClick={async () => {
@@ -709,6 +710,46 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
                   disabled={isLoading || isSavingPrompts}
                 >
                   Reset All to Defaults
+                </button>
+                <button 
+                  className="btn btn-secondary"
+                  onClick={async () => {
+                    if (confirm('This will update the default prompts with your current prompts. Are you sure?')) {
+                      setIsSavingPrompts(true);
+                      // First save current prompts
+                      await handleSavePrompts();
+                      
+                      // Then update defaults
+                      const result = await generationService.updateDefaultPrompts();
+                      if (result.success) {
+                        // Update the original defaults in state
+                        setOriginalDefaultPrompts({
+                          mcq_generator: mcqGeneratorPrompt,
+                          mcq_formatter: mcqFormatterPrompt,
+                          nmcq_generator: nmcqGeneratorPrompt,
+                          nmcq_formatter: nmcqFormatterPrompt,
+                          summary_generator: summaryGeneratorPrompt,
+                          summary_formatter: summaryFormatterPrompt
+                        });
+                        setPromptsSaveStatus({ 
+                          show: true, 
+                          message: 'Default prompts updated successfully!', 
+                          type: 'success' 
+                        });
+                      } else {
+                        setPromptsSaveStatus({ 
+                          show: true, 
+                          message: result.message || 'Failed to update default prompts', 
+                          type: 'error' 
+                        });
+                      }
+                      setIsSavingPrompts(false);
+                    }
+                  }}
+                  disabled={isLoading || isSavingPrompts}
+                  title="Save current prompts as the new defaults"
+                >
+                  {isSavingPrompts ? 'Updating...' : 'Save as New Defaults'}
                 </button>
                 <button 
                   className="btn btn-primary"

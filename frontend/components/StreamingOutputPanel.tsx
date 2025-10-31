@@ -10,6 +10,8 @@ interface StreamingOutputPanelProps {
   output: any;
   isStreaming: boolean;
   onShowToast: (message: string, type: string) => void;
+  onReformat?: () => void;
+  isReformatting?: boolean;
 }
 
 const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({ 
@@ -17,7 +19,9 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
   draft, 
   output, 
   isStreaming, 
-  onShowToast 
+  onShowToast,
+  onReformat,
+  isReformatting = false
 }) => {
   const handleCopy = (text: string) => {
     if (!text) {
@@ -136,20 +140,7 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
       {/* Final Output Section */}
       {output && !isStreaming && (
         <>
-          <div className="output-actions">
-            <button 
-              onClick={() => handleCopy(output.output || output.partial_output)} 
-              className="btn btn-primary btn-sm"
-            >
-              📋 Copy Final Output
-            </button>
-            <button 
-              onClick={() => handleDownload(output.output || output.partial_output, output?.metadata?.content_type || 'output')} 
-              className="btn btn-primary btn-sm"
-            >
-              💾 Download Final Output
-            </button>
-          </div>
+          
 
           {output.success && (
             <div className="status-message success">
@@ -161,6 +152,16 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
             <>
               <div className="status-message warning">
                 ⚠️ Generation completed with validation errors
+                {onReformat && (
+                  <button 
+                    onClick={onReformat}
+                    disabled={isReformatting}
+                    className="btn btn-warning btn-sm"
+                    style={{ marginLeft: '16px' }}
+                  >
+                    {isReformatting ? '🔄 Reformatting...' : '🔧 Reformat Output'}
+                  </button>
+                )}
               </div>
               <div className="validation-errors">
                 <h3>Validation Errors ({output.validation_errors.length})</h3>
@@ -171,6 +172,9 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
                     </li>
                   ))}
                 </ul>
+                <p className="reformat-tip">
+                  💡 <strong>Tip:</strong> If reformatting fails repeatedly, try adjusting the formatter prompt in the admin panel for better results.
+                </p>
               </div>
             </>
           )}
@@ -186,6 +190,21 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
               <pre>{output.output || output.partial_output}</pre>
             </div>
           )}
+          
+          <div className="output-actions">
+            <button 
+              onClick={() => handleCopy(output.output || output.partial_output)} 
+              className="btn btn-primary btn-sm"
+            >
+              📋 Copy Final Output
+            </button>
+            <button 
+              onClick={() => handleDownload(output.output || output.partial_output, output?.metadata?.content_type || 'output')} 
+              className="btn btn-primary btn-sm"
+            >
+              💾 Download Final Output
+            </button>
+          </div>
 
           {output.metadata && (
             <div className="metadata">
@@ -362,6 +381,20 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
         .btn-sm {
           padding: 6px 12px;
           font-size: 13px;
+        }
+
+        .btn-warning {
+          background: #f59e0b;
+          color: white;
+        }
+
+        .btn-warning:hover {
+          background: #d97706;
+        }
+
+        .btn-warning:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .status-message {

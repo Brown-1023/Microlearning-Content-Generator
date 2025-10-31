@@ -223,6 +223,17 @@ textarea {
   box-shadow: var(--shadow-md);
 }
 
+.btn-secondary {
+  background: var(--secondary);
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
 .btn-outline {
   background: transparent;
   color: var(--text-primary);
