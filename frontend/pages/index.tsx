@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import LoginModal from '../components/LoginModal';
 import GeneratorForm from '../components/GeneratorForm';
@@ -24,6 +24,7 @@ export default function Home() {
   const [originalInputText, setOriginalInputText] = useState<string>('');  // Store original input
   const [streamingDraft, setStreamingDraft] = useState<string>(''); // For token streaming
   const [streamingFormatted, setStreamingFormatted] = useState<string>(''); // For token streaming
+  const streamingFormattedRef = useRef<string>(''); // Ref to access latest value in callbacks
 
   useEffect(() => {
     checkAuth();
@@ -62,6 +63,7 @@ export default function Home() {
     setStreamDraft(null);
     setStreamingDraft(''); // Reset streaming draft
     setStreamingFormatted(''); // Reset streaming formatted
+    streamingFormattedRef.current = ''; // Reset ref
     setLastGenerationParams(params); // Store params for potential reformat
     setOriginalInputText(params.input_text || ''); // Store original input text
     
@@ -81,11 +83,25 @@ export default function Home() {
             setStreamingDraft(prev => prev + token);
           },
           onFormattedToken: (token: string) => {
-            setStreamingFormatted(prev => prev + token);
+            setStreamingFormatted(prev => {
+              const newContent = prev + token;
+              streamingFormattedRef.current = newContent; // Update ref
+              return newContent;
+            });
             // Don't clear draft immediately
           },
           onComplete: (result: any) => {
-            setOutput(result);
+            // If content was streamed, use the accumulated streamingFormatted as output
+            if (result.streamed && streamingFormattedRef.current) {
+              setOutput({
+                ...result,
+                output: streamingFormattedRef.current,
+                partial_output: streamingFormattedRef.current
+              });
+            } else {
+              // Fallback for non-streaming or if output is provided
+              setOutput(result);
+            }
             setIsStreaming(false);
             
             if (result.success) {
@@ -209,6 +225,7 @@ export default function Home() {
                     
                     setIsReformatting(true);
                     setStreamingFormatted(''); // Clear previous formatted content
+                    streamingFormattedRef.current = ''; // Clear ref too
                     
                     try {
                       // Use the draft or output for reformatting
@@ -232,12 +249,26 @@ export default function Home() {
                           setStreamProgress(data);
                         },
                         onFormattedToken: (token: string) => {
-                          setStreamingFormatted(prev => prev + token);
+                          setStreamingFormatted(prev => {
+                            const newContent = prev + token;
+                            streamingFormattedRef.current = newContent; // Update ref
+                            return newContent;
+                          });
                         },
                         onComplete: (result: any) => {
-                          setOutput(result);
+                          // If content was streamed, use the accumulated streamingFormatted as output
+                          if (result.streamed && streamingFormattedRef.current) {
+                            setOutput({
+                              ...result,
+                              output: streamingFormattedRef.current,
+                              partial_output: streamingFormattedRef.current
+                            });
+                          } else {
+                            // Fallback for non-streaming or if output is provided
+                            setOutput(result);
+                          }
                           setIsReformatting(false);
-                          setStreamingFormatted(''); // Clear streaming content after completion
+                          // Don't clear immediately - keep for display
                           
                           if (result.success) {
                             showToast('Content reformatted successfully!', 'success');

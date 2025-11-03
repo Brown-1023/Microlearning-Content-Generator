@@ -606,12 +606,13 @@ async def reformat_content_stream(
             
             state = validator_node(state)
             
-            # Complete
+            # Complete (don't send full output again - already streamed)
             yield {
                 "event": "complete",
                 "data": json.dumps({
                     "success": state.get("success", False),
-                    "output": state.get("formatted_output"),
+                    # Don't send full output - it was already streamed token by token
+                    "streamed": True,  # Flag to indicate content was streamed
                     "validation_errors": state.get("validation_errors", []),
                     "metadata": {
                         "content_type": state["content_type"],
