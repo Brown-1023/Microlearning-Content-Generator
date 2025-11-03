@@ -182,7 +182,7 @@ export default function Home() {
               <ModelRestrictionsPanel userRole={userRole} />
               
               {/* Streaming Mode Toggle */}
-              <div className="streaming-toggle">
+              {/* <div className="streaming-toggle">
                 <label className="toggle-label">
                   <input
                     type="checkbox"
@@ -199,7 +199,7 @@ export default function Home() {
                     ? 'Shows real-time progress as content is generated'
                     : 'Waits for complete response before showing results'}
                 </span>
-              </div>
+              </div> */}
               
               <GeneratorForm 
                 onGenerate={handleGenerate} 
