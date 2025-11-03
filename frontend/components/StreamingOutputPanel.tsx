@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface StreamingOutputPanelProps {
   progress: {
@@ -12,6 +12,8 @@ interface StreamingOutputPanelProps {
   onShowToast: (message: string, type: string) => void;
   onReformat?: () => void;
   isReformatting?: boolean;
+  streamingDraft?: string;
+  streamingFormatted?: string;
 }
 
 const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({ 
@@ -21,8 +23,25 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
   isStreaming, 
   onShowToast,
   onReformat,
-  isReformatting = false
+  isReformatting = false,
+  streamingDraft = '',
+  streamingFormatted = ''
 }) => {
+  const draftRef = useRef<HTMLDivElement>(null);
+  const formattedRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new content arrives
+  useEffect(() => {
+    if (draftRef.current && streamingDraft) {
+      draftRef.current.scrollTop = draftRef.current.scrollHeight;
+    }
+  }, [streamingDraft]);
+
+  useEffect(() => {
+    if (formattedRef.current && streamingFormatted) {
+      formattedRef.current.scrollTop = formattedRef.current.scrollHeight;
+    }
+  }, [streamingFormatted]);
   const handleCopy = (text: string) => {
     if (!text) {
       onShowToast('No content to copy', 'error');
@@ -111,28 +130,48 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
         </div>
       )}
 
-      {/* Draft Section - Show when draft is available */}
-      {draft && (
+      {/* Streaming Draft Section - Show when generating or draft is available */}
+      {(streamingDraft || draft) && !streamingFormatted && !output && (
         <div className="draft-section">
           <div className="section-header">
-            <h3>📝 Initial Draft</h3>
-            <div className="draft-actions">
-              <button 
-                onClick={() => handleCopy(draft)} 
-                className="btn btn-outline btn-sm"
-              >
-                📋 Copy Draft
-              </button>
-              <button 
-                onClick={() => handleDownload(draft, 'draft')} 
-                className="btn btn-outline btn-sm"
-              >
-                💾 Download Draft
-              </button>
-            </div>
+            <h3>📝 {streamingDraft && isStreaming ? 'Generating Initial Draft...' : 'Initial Draft'}</h3>
+            {!isStreaming && (draft || streamingDraft) && (
+              <div className="draft-actions">
+                <button 
+                  onClick={() => handleCopy(draft || streamingDraft)} 
+                  className="btn btn-outline btn-sm"
+                >
+                  📋 Copy Draft
+                </button>
+                <button 
+                  onClick={() => handleDownload(draft || streamingDraft, 'draft')} 
+                  className="btn btn-outline btn-sm"
+                >
+                  💾 Download Draft
+                </button>
+              </div>
+            )}
           </div>
-          <div className="draft-content">
-            <pre>{draft}</pre>
+          <div className="draft-content streaming-content" ref={draftRef}>
+            <pre>{streamingDraft || draft}</pre>
+            {isStreaming && streamingDraft && (
+              <span className="cursor-blink">▊</span>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Streaming Formatted Section - Show when formatting or reformatting */}
+      {streamingFormatted && (isReformatting || !output) && (
+        <div className="formatted-section">
+          <div className="section-header">
+            <h3>✨ {(isStreaming || isReformatting) ? 'Formatting Content...' : 'Formatted Content'}</h3>
+          </div>
+          <div className="formatted-content streaming-content" ref={formattedRef}>
+            <pre>{streamingFormatted}</pre>
+            {(isStreaming || isReformatting) && (
+              <span className="cursor-blink">▊</span>
+            )}
           </div>
         </div>
       )}
@@ -550,6 +589,38 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           font-size: 15px;
           font-weight: 600;
           color: #111827;
+        }
+        
+        .streaming-content {
+          max-height: 500px;
+          overflow-y: auto;
+          position: relative;
+        }
+        
+        .cursor-blink {
+          animation: blink 1s infinite;
+          color: #3b82f6;
+          font-weight: bold;
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+        
+        .formatted-section {
+          margin-top: 20px;
+          background: white;
+          border-radius: 8px;
+          padding: 20px;
+          border: 1px solid #e5e7eb;
+        }
+        
+        .formatted-content {
+          background: #f9fafb;
+          padding: 16px;
+          border-radius: 6px;
+          margin-top: 12px;
         }
       `}</style>
     </div>

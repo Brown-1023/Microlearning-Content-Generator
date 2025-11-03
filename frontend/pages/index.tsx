@@ -22,6 +22,8 @@ export default function Home() {
   const [isReformatting, setIsReformatting] = useState(false);
   const [lastGenerationParams, setLastGenerationParams] = useState<any>(null);
   const [originalInputText, setOriginalInputText] = useState<string>('');  // Store original input
+  const [streamingDraft, setStreamingDraft] = useState<string>(''); // For token streaming
+  const [streamingFormatted, setStreamingFormatted] = useState<string>(''); // For token streaming
 
   useEffect(() => {
     checkAuth();
@@ -58,6 +60,8 @@ export default function Home() {
     setOutput(null);
     setStreamProgress(null);
     setStreamDraft(null);
+    setStreamingDraft(''); // Reset streaming draft
+    setStreamingFormatted(''); // Reset streaming formatted
     setLastGenerationParams(params); // Store params for potential reformat
     setOriginalInputText(params.input_text || ''); // Store original input text
     
@@ -72,6 +76,13 @@ export default function Home() {
           },
           onDraft: (draft: string) => {
             setStreamDraft(draft);
+          },
+          onDraftToken: (token: string) => {
+            setStreamingDraft(prev => prev + token);
+          },
+          onFormattedToken: (token: string) => {
+            setStreamingFormatted(prev => prev + token);
+            // Don't clear draft immediately
           },
           onComplete: (result: any) => {
             setOutput(result);
@@ -181,13 +192,15 @@ export default function Home() {
               />
               
               {/* Show streaming panel if streaming, otherwise show regular panel */}
-              {(isStreaming || streamProgress || streamDraft || output) && (
+              {(isStreaming || streamProgress || streamDraft || output || streamingDraft || streamingFormatted) && (
                 <StreamingOutputPanel
                   progress={streamProgress}
                   draft={streamDraft}
                   output={output}
                   isStreaming={isStreaming}
                   onShowToast={showToast}
+                  streamingDraft={streamingDraft}
+                  streamingFormatted={streamingFormatted}
                   onReformat={async () => {
                     if (!output || (!output.output && !output.partial_output && !streamDraft)) {
                       showToast('No content available to reformat', 'error');
@@ -195,6 +208,7 @@ export default function Home() {
                     }
                     
                     setIsReformatting(true);
+                    setStreamingFormatted(''); // Clear previous formatted content
                     
                     try {
                       // Use the draft or output for reformatting
@@ -212,22 +226,37 @@ export default function Home() {
                         formatter_top_p: 0.9  // Slightly lower for consistency
                       };
                       
-                      const result = await generationService.reformatContent(reformatParams);
-                      
-                      // Update the output with reformatted content
-                      setOutput(result);
-                      
-                      if (result.success) {
-                        showToast('Content reformatted successfully!', 'success');
-                      } else if (result.validation_errors?.length > 0) {
-                        showToast(`Reformatting completed with ${result.validation_errors.length} validation errors. Try again or adjust prompts.`, 'warning');
-                      } else {
-                        showToast(result.error || 'Reformatting failed. Consider adjusting formatter prompts.', 'error');
-                      }
+                      // Use streaming for reformatting
+                      await generationService.reformatContentStream(reformatParams, {
+                        onProgress: (data: StreamProgress) => {
+                          setStreamProgress(data);
+                        },
+                        onFormattedToken: (token: string) => {
+                          setStreamingFormatted(prev => prev + token);
+                        },
+                        onComplete: (result: any) => {
+                          setOutput(result);
+                          setIsReformatting(false);
+                          setStreamingFormatted(''); // Clear streaming content after completion
+                          
+                          if (result.success) {
+                            showToast('Content reformatted successfully!', 'success');
+                          } else if (result.validation_errors?.length > 0) {
+                            showToast(`Reformatting completed with ${result.validation_errors.length} validation errors. Try again or adjust prompts.`, 'warning');
+                          } else {
+                            showToast(result.error || 'Reformatting failed. Consider adjusting formatter prompts.', 'error');
+                          }
+                        },
+                        onError: (error: string) => {
+                          setIsReformatting(false);
+                          setStreamingFormatted(''); // Clear streaming content on error
+                          showToast(error || 'Failed to reformat content', 'error');
+                        }
+                      });
                     } catch (error) {
-                      showToast('Failed to reformat content', 'error');
-                    } finally {
                       setIsReformatting(false);
+                      setStreamingFormatted(''); // Clear streaming content on error
+                      showToast('Failed to reformat content', 'error');
                     }
                   }}
                   isReformatting={isReformatting}

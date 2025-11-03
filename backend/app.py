@@ -382,8 +382,8 @@ async def run_pipeline_stream(
                 })
             }
             
-            # Run the pipeline with streaming
-            async for event in pipeline.run_stream(
+            # Run the pipeline with token-by-token streaming
+            async for event in pipeline.run_stream_tokens(
                 content_type=run_request.content_type,
                 generator_model=run_request.generator_model,
                 input_text=run_request.input_text,
@@ -492,6 +492,145 @@ async def run_pipeline(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Pipeline execution failed: {str(e)}"
         )
+
+
+@app.post("/reformat/stream")
+@limiter.limit("10 per minute")
+async def reformat_content_stream(
+    request: Request,
+    reformat_request: dict,
+    auth_info: dict = Depends(verify_auth)
+):
+    """
+    Stream reformatting of existing content with validation errors.
+    Provides token-by-token updates during reformatting.
+    """
+    logger.info(
+        "reformat_stream_request_received",
+        content_type=reformat_request.get("content_type"),
+        has_draft=bool(reformat_request.get("draft_1"))
+    )
+    
+    # Validate required fields
+    if not reformat_request.get("draft_1"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No draft content provided for reformatting"
+        )
+    
+    async def generate_reformat_events() -> AsyncGenerator:
+        try:
+            from pipeline import ModelCaller, load_prompts_node, validator_node, PromptLoader
+            import time
+            import json
+            import asyncio
+            
+            model_caller = ModelCaller()
+            
+            # Initialize state for reformatting
+            state = {
+                "content_type": reformat_request.get("content_type", "MCQ").upper(),
+                "generator_model": reformat_request.get("generator_model", "claude-sonnet-3.5"),
+                "draft_1": reformat_request["draft_1"],
+                "input_text": reformat_request.get("input_text", ""),
+                "num_questions": reformat_request.get("num_questions", 1),
+                "focus_areas": reformat_request.get("focus_areas"),
+                "formatter_temperature": reformat_request.get("formatter_temperature", 0.3),
+                "formatter_top_p": reformat_request.get("formatter_top_p", 0.9),
+                "prompts": {},
+                "formatted_output": None,
+                "validation_errors": [],
+                "formatter_retries": 0,
+                "start_time": time.time(),
+                "model_latencies": {},
+                "model_ids": {},
+                "success": False,
+                "error_message": None
+            }
+            
+            # Load prompts
+            state = load_prompts_node(state)
+            
+            # Initial progress
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "formatter_starting",
+                    "message": "Starting reformatting...",
+                    "progress": 10
+                })
+            }
+            
+            # Prepare formatter prompt
+            prompt_template = state['prompts']["formatter"]
+            full_prompt = f"{prompt_template}\n\nContent to format:\n\n{state['draft_1']}"
+            
+            # Stream formatting with Gemini Flash
+            formatted_content = ""
+            async def async_generator(sync_gen):
+                for item in sync_gen:
+                    yield item
+                    await asyncio.sleep(0)
+            
+            async for chunk in async_generator(
+                model_caller.stream_gemini(
+                    full_prompt, 
+                    model_caller.gemini_flash_model,
+                    state["formatter_temperature"],
+                    state["formatter_top_p"]
+                )
+            ):
+                if chunk.get("token"):
+                    formatted_content += chunk["token"]
+                    yield {
+                        "event": "formatted_token",
+                        "data": json.dumps({
+                            "token": chunk["token"],
+                            "stage": "formatter"
+                        })
+                    }
+                elif chunk.get("complete"):
+                    state["formatted_output"] = chunk["full_content"]
+                    state["model_ids"]["formatter"] = chunk["model"]
+                    state["model_latencies"]["formatter"] = chunk["latency"]
+            
+            # Validate
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "validator",
+                    "message": "Validating reformatted content...",
+                    "progress": 90
+                })
+            }
+            
+            state = validator_node(state)
+            
+            # Complete
+            yield {
+                "event": "complete",
+                "data": json.dumps({
+                    "success": state.get("success", False),
+                    "output": state.get("formatted_output"),
+                    "validation_errors": state.get("validation_errors", []),
+                    "metadata": {
+                        "content_type": state["content_type"],
+                        "generator_model": state["generator_model"],
+                        "num_questions": state.get("num_questions", 1),
+                        "formatter_retries": state.get("formatter_retries", 0),
+                        "total_time": time.time() - state["start_time"]
+                    }
+                })
+            }
+            
+        except Exception as e:
+            logger.error("reformat_stream_failed", error=str(e))
+            yield {
+                "event": "error",
+                "data": json.dumps({"error": str(e)})
+            }
+    
+    return EventSourceResponse(generate_reformat_events())
 
 
 @app.post("/reformat")
