@@ -83,13 +83,13 @@ class GenerationService {
     const headers = this.getHeaders();
     headers['Accept'] = 'text/event-stream';
     
-    const eventSource = new EventSource(
-      `${this.baseURL}/run/stream`,
-      {
-        // @ts-ignore - EventSource doesn't natively support headers, but we'll use a workaround
-        withCredentials: true
-      }
-    );
+    // const eventSource = new EventSource(
+    //   `${this.baseURL}/run/stream`,
+    //   {
+    //     // @ts-ignore - EventSource doesn't natively support headers, but we'll use a workaround
+    //     withCredentials: true
+    //   }
+    // );
 
     // Use fetch with EventSource polyfill for headers support
     const response = await fetch(`${this.baseURL}/run/stream`, {
