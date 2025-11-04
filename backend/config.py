@@ -58,8 +58,8 @@ class Settings(BaseSettings):
     
     # Server Configuration
     host: str = Field(default="0.0.0.0", env="HOST")
-    # Use PORT env var (Cloud Run sets this) or default to 4000
-    port: int = Field(default=4000, env="PORT")
+    # Use PORT env var (Cloud Run sets this) or default to 8080
+    port: int = Field(default=int(os.getenv("PORT", "8080")), env="PORT")
     reload: bool = Field(default=False, env="RELOAD")
     
     # CORS Configuration
