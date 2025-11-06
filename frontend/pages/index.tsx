@@ -24,7 +24,8 @@ export default function Home() {
   const [originalInputText, setOriginalInputText] = useState<string>('');  // Store original input
   const [streamingDraft, setStreamingDraft] = useState<string>(''); // For token streaming
   const [streamingFormatted, setStreamingFormatted] = useState<string>(''); // For token streaming
-  const streamingFormattedRef = useRef<string>(''); // Ref to access latest value in callbacks
+  const streamingDraftRef = useRef<string>(''); // Ref to access latest draft value in callbacks
+  const streamingFormattedRef = useRef<string>(''); // Ref to access latest formatted value in callbacks
 
   useEffect(() => {
     checkAuth();
@@ -47,6 +48,7 @@ export default function Home() {
       setStreamDraft(null);
       setStreamingDraft('');
       setStreamingFormatted('');
+      streamingDraftRef.current = '';
       streamingFormattedRef.current = '';
       setLastGenerationParams(null);
       setOriginalInputText('');
@@ -70,6 +72,7 @@ export default function Home() {
     setStreamDraft(null);
     setStreamingDraft('');
     setStreamingFormatted('');
+    streamingDraftRef.current = '';
     streamingFormattedRef.current = '';
     setLastGenerationParams(null);
     setOriginalInputText('');
@@ -86,7 +89,8 @@ export default function Home() {
     setStreamDraft(null);
     setStreamingDraft(''); // Reset streaming draft
     setStreamingFormatted(''); // Reset streaming formatted
-    streamingFormattedRef.current = ''; // Reset ref
+    streamingDraftRef.current = ''; // Reset draft ref
+    streamingFormattedRef.current = ''; // Reset formatted ref
     setLastGenerationParams(params); // Store params for potential format
     setOriginalInputText(params.input_text || ''); // Store original input text
     
@@ -99,12 +103,21 @@ export default function Home() {
           setStreamProgress(data);
         },
         onDraftToken: (token: string) => {
-          setStreamingDraft(prev => prev + token);
+          setStreamingDraft(prev => {
+            const newContent = prev + token;
+            streamingDraftRef.current = newContent; // Update ref with latest
+            return newContent;
+          });
         },
         onComplete: (result: any) => {
           if (result.success) {
-            // Store the complete draft
-            setStreamDraft(result.draft_1);
+            // If content was streamed, use the accumulated draft from ref
+            if (result.streamed) {
+              setStreamDraft(streamingDraftRef.current);  // Use the ref's current value
+            } else if (result.draft_1) {
+              // Fallback if full draft is provided (backward compatibility)
+              setStreamDraft(result.draft_1);
+            }
             showToast('Draft generated successfully! Click "Format Draft" to continue.', 'success');
           } else {
             showToast(result.error || 'Draft generation failed', 'error');
@@ -162,9 +175,12 @@ export default function Home() {
           });
         },
         onComplete: (result: any) => {
+          // Use the streamed content from ref if content was streamed
+          const finalOutput = result.streamed ? streamingFormattedRef.current : result.output;
           setOutput({
             ...result,
-            partial_output: result.output
+            partial_output: finalOutput,
+            output: finalOutput  // Ensure both are set
           });
           setIsStreaming(false);
           

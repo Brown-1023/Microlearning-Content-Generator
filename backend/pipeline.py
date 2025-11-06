@@ -683,16 +683,17 @@ class ContentPipeline:
                         state["model_ids"]["generator"] = chunk["model"]
                         state["model_latencies"]["generator"] = chunk["latency"]
             
-            # Send complete event with draft
+            # Send complete event WITHOUT the full draft (already streamed)
             yield {
                 "event": "draft_complete",
                 "data": json.dumps({
                     "success": True,
-                    "draft_1": state["draft_1"],
+                    "streamed": True,  # Flag to indicate content was streamed
                     "metadata": {
                         "content_type": state["content_type"],
                         "generator_model": state["generator_model"],
                         "num_questions": state["num_questions"],
+                        "draft_length": len(state.get("draft_1", "")),
                         "total_time": time.time() - state["start_time"]
                     }
                 })
@@ -816,17 +817,18 @@ class ContentPipeline:
             
             state = validator_node(state)
             
-            # Complete
+            # Complete WITHOUT sending the full output (already streamed)
             yield {
                 "event": "format_complete",
                 "data": json.dumps({
                     "success": state.get("success", False),
-                    "output": state["formatted_output"],
+                    "streamed": True,  # Flag to indicate content was streamed
                     "validation_errors": state.get("validation_errors", []),
                     "metadata": {
                         "content_type": state["content_type"],
                         "generator_model": state["generator_model"],
                         "num_questions": state.get("num_questions", 1),
+                        "output_length": len(state.get("formatted_output", "")),
                         "formatter_retries": state.get("formatter_retries", 0),
                         "total_time": time.time() - state["start_time"]
                     }
