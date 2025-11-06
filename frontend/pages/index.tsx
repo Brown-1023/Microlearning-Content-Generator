@@ -87,72 +87,100 @@ export default function Home() {
     setStreamingDraft(''); // Reset streaming draft
     setStreamingFormatted(''); // Reset streaming formatted
     streamingFormattedRef.current = ''; // Reset ref
-    setLastGenerationParams(params); // Store params for potential reformat
+    setLastGenerationParams(params); // Store params for potential format
     setOriginalInputText(params.input_text || ''); // Store original input text
     
     try {
-      if (useStreaming) {
-        // Use streaming mode
-        setIsStreaming(true);
-        
-        await generationService.generateContentStream(params, {
-          onProgress: (data: StreamProgress) => {
-            setStreamProgress(data);
-          },
-          onDraft: (draft: string) => {
-            setStreamDraft(draft);
-          },
-          onDraftToken: (token: string) => {
-            setStreamingDraft(prev => prev + token);
-          },
-          onFormattedToken: (token: string) => {
-            setStreamingFormatted(prev => {
-              const newContent = prev + token;
-              streamingFormattedRef.current = newContent; // Update ref
-              return newContent;
-            });
-            // Don't clear draft immediately
-          },
-          onComplete: (result: any) => {
-            // If content was streamed, use the accumulated streamingFormatted as output
-            if (result.streamed && streamingFormattedRef.current) {
-              setOutput({
-                ...result,
-                output: streamingFormattedRef.current,
-                partial_output: streamingFormattedRef.current
-              });
-            } else {
-              // Fallback for non-streaming or if output is provided
-              setOutput(result);
-            }
-            setIsStreaming(false);
-            
-            if (result.success) {
-              showToast('Content generated successfully!', 'success');
-            } else if (result.validation_errors?.length > 0) {
-              showToast('Generation completed with validation errors', 'warning');
-            } else {
-              showToast(result.error || 'Generation failed', 'error');
-            }
-          },
-          onError: (error: string) => {
-            setIsStreaming(false);
-            showToast(error, 'error');
+      // Generate only the draft
+      setIsStreaming(true);
+      
+      await generationService.generateDraftStream(params, {
+        onProgress: (data: StreamProgress) => {
+          setStreamProgress(data);
+        },
+        onDraftToken: (token: string) => {
+          setStreamingDraft(prev => prev + token);
+        },
+        onComplete: (result: any) => {
+          if (result.success) {
+            // Store the complete draft
+            setStreamDraft(result.draft_1);
+            showToast('Draft generated successfully! Click "Format Draft" to continue.', 'success');
+          } else {
+            showToast(result.error || 'Draft generation failed', 'error');
           }
-        });
-      } else {
-        // Use traditional non-streaming mode
-        const result = await generationService.generateContent(params);
-        setOutput(result);
-        
-        if (result.success) {
-          showToast('Content generated successfully!', 'success');
-        } else if (result.validation_errors?.length > 0) {
-          showToast('Generation completed with validation errors', 'warning');
-        } else {
-          showToast(result.error || 'Generation failed', 'error');
+          setIsStreaming(false);
+        },
+        onError: (error: string) => {
+          setIsStreaming(false);
+          showToast(error, 'error');
         }
-      }
+      });
+    } catch (error) {
+      setIsStreaming(false);
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFormatDraft = async () => {
+    if (!streamDraft && !streamingDraft) {
+      showToast('No draft available to format', 'error');
+      return;
+    }
+    
+    const draftToFormat = streamDraft || streamingDraft;
+    
+    setIsLoading(true);
+    setOutput(null);
+    setStreamingFormatted(''); // Reset formatted content
+    streamingFormattedRef.current = ''; // Reset ref
+    setIsStreaming(true);
+    
+    try {
+      const formatParams = {
+        draft_1: draftToFormat,
+        content_type: lastGenerationParams?.content_type || 'MCQ',
+        generator_model: lastGenerationParams?.generator_model || 'claude-sonnet-3.5',
+        input_text: originalInputText,
+        num_questions: lastGenerationParams?.num_questions || 1,
+        focus_areas: lastGenerationParams?.focus_areas,
+        formatter_temperature: lastGenerationParams?.formatter_temperature || 0.51,
+        formatter_top_p: lastGenerationParams?.formatter_top_p || 0.95
+      };
+      
+      await generationService.formatDraftStream(formatParams, {
+        onProgress: (data: StreamProgress) => {
+          setStreamProgress(data);
+        },
+        onFormattedToken: (token: string) => {
+          setStreamingFormatted(prev => {
+            const newContent = prev + token;
+            streamingFormattedRef.current = newContent;
+            return newContent;
+          });
+        },
+        onComplete: (result: any) => {
+          setOutput({
+            ...result,
+            partial_output: result.output
+          });
+          setIsStreaming(false);
+          
+          if (result.success) {
+            showToast('Content formatted successfully!', 'success');
+          } else if (result.validation_errors?.length > 0) {
+            showToast('Formatting completed with validation errors', 'warning');
+          } else {
+            showToast(result.error || 'Formatting failed', 'error');
+          }
+        },
+        onError: (error: string) => {
+          setIsStreaming(false);
+          showToast(error, 'error');
+        }
+      });
     } catch (error) {
       setIsStreaming(false);
       showToast('Network error. Please try again.', 'error');
@@ -240,6 +268,8 @@ export default function Home() {
                   onShowToast={showToast}
                   streamingDraft={streamingDraft}
                   streamingFormatted={streamingFormatted}
+                  onFormatDraft={handleFormatDraft}
+                  isFormattingDraft={isLoading && (!!streamDraft || !!streamingDraft) && !output}
                   onReformat={async () => {
                     if (!output || (!output.output && !output.partial_output && !streamDraft)) {
                       showToast('No content available to reformat', 'error');

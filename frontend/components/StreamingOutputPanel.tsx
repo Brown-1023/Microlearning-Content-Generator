@@ -14,6 +14,8 @@ interface StreamingOutputPanelProps {
   isReformatting?: boolean;
   streamingDraft?: string;
   streamingFormatted?: string;
+  onFormatDraft?: () => void;
+  isFormattingDraft?: boolean;
 }
 
 const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({ 
@@ -25,7 +27,9 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
   onReformat,
   isReformatting = false,
   streamingDraft = '',
-  streamingFormatted = ''
+  streamingFormatted = '',
+  onFormatDraft,
+  isFormattingDraft = false
 }) => {
   const draftRef = useRef<HTMLDivElement>(null);
   const formattedRef = useRef<HTMLDivElement>(null);
@@ -131,11 +135,20 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
       )}
 
       {/* Streaming Draft Section - Show when generating or draft is available */}
-      {(streamingDraft || draft) && !streamingFormatted && !output && (
+      {(streamingDraft || draft) && !output && (
         <div className="draft-section">
           <div className="section-header">
             <h3>📝 {streamingDraft && isStreaming ? 'Generating Initial Draft...' : 'Initial Draft'}</h3>
-            {!isStreaming && (draft || streamingDraft) && (
+            
+          </div>
+          <div className="draft-content streaming-content" ref={draftRef}>
+            <pre>{streamingDraft || draft}</pre>
+            {isStreaming && streamingDraft && (
+              <span className="cursor-blink">▊</span>
+            )}
+          </div>
+          <div>
+            {!isStreaming && !isFormattingDraft && (draft || streamingDraft) && (
               <div className="draft-actions">
                 <button 
                   onClick={() => handleCopy(draft || streamingDraft)} 
@@ -149,27 +162,30 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
                 >
                   💾 Download Draft
                 </button>
+                {onFormatDraft && (
+                  <button 
+                    onClick={onFormatDraft}
+                    className="btn btn-primary btn-sm"
+                    style={{ marginLeft: 'auto' }}
+                  >
+                    ✨ Format Draft
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-          <div className="draft-content streaming-content" ref={draftRef}>
-            <pre>{streamingDraft || draft}</pre>
-            {isStreaming && streamingDraft && (
-              <span className="cursor-blink">▊</span>
             )}
           </div>
         </div>
       )}
       
       {/* Streaming Formatted Section - Show when formatting or reformatting */}
-      {streamingFormatted && (isReformatting || !output) && (
+      {streamingFormatted && (isReformatting || isFormattingDraft || !output) && (
         <div className="formatted-section">
           <div className="section-header">
-            <h3>✨ {(isStreaming || isReformatting) ? 'Formatting Content...' : 'Formatted Content'}</h3>
+            <h3>✨ {(isStreaming || isReformatting || isFormattingDraft) ? 'Formatting Content...' : 'Formatted Content'}</h3>
           </div>
           <div className="formatted-content streaming-content" ref={formattedRef}>
             <pre>{streamingFormatted}</pre>
-            {(isStreaming || isReformatting) && (
+            {(isStreaming || isReformatting || isFormattingDraft) && (
               <span className="cursor-blink">▊</span>
             )}
           </div>

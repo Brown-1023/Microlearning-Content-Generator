@@ -76,6 +76,197 @@ class GenerationService {
     }
   }
 
+  async generateDraftStream(
+    params: {
+      content_type: string;
+      generator_model: string;
+      input_text: string;
+      num_questions: number;
+      focus_areas?: string | null;
+      generator_temperature?: number;
+      generator_top_p?: number;
+      formatter_temperature?: number;
+      formatter_top_p?: number;
+    },
+    callbacks: StreamCallback
+  ): Promise<void> {
+    const headers = this.getHeaders();
+    headers['Accept'] = 'text/event-stream';
+    headers['Content-Type'] = 'application/json';
+    
+    try {
+      const response = await fetch(`${this.baseURL}/run/stream/draft`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(params),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        callbacks.onError?.(`Failed to start generation: ${error}`);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      if (!reader) {
+        callbacks.onError?.('Stream reader not available');
+        return;
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('event:')) {
+            continue;
+          }
+          
+          if (line.startsWith('data:')) {
+            const data = line.substring(5).trim();
+            if (data === '[DONE]') {
+              return;
+            }
+            
+            try {
+              const parsedData = JSON.parse(data);
+              const eventLine = lines[lines.indexOf(line) - 1];
+              const eventType = eventLine?.startsWith('event:') 
+                ? eventLine.substring(6).trim() 
+                : 'message';
+
+              switch (eventType) {
+                case 'progress':
+                  callbacks.onProgress?.(parsedData);
+                  break;
+                case 'draft_token':
+                  callbacks.onDraftToken?.(parsedData.token || '');
+                  break;
+                case 'draft_complete':
+                  callbacks.onComplete?.(parsedData);
+                  break;
+                case 'error':
+                  callbacks.onError?.(parsedData.error);
+                  break;
+                case 'keepalive':
+                case 'ping':
+                  console.debug('Keepalive received:', parsedData.timestamp);
+                  break;
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE data:', e);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      callbacks.onError?.(error.message || 'Stream failed');
+    }
+  }
+
+  async formatDraftStream(
+    params: {
+      draft_1: string;
+      content_type: string;
+      generator_model: string;
+      input_text: string;
+      num_questions: number;
+      focus_areas?: string | null;
+      formatter_temperature?: number;
+      formatter_top_p?: number;
+    },
+    callbacks: StreamCallback
+  ): Promise<void> {
+    const headers = this.getHeaders();
+    headers['Accept'] = 'text/event-stream';
+    headers['Content-Type'] = 'application/json';
+    
+    try {
+      const response = await fetch(`${this.baseURL}/run/stream/format`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(params),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        callbacks.onError?.(`Failed to start formatting: ${error}`);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      if (!reader) {
+        callbacks.onError?.('Stream reader not available');
+        return;
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('event:')) {
+            continue;
+          }
+          
+          if (line.startsWith('data:')) {
+            const data = line.substring(5).trim();
+            if (data === '[DONE]') {
+              return;
+            }
+            
+            try {
+              const parsedData = JSON.parse(data);
+              const eventLine = lines[lines.indexOf(line) - 1];
+              const eventType = eventLine?.startsWith('event:') 
+                ? eventLine.substring(6).trim() 
+                : 'message';
+
+              switch (eventType) {
+                case 'progress':
+                  callbacks.onProgress?.(parsedData);
+                  break;
+                case 'formatted_token':
+                  callbacks.onFormattedToken?.(parsedData.token || '');
+                  break;
+                case 'format_complete':
+                  callbacks.onComplete?.(parsedData);
+                  break;
+                case 'error':
+                  callbacks.onError?.(parsedData.error);
+                  break;
+                case 'keepalive':
+                case 'ping':
+                  console.debug('Keepalive received:', parsedData.timestamp);
+                  break;
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE data:', e);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      callbacks.onError?.(error.message || 'Stream failed');
+    }
+  }
+
   async generateContentStream(
     params: GenerationParams,
     callbacks: StreamCallback

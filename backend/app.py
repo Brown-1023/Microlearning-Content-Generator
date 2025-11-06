@@ -339,6 +339,138 @@ async def version_info():
     )
 
 
+@app.post("/run/stream/draft")
+@limiter.limit("10 per minute")
+async def generate_draft_stream(
+    request: Request,
+    run_request: RunRequest,
+    auth_info: dict = Depends(verify_auth)
+):
+    """
+    Stream only the draft generation (step 1 of 2).
+    """
+    logger.info(
+        "draft_stream_request_received",
+        content_type=run_request.content_type,
+        generator_model=run_request.generator_model,
+        num_questions=run_request.num_questions
+    )
+    
+    async def generate_draft_events() -> AsyncGenerator:
+        try:
+            yield {
+                "event": "start",
+                "data": json.dumps({
+                    "message": "Starting draft generation...",
+                    "stage": "init"
+                })
+            }
+            
+            # Run only the draft generation with streaming
+            async for event in pipeline.run_stream_draft_only(
+                content_type=run_request.content_type,
+                generator_model=run_request.generator_model,
+                input_text=run_request.input_text,
+                num_questions=run_request.num_questions,
+                focus_areas=run_request.focus_areas,
+                generator_temperature=run_request.generator_temperature,
+                generator_top_p=run_request.generator_top_p
+            ):
+                yield event
+                
+        except Exception as e:
+            logger.error("draft_stream_failed", error=str(e))
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "error": f"Draft generation failed: {str(e)}"
+                })
+            }
+    
+    return EventSourceResponse(
+        generate_draft_events(),
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+            "Transfer-Encoding": "chunked"
+        },
+        ping=10
+    )
+
+
+class FormatRequest(BaseModel):
+    """Request model for formatting a draft."""
+    draft_1: str = Field(..., description="The draft to format")
+    content_type: Literal["MCQ", "NMCQ", "SUMMARY"] = Field(..., description="Type of content")
+    generator_model: str = Field(..., description="Original generator model used")
+    input_text: str = Field(..., description="Original input text")
+    num_questions: int = Field(..., ge=1, le=20)
+    focus_areas: Optional[str] = None
+    formatter_temperature: Optional[float] = Field(None, ge=0.0, le=1.0)
+    formatter_top_p: Optional[float] = Field(None, ge=0.0, le=1.0)
+
+
+@app.post("/run/stream/format")
+@limiter.limit("10 per minute")
+async def format_draft_stream(
+    request: Request,
+    format_request: FormatRequest,
+    auth_info: dict = Depends(verify_auth)
+):
+    """
+    Stream the formatting of a draft (step 2 of 2).
+    """
+    logger.info(
+        "format_stream_request_received",
+        content_type=format_request.content_type,
+        has_draft=bool(format_request.draft_1)
+    )
+    
+    async def generate_format_events() -> AsyncGenerator:
+        try:
+            yield {
+                "event": "start",
+                "data": json.dumps({
+                    "message": "Starting formatting...",
+                    "stage": "formatting"
+                })
+            }
+            
+            # Run only the formatting with streaming
+            async for event in pipeline.run_stream_format_only(
+                draft_1=format_request.draft_1,
+                content_type=format_request.content_type,
+                generator_model=format_request.generator_model,
+                input_text=format_request.input_text,
+                num_questions=format_request.num_questions,
+                focus_areas=format_request.focus_areas,
+                formatter_temperature=format_request.formatter_temperature,
+                formatter_top_p=format_request.formatter_top_p
+            ):
+                yield event
+                
+        except Exception as e:
+            logger.error("format_stream_failed", error=str(e))
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "error": f"Formatting failed: {str(e)}"
+                })
+            }
+    
+    return EventSourceResponse(
+        generate_format_events(),
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+            "Transfer-Encoding": "chunked"
+        },
+        ping=10
+    )
+
+
 @app.post("/run/stream")
 @limiter.limit("10 per minute")
 async def run_pipeline_stream(

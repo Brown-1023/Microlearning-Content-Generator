@@ -552,6 +552,294 @@ class ContentPipeline:
             hashes[key] = hashlib.md5(content.encode()).hexdigest()[:8]
         return hashes
     
+    async def run_stream_draft_only(
+        self,
+        content_type: str,
+        generator_model: str,
+        input_text: str,
+        num_questions: int,
+        focus_areas: Optional[str] = None,
+        generator_temperature: Optional[float] = None,
+        generator_top_p: Optional[float] = None
+    ) -> AsyncGenerator[Dict, None]:
+        """Stream only the draft generation with token-by-token updates."""
+        model_caller = ModelCaller()
+        
+        # Initialize state
+        state = {
+            "content_type": content_type.upper(),
+            "generator_model": generator_model,
+            "input_text": input_text,
+            "num_questions": num_questions,
+            "focus_areas": focus_areas,
+            "generator_temperature": generator_temperature,
+            "generator_top_p": generator_top_p,
+            "prompts": {},
+            "draft_1": None,
+            "start_time": time.time(),
+            "model_latencies": {},
+            "model_ids": {},
+            "success": False,
+            "error_message": None,
+            "custom_mcq_generator": None,
+            "custom_mcq_formatter": None,
+            "custom_nmcq_generator": None,
+            "custom_nmcq_formatter": None,
+            "custom_summary_generator": None,
+            "custom_summary_formatter": None
+        }
+        
+        try:
+            # Stage 1: Loading prompts
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "load_prompts",
+                    "message": "Loading prompts...",
+                    "progress": 5
+                })
+            }
+            
+            # Load all prompts directly
+            all_prompts = PromptLoader.load_prompts()
+            
+            # Select the appropriate generator prompt based on content type
+            if content_type.upper() == "MCQ":
+                prompt_template = all_prompts.get("mcq_generator", "")
+            elif content_type.upper() == "NMCQ":
+                prompt_template = all_prompts.get("nmcq_generator", "")
+            elif content_type.upper() == "SUMMARY":
+                prompt_template = all_prompts.get("summary_generator", "")
+            else:
+                prompt_template = all_prompts.get("nmcq_generator", "")
+            
+            if not prompt_template:
+                yield {
+                    "event": "error", 
+                    "data": json.dumps({"error": f"Prompt not found for {content_type}"})
+                }
+                return
+                
+            # Stage 2: Generate draft with streaming
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "generator_starting",
+                    "message": f"Starting draft generation with {generator_model}...",
+                    "progress": 10
+                })
+            }
+            
+            # Build the prompt
+            full_prompt = f"{prompt_template}\n\nInput text:\n{input_text}"
+            if focus_areas:
+                full_prompt += f"\n\nFocus areas: {focus_areas}"
+            if content_type.upper() in ["MCQ", "NMCQ"]:
+                full_prompt += f"\n\nNumber of questions: {num_questions}"
+            
+            # Stream generation
+            full_content = ""
+            
+            # Helper to convert sync generator to async
+            async def _async_generator(sync_gen):
+                loop = asyncio.get_event_loop()
+                for item in sync_gen:
+                    yield item
+                    await asyncio.sleep(0)  # Allow other async operations
+            
+            # Determine which model to use and stream
+            if "claude" in generator_model.lower():
+                async for chunk in _async_generator(
+                    model_caller.stream_claude(full_prompt, generator_temperature, generator_top_p)
+                ):
+                    if chunk.get("token"):
+                        full_content += chunk["token"]
+                        yield {
+                            "event": "draft_token",
+                            "data": json.dumps({
+                                "token": chunk["token"],
+                                "stage": "generator"
+                            })
+                        }
+                    elif chunk.get("complete"):
+                        state["draft_1"] = chunk["full_content"]
+                        state["model_ids"]["generator"] = chunk["model"]
+                        state["model_latencies"]["generator"] = chunk["latency"]
+            elif "gemini" in generator_model.lower():
+                async for chunk in _async_generator(
+                    model_caller.stream_gemini(full_prompt, generator_model, generator_temperature, generator_top_p)
+                ):
+                    if chunk.get("token"):
+                        full_content += chunk["token"]
+                        yield {
+                            "event": "draft_token",
+                            "data": json.dumps({
+                                "token": chunk["token"],
+                                "stage": "generator"
+                            })
+                        }
+                    elif chunk.get("complete"):
+                        state["draft_1"] = chunk["full_content"]
+                        state["model_ids"]["generator"] = chunk["model"]
+                        state["model_latencies"]["generator"] = chunk["latency"]
+            
+            # Send complete event with draft
+            yield {
+                "event": "draft_complete",
+                "data": json.dumps({
+                    "success": True,
+                    "draft_1": state["draft_1"],
+                    "metadata": {
+                        "content_type": state["content_type"],
+                        "generator_model": state["generator_model"],
+                        "num_questions": state["num_questions"],
+                        "total_time": time.time() - state["start_time"]
+                    }
+                })
+            }
+            
+        except Exception as e:
+            logger.error(f"Draft generation error: {str(e)}")
+            yield {
+                "event": "error",
+                "data": json.dumps({"error": str(e)})
+            }
+    
+    async def run_stream_format_only(
+        self,
+        draft_1: str,
+        content_type: str,
+        generator_model: str,
+        input_text: str,
+        num_questions: int,
+        focus_areas: Optional[str] = None,
+        formatter_temperature: Optional[float] = None,
+        formatter_top_p: Optional[float] = None
+    ) -> AsyncGenerator[Dict, None]:
+        """Stream only the formatting with token-by-token updates."""
+        model_caller = ModelCaller()
+        
+        # Initialize state
+        state = {
+            "content_type": content_type.upper(),
+            "generator_model": generator_model,
+            "input_text": input_text,
+            "num_questions": num_questions,
+            "focus_areas": focus_areas,
+            "draft_1": draft_1,
+            "formatter_temperature": formatter_temperature or 0.51,
+            "formatter_top_p": formatter_top_p or 0.95,
+            "prompts": {},
+            "formatted_output": None,
+            "validation_errors": [],
+            "formatter_retries": 0,
+            "start_time": time.time(),
+            "model_latencies": {},
+            "model_ids": {},
+            "success": False,
+            "error_message": None
+        }
+        
+        try:
+            # Load prompts directly
+            all_prompts = PromptLoader.load_prompts()
+            
+            # Select the appropriate formatter prompt based on content type
+            if content_type.upper() == "MCQ":
+                prompt_template = all_prompts.get("mcq_formatter", "")
+            elif content_type.upper() == "NMCQ":
+                prompt_template = all_prompts.get("nmcq_formatter", "")
+            elif content_type.upper() == "SUMMARY":
+                prompt_template = all_prompts.get("summary_formatter", "")
+            else:
+                prompt_template = all_prompts.get("nmcq_formatter", "")
+            
+            if not prompt_template:
+                yield {
+                    "event": "error", 
+                    "data": json.dumps({"error": f"Formatter prompt not found for {content_type}"})
+                }
+                return
+            
+            # Start formatting
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "formatter_starting",
+                    "message": "Starting formatting...",
+                    "progress": 50
+                })
+            }
+            full_prompt = f"{prompt_template}\n\nContent to format:\n\n{draft_1}"
+            
+            # Stream formatting with Gemini Flash
+            formatted_content = ""
+            
+            # Helper to convert sync generator to async
+            async def _async_generator(sync_gen):
+                loop = asyncio.get_event_loop()
+                for item in sync_gen:
+                    yield item
+                    await asyncio.sleep(0)
+            
+            async for chunk in _async_generator(
+                model_caller.stream_gemini(
+                    full_prompt, 
+                    model_caller.gemini_flash_model,
+                    state["formatter_temperature"],
+                    state["formatter_top_p"]
+                )
+            ):
+                if chunk.get("token"):
+                    formatted_content += chunk["token"]
+                    yield {
+                        "event": "formatted_token",
+                        "data": json.dumps({
+                            "token": chunk["token"],
+                            "stage": "formatter"
+                        })
+                    }
+                elif chunk.get("complete"):
+                    state["formatted_output"] = chunk["full_content"]
+                    state["model_ids"]["formatter"] = chunk["model"]
+                    state["model_latencies"]["formatter"] = chunk["latency"]
+            
+            # Validate
+            yield {
+                "event": "progress",
+                "data": json.dumps({
+                    "stage": "validator",
+                    "message": "Validating formatted content...",
+                    "progress": 90
+                })
+            }
+            
+            state = validator_node(state)
+            
+            # Complete
+            yield {
+                "event": "format_complete",
+                "data": json.dumps({
+                    "success": state.get("success", False),
+                    "output": state["formatted_output"],
+                    "validation_errors": state.get("validation_errors", []),
+                    "metadata": {
+                        "content_type": state["content_type"],
+                        "generator_model": state["generator_model"],
+                        "num_questions": state.get("num_questions", 1),
+                        "formatter_retries": state.get("formatter_retries", 0),
+                        "total_time": time.time() - state["start_time"]
+                    }
+                })
+            }
+            
+        except Exception as e:
+            logger.error(f"Formatting error: {str(e)}")
+            yield {
+                "event": "error",
+                "data": json.dumps({"error": str(e)})
+            }
+    
     async def run_stream_tokens(
         self,
         content_type: str,
