@@ -134,102 +134,111 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
         </div>
       )}
 
-      {/* Streaming Draft Section - Show when generating or draft is available */}
-      {(streamingDraft || draft) && !output && (
-        <div className="draft-section">
-          <div className="section-header">
-            <h3>📝 {streamingDraft && isStreaming ? 'Generating Initial Draft...' : 'Initial Draft'}</h3>
-            
-          </div>
-          <div className="draft-content streaming-content" ref={draftRef}>
-            <pre>{streamingDraft || draft}</pre>
-            {isStreaming && streamingDraft && (
-              <span className="cursor-blink">▊</span>
-            )}
-          </div>
-          <div>
-            {!isStreaming && !isFormattingDraft && (draft || streamingDraft) && (
-              <div className="draft-actions">
-                <button 
-                  onClick={() => handleCopy(draft || streamingDraft)} 
-                  className="btn btn-outline btn-sm"
-                >
-                  📋 Copy Draft
-                </button>
-                <button 
-                  onClick={() => handleDownload(draft || streamingDraft, 'draft')} 
-                  className="btn btn-outline btn-sm"
-                >
-                  💾 Download Draft
-                </button>
-                {onFormatDraft && (
-                  <button 
-                    onClick={onFormatDraft}
-                    className="btn btn-primary btn-sm"
-                    style={{ marginLeft: 'auto' }}
-                  >
-                    ✨ Format Draft
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+      {/* Draft Panel - Always visible */}
+      <div className="draft-section panel-persistent">
+        <div className="section-header">
+          <h3>📝 {streamingDraft && isStreaming && !isFormattingDraft ? 'Generating Initial Draft...' : 'Initial Draft'}</h3>
         </div>
-      )}
+        <div className="draft-content streaming-content" ref={draftRef}>
+          {(streamingDraft || draft) ? (
+            <>
+              <pre>{streamingDraft || draft}</pre>
+              {isStreaming && streamingDraft && !isFormattingDraft && (
+                <span className="cursor-blink">▊</span>
+              )}
+            </>
+          ) : (
+            <div className="panel-placeholder">
+              <span className="placeholder-icon">📄</span>
+              <p>Draft will appear here once generated</p>
+            </div>
+          )}
+        </div>
+        {(draft || streamingDraft) && !isStreaming && !isFormattingDraft && (
+          <div className="draft-actions">
+            <button 
+              onClick={() => handleCopy(draft || streamingDraft)} 
+              className="btn btn-outline btn-sm"
+            >
+              📋 Copy Draft
+            </button>
+            <button 
+              onClick={() => handleDownload(draft || streamingDraft, 'draft')} 
+              className="btn btn-outline btn-sm"
+            >
+              💾 Download Draft
+            </button>
+            {onFormatDraft && (
+              <button 
+                onClick={onFormatDraft}
+                className="btn btn-primary btn-sm"
+                style={{ marginLeft: 'auto' }}
+              >
+                ✨ Format Draft
+              </button>
+            )}
+          </div>
+        )}
+      </div>
       
-      {/* Streaming Formatted Section - Show when formatting or reformatting */}
-      {streamingFormatted && (isReformatting || isFormattingDraft || !output) && (
-        <div className="formatted-section">
-          <div className="section-header">
-            <h3>✨ {(isStreaming || isReformatting || isFormattingDraft) ? 'Formatting Content...' : 'Formatted Content'}</h3>
-          </div>
-          <div className="formatted-content streaming-content" ref={formattedRef}>
-            <pre>{streamingFormatted}</pre>
-            {(isStreaming || isReformatting || isFormattingDraft) && (
-              <span className="cursor-blink">▊</span>
-            )}
-          </div>
+      {/* Formatted Content Panel - Always visible */}
+      <div className="formatted-section panel-persistent">
+        <div className="section-header">
+          <h3>✨ {(isReformatting || isFormattingDraft) ? 'Formatting Content...' : 'Formatted Content'}</h3>
         </div>
-      )}
+        <div className="formatted-content streaming-content" ref={formattedRef}>
+          {(streamingFormatted || (output && (output.output || output.partial_output))) ? (
+            <>
+              <pre>{streamingFormatted || output?.output || output?.partial_output}</pre>
+              {(isReformatting || isFormattingDraft) && streamingFormatted && (
+                <span className="cursor-blink">▊</span>
+              )}
+            </>
+          ) : (
+            <div className="panel-placeholder">
+              <span className="placeholder-icon">✨</span>
+              <p>Formatted content will appear here after formatting</p>
+            </div>
+          )}
+        </div>
+        {(output && (output.output || output.partial_output)) && !isReformatting && !isFormattingDraft && (
+          <div className="formatted-actions">
+            <button 
+              onClick={() => handleCopy(output.output || output.partial_output)} 
+              className="btn btn-outline btn-sm"
+            >
+              📋 Copy Formatted
+            </button>
+            <button 
+              onClick={() => handleDownload(output.output || output.partial_output, output?.metadata?.content_type || 'output')} 
+              className="btn btn-outline btn-sm"
+            >
+              💾 Download Formatted
+            </button>
+          </div>
+        )}
+      </div>
 
-      {/* Final Output Section */}
+      {/* Status Messages and Validation Errors */}
       {output && !isStreaming && (
         <>
           {output.success && (
             <div className="status-message success">
-              ✅ Content generated successfully!
+              ✅ Content formatted successfully!
             </div>
           )}
 
           {!output.success && output.validation_errors?.length > 0 && (
-            <>
-              <div className="status-message warning">
-                <span>⚠️ Generation completed with validation errors</span>
-                {onReformat && (
-                  <button 
-                    onClick={onReformat}
-                    disabled={isReformatting}
-                    className="btn btn-warning btn-sm"
-                    style={{ marginLeft: 'auto' }}
-                  >
-                    {isReformatting ? '🔄 Reformatting...' : '🔧 Reformat Output'}
-                  </button>
-                )}
-              </div>
-              <div className="validation-errors">
-                <h3>Validation Errors ({output.validation_errors.length})</h3>
-                <ul>
-                  {output.validation_errors.map((err: any, idx: number) => (
-                    <li key={idx}>
-                      Line {err.line || 'N/A'}: {err.message}
-                    </li>
-                  ))}
-                </ul>
-                <p className="reformat-tip">
-                  💡 <strong>Tip:</strong> If reformatting fails repeatedly, try adjusting the formatter prompt in the admin panel for better results.
-                </p>
-              </div>
-            </>
+            <div className="validation-errors">
+              <h3>⚠️ Validation Errors ({output.validation_errors.length})</h3>
+              <ul>
+                {output.validation_errors.map((err: any, idx: number) => (
+                  <li key={idx}>
+                    Line {err.line || 'N/A'}: {err.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {!output.success && output.error && !output.validation_errors?.length && (
@@ -237,39 +246,46 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
               ❌ {output.error}
             </div>
           )}
-
-          {(output.output || output.partial_output) && (
-            <div className="output-section">
-              <div className="output-content">
-                <pre>{output.output || output.partial_output}</pre>
-              </div>
-              <div className="output-actions">
-                <button 
-                  onClick={() => handleCopy(output.output || output.partial_output)} 
-                  className="action-button copy-btn"
-                >
-                  <svg className="button-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M10.5 1h-6A1.5 1.5 0 003 2.5v9A1.5 1.5 0 004.5 13h6a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 1zM4.5 2h6a.5.5 0 01.5.5v9a.5.5 0 01-.5.5h-6a.5.5 0 01-.5-.5v-9a.5.5 0 01.5-.5z"/>
-                    <path d="M13 4.5V12a1.5 1.5 0 01-1.5 1.5h-7v1h7A2.5 2.5 0 0014 12V4.5h-1z"/>
-                  </svg>
-                  Copy Final Output
-                </button>
-                <button 
-                  onClick={() => handleDownload(output.output || output.partial_output, output?.metadata?.content_type || 'output')} 
-                  className="action-button download-btn"
-                >
-                  <svg className="button-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 11.5l3.5-3.5L10 6.5 9 7.5V1H7v6.5L6 6.5 4.5 8 8 11.5z"/>
-                    <path d="M13 13v-1h1v1a1 1 0 01-1 1H3a1 1 0 01-1-1v-1h1v1h10z"/>
-                  </svg>
-                  Download Final Output
-                </button>
-              </div>
-            </div>
-          )}
-
-          
         </>
+      )}
+
+      {/* Metadata Panel */}
+      {output && output.metadata && (
+        <div className="metadata-panel">
+          <div className="metadata-header">
+            <svg className="metadata-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9 2a1 1 0 00-1 1v1H6a2 2 0 00-2 2v9a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2h-2V3a1 1 0 00-1-1H9zM8 5V3h3v2H8z"/>
+              <path d="M6 7h8v1H6V7zm0 2h8v1H6V9zm0 2h5v1H6v-1z"/>
+            </svg>
+            <h3>Generation Details</h3>
+          </div>
+          <div className="metadata-grid">
+            <div className="metadata-item">
+              <span className="metadata-label">Content Type:</span>
+              <span className="metadata-value">{output.metadata.content_type}</span>
+            </div>
+            <div className="metadata-item">
+              <span className="metadata-label">Generator Model:</span>
+              <span className="metadata-value">{output.metadata.generator_model}</span>
+            </div>
+            <div className="metadata-item">
+              <span className="metadata-label">Questions:</span>
+              <span className="metadata-value">{output.metadata.num_questions}</span>
+            </div>
+            {output.metadata.formatter_retries > 0 && (
+              <div className="metadata-item">
+                <span className="metadata-label">Formatter Retries:</span>
+                <span className="metadata-value">{output.metadata.formatter_retries}</span>
+              </div>
+            )}
+            {output.metadata.total_time && (
+              <div className="metadata-item">
+                <span className="metadata-label">Total Time:</span>
+                <span className="metadata-value">{output.metadata.total_time.toFixed(2)}s</span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <style jsx>{`
@@ -637,6 +653,74 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           padding: 16px;
           border-radius: 6px;
           margin-top: 12px;
+          min-height: 150px;
+        }
+
+        /* Persistent Panel Styles */
+        .panel-persistent {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .draft-section.panel-persistent {
+          background: #fef3c7;
+          min-height: 250px;
+        }
+
+        .formatted-section.panel-persistent {
+          background: #e0f2fe;
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: 20px;
+          min-height: 250px;
+        }
+
+        .formatted-section .section-header h3 {
+          color: #075985;
+        }
+
+        .formatted-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid #cbd5e1;
+        }
+
+        /* Placeholder Styles */
+        .panel-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+          text-align: center;
+          color: #9ca3af;
+          min-height: 150px;
+        }
+
+        .placeholder-icon {
+          font-size: 48px;
+          opacity: 0.5;
+          margin-bottom: 12px;
+        }
+
+        .panel-placeholder p {
+          font-size: 14px;
+          margin: 0;
+          color: #6b7280;
+        }
+
+        /* Ensure draft content has minimum height */
+        .draft-content {
+          min-height: 150px;
+          position: relative;
+        }
+
+        .streaming-content.draft-content,
+        .streaming-content.formatted-content {
+          max-height: 400px;
+          overflow-y: auto;
         }
       `}</style>
     </div>
