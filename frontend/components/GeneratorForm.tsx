@@ -153,6 +153,29 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onGenerate, isLoading, us
     summary_formatter: ''
   });
 
+  // Reset form states when user role changes
+  useEffect(() => {
+    // Clear form inputs when user role changes
+    setInputText('');
+    setNumQuestions(1);
+    setFocusAreas('');
+    setContentType('MCQ');
+    setGeneratorTemperature(0.51);
+    setGeneratorTopP(0.95);
+    setFormatterTemperature(0.51);
+    setFormatterTopP(0.95);
+    setShowAdvanced(false);
+    setShowPrompts(false);
+    
+    // Reset prompts
+    setMcqGeneratorPrompt('');
+    setMcqFormatterPrompt('');
+    setNmcqGeneratorPrompt('');
+    setNmcqFormatterPrompt('');
+    setSummaryGeneratorPrompt('');
+    setSummaryFormatterPrompt('');
+  }, [userRole]);
+
   // Fetch available models on component mount
   useEffect(() => {
     const fetchModels = async () => {

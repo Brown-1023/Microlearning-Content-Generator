@@ -41,6 +41,18 @@ export default function Home() {
     if (success) {
       setIsAuthenticated(true);
       setUserRole(role);
+      // Clear all generation-related states when logging in
+      setOutput(null);
+      setStreamProgress(null);
+      setStreamDraft(null);
+      setStreamingDraft('');
+      setStreamingFormatted('');
+      streamingFormattedRef.current = '';
+      setLastGenerationParams(null);
+      setOriginalInputText('');
+      setIsStreaming(false);
+      setIsReformatting(false);
+      setIsLoading(false);
       showToast(`Successfully logged in as ${role}`, 'success');
     } else {
       showToast('Invalid password', 'error');
@@ -52,7 +64,18 @@ export default function Home() {
     await authService.logout();
     setIsAuthenticated(false);
     setUserRole(null);
+    // Clear all generation-related states
     setOutput(null);
+    setStreamProgress(null);
+    setStreamDraft(null);
+    setStreamingDraft('');
+    setStreamingFormatted('');
+    streamingFormattedRef.current = '';
+    setLastGenerationParams(null);
+    setOriginalInputText('');
+    setIsStreaming(false);
+    setIsReformatting(false);
+    setIsLoading(false);
     showToast('Logged out successfully', 'info');
   };
 
