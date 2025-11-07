@@ -119,9 +119,60 @@ class GenerationService {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+        }
+        
+        if (done) {
+          // Process any remaining data in buffer after stream ends
+          if (buffer.trim()) {
+            const lines = buffer.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                continue;
+              }
+              
+              if (line.startsWith('data:')) {
+                const data = line.substring(5).trim();
+                if (data === '[DONE]') {
+                  return;
+                }
+                
+                try {
+                  const parsedData = JSON.parse(data);
+                  const eventLine = lines[lines.indexOf(line) - 1];
+                  const eventType = eventLine?.startsWith('event:') 
+                    ? eventLine.substring(6).trim() 
+                    : 'message';
 
-        buffer += decoder.decode(value, { stream: true });
+                  switch (eventType) {
+                    case 'progress':
+                      callbacks.onProgress?.(parsedData);
+                      break;
+                    case 'draft_token':
+                      callbacks.onDraftToken?.(parsedData.token || '');
+                      break;
+                    case 'draft_complete':
+                      callbacks.onComplete?.(parsedData);
+                      break;
+                    case 'error':
+                      callbacks.onError?.(parsedData.error);
+                      break;
+                    case 'keepalive':
+                    case 'ping':
+                      console.debug('Keepalive received:', parsedData.timestamp);
+                      break;
+                  }
+                } catch (e) {
+                  console.error('Failed to parse SSE data:', e);
+                }
+              }
+            }
+          }
+          break;
+        }
+
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
@@ -214,9 +265,60 @@ class GenerationService {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+        }
+        
+        if (done) {
+          // Process any remaining data in buffer after stream ends
+          if (buffer.trim()) {
+            const lines = buffer.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                continue;
+              }
+              
+              if (line.startsWith('data:')) {
+                const data = line.substring(5).trim();
+                if (data === '[DONE]') {
+                  return;
+                }
+                
+                try {
+                  const parsedData = JSON.parse(data);
+                  const eventLine = lines[lines.indexOf(line) - 1];
+                  const eventType = eventLine?.startsWith('event:') 
+                    ? eventLine.substring(6).trim() 
+                    : 'message';
 
-        buffer += decoder.decode(value, { stream: true });
+                  switch (eventType) {
+                    case 'progress':
+                      callbacks.onProgress?.(parsedData);
+                      break;
+                    case 'formatted_token':
+                      callbacks.onFormattedToken?.(parsedData.token || '');
+                      break;
+                    case 'format_complete':
+                      callbacks.onComplete?.(parsedData);
+                      break;
+                    case 'error':
+                      callbacks.onError?.(parsedData.error);
+                      break;
+                    case 'keepalive':
+                    case 'ping':
+                      console.debug('Keepalive received:', parsedData.timestamp);
+                      break;
+                  }
+                } catch (e) {
+                  console.error('Failed to parse SSE data:', e);
+                }
+              }
+            }
+          }
+          break;
+        }
+
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
@@ -311,9 +413,68 @@ class GenerationService {
     try {
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+        }
+        
+        if (done) {
+          // Process any remaining data in buffer after stream ends
+          if (buffer.trim()) {
+            const lines = buffer.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                const eventType = line.substring(6).trim();
+                continue;
+              }
+              
+              if (line.startsWith('data:')) {
+                const data = line.substring(5).trim();
+                if (data === '[DONE]') {
+                  return;
+                }
+                
+                try {
+                  const parsedData = JSON.parse(data);
+                  const eventLine = lines[lines.indexOf(line) - 1];
+                  const eventType = eventLine?.startsWith('event:') 
+                    ? eventLine.substring(6).trim() 
+                    : 'message';
 
-        buffer += decoder.decode(value, { stream: true });
+                  switch (eventType) {
+                    case 'progress':
+                      callbacks.onProgress?.(parsedData);
+                      break;
+                    case 'draft':
+                      callbacks.onDraft?.(parsedData.draft || '');
+                      callbacks.onProgress?.(parsedData);
+                      break;
+                    case 'draft_token':
+                      callbacks.onDraftToken?.(parsedData.token || '');
+                      break;
+                    case 'formatted_token':
+                      callbacks.onFormattedToken?.(parsedData.token || '');
+                      break;
+                    case 'complete':
+                      callbacks.onComplete?.(parsedData);
+                      break;
+                    case 'error':
+                      callbacks.onError?.(parsedData.error);
+                      break;
+                    default:
+                      if (parsedData.stage) {
+                        callbacks.onProgress?.(parsedData);
+                      }
+                  }
+                } catch (e) {
+                  console.error('Failed to parse SSE data:', e);
+                }
+              }
+            }
+          }
+          break;
+        }
+
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
@@ -534,9 +695,56 @@ class GenerationService {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+        }
+        
+        if (done) {
+          // Process any remaining data in buffer after stream ends
+          if (buffer.trim()) {
+            const lines = buffer.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                continue;
+              }
+              
+              if (line.startsWith('data:')) {
+                const data = line.substring(5).trim();
+                if (data === '[DONE]') {
+                  return;
+                }
+                
+                try {
+                  const parsedData = JSON.parse(data);
+                  const eventLine = lines[lines.indexOf(line) - 1];
+                  const eventType = eventLine?.startsWith('event:') 
+                    ? eventLine.substring(6).trim() 
+                    : 'message';
 
-        buffer += decoder.decode(value, { stream: true });
+                  switch (eventType) {
+                    case 'progress':
+                      callbacks.onProgress?.(parsedData);
+                      break;
+                    case 'formatted_token':
+                      callbacks.onFormattedToken?.(parsedData.token || '');
+                      break;
+                    case 'complete':
+                      callbacks.onComplete?.(parsedData);
+                      break;
+                    case 'error':
+                      callbacks.onError?.(parsedData.error);
+                      break;
+                  }
+                } catch (e) {
+                  console.error('Failed to parse SSE data:', e);
+                }
+              }
+            }
+          }
+          break;
+        }
+
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
