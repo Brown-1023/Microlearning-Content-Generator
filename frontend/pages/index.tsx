@@ -113,10 +113,13 @@ export default function Home() {
           if (result.success) {
             // If content was streamed, use the accumulated draft from ref
             if (result.streamed) {
-              setStreamDraft(streamingDraftRef.current);  // Use the ref's current value
+              const fullDraft = streamingDraftRef.current;
+              setStreamDraft(fullDraft);  // Set the complete draft
+              setStreamingDraft(fullDraft);  // Also update streamingDraft to ensure consistency
             } else if (result.draft_1) {
               // Fallback if full draft is provided (backward compatibility)
               setStreamDraft(result.draft_1);
+              setStreamingDraft(result.draft_1);
             }
             showToast('Draft generated successfully! Click "Format Draft" to continue.', 'success');
           } else {
@@ -177,6 +180,12 @@ export default function Home() {
         onComplete: (result: any) => {
           // Use the streamed content from ref if content was streamed
           const finalOutput = result.streamed ? streamingFormattedRef.current : result.output;
+          
+          // Ensure streamingFormatted has the complete content
+          if (result.streamed) {
+            setStreamingFormatted(finalOutput);
+          }
+          
           setOutput({
             ...result,
             partial_output: finalOutput,
@@ -327,14 +336,19 @@ export default function Home() {
                         onComplete: (result: any) => {
                           // If content was streamed, use the accumulated streamingFormatted as output
                           if (result.streamed && streamingFormattedRef.current) {
+                            const finalOutput = streamingFormattedRef.current;
+                            setStreamingFormatted(finalOutput); // Ensure state is updated with full content
                             setOutput({
                               ...result,
-                              output: streamingFormattedRef.current,
-                              partial_output: streamingFormattedRef.current
+                              output: finalOutput,
+                              partial_output: finalOutput
                             });
                           } else {
                             // Fallback for non-streaming or if output is provided
                             setOutput(result);
+                            if (result.output) {
+                              setStreamingFormatted(result.output);
+                            }
                           }
                           setIsReformatting(false);
                           // Don't clear immediately - keep for display

@@ -140,9 +140,9 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           <h3>📝 {streamingDraft && isStreaming && !isFormattingDraft ? 'Generating Initial Draft...' : 'Initial Draft'}</h3>
         </div>
         <div className="draft-content streaming-content" ref={draftRef}>
-          {(streamingDraft || draft) ? (
+          {(draft || streamingDraft) ? (
             <>
-              <pre>{streamingDraft || draft}</pre>
+              <pre>{draft || streamingDraft}</pre>
               {isStreaming && streamingDraft && !isFormattingDraft && (
                 <span className="cursor-blink">▊</span>
               )}
@@ -187,9 +187,9 @@ const StreamingOutputPanel: React.FC<StreamingOutputPanelProps> = ({
           <h3>✨ {(isReformatting || isFormattingDraft) ? 'Formatting Content...' : 'Formatted Content'}</h3>
         </div>
         <div className="formatted-content streaming-content" ref={formattedRef}>
-          {(streamingFormatted || (output && (output.output || output.partial_output))) ? (
+          {((output && (output.output || output.partial_output)) || streamingFormatted) ? (
             <>
-              <pre>{streamingFormatted || output?.output || output?.partial_output}</pre>
+              <pre>{output?.output || output?.partial_output || streamingFormatted}</pre>
               {(isReformatting || isFormattingDraft) && streamingFormatted && (
                 <span className="cursor-blink">▊</span>
               )}
