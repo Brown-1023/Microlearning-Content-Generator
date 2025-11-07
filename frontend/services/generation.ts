@@ -128,10 +128,10 @@ class GenerationService {
           // Process any remaining data in buffer after stream ends
           if (buffer.trim()) {
             const lines = buffer.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('event:')) {
-                continue;
-              }
+            const events: Array<{type: string, data: any}> = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i];
               
               if (line.startsWith('data:')) {
                 const data = line.substring(5).trim();
@@ -141,32 +141,54 @@ class GenerationService {
                 
                 try {
                   const parsedData = JSON.parse(data);
-                  const eventLine = lines[lines.indexOf(line) - 1];
+                  const eventLine = i > 0 ? lines[i - 1] : '';
                   const eventType = eventLine?.startsWith('event:') 
                     ? eventLine.substring(6).trim() 
                     : 'message';
-
-                  switch (eventType) {
-                    case 'progress':
-                      callbacks.onProgress?.(parsedData);
-                      break;
-                    case 'draft_token':
-                      callbacks.onDraftToken?.(parsedData.token || '');
-                      break;
-                    case 'draft_complete':
-                      callbacks.onComplete?.(parsedData);
-                      break;
-                    case 'error':
-                      callbacks.onError?.(parsedData.error);
-                      break;
-                    case 'keepalive':
-                    case 'ping':
-                      console.debug('Keepalive received:', parsedData.timestamp);
-                      break;
-                  }
+                  
+                  events.push({ type: eventType, data: parsedData });
                 } catch (e) {
                   console.error('Failed to parse SSE data:', e);
                 }
+              }
+            }
+            
+            // Process tokens first, then completion events
+            const sortedEvents = events.sort((a, b) => {
+              const priority: Record<string, number> = {
+                'draft_token': 1,
+                'formatted_token': 1,
+                'progress': 2,
+                'keepalive': 3,
+                'ping': 3,
+                'draft_complete': 4,
+                'format_complete': 4,
+                'complete': 4,
+                'error': 5
+              };
+              return (priority[a.type] || 3) - (priority[b.type] || 3);
+            });
+            
+            for (const event of sortedEvents) {
+              switch (event.type) {
+                case 'progress':
+                  callbacks.onProgress?.(event.data);
+                  break;
+                case 'draft_token':
+                  callbacks.onDraftToken?.(event.data.token || '');
+                  break;
+                case 'draft_complete':
+                  // Add small delay to ensure all tokens are rendered
+                  await new Promise(resolve => setTimeout(resolve, 10));
+                  callbacks.onComplete?.(event.data);
+                  break;
+                case 'error':
+                  callbacks.onError?.(event.data.error);
+                  break;
+                case 'keepalive':
+                case 'ping':
+                  console.debug('Keepalive received:', event.data.timestamp);
+                  break;
               }
             }
           }
@@ -176,10 +198,11 @@ class GenerationService {
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          if (line.startsWith('event:')) {
-            continue;
-          }
+        // Collect all events in this chunk
+        const events: Array<{type: string, data: any}> = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
           
           if (line.startsWith('data:')) {
             const data = line.substring(5).trim();
@@ -189,32 +212,57 @@ class GenerationService {
             
             try {
               const parsedData = JSON.parse(data);
-              const eventLine = lines[lines.indexOf(line) - 1];
+              // Look for the event type in the previous line
+              const eventLine = i > 0 ? lines[i - 1] : '';
               const eventType = eventLine?.startsWith('event:') 
                 ? eventLine.substring(6).trim() 
                 : 'message';
-
-              switch (eventType) {
-                case 'progress':
-                  callbacks.onProgress?.(parsedData);
-                  break;
-                case 'draft_token':
-                  callbacks.onDraftToken?.(parsedData.token || '');
-                  break;
-                case 'draft_complete':
-                  callbacks.onComplete?.(parsedData);
-                  break;
-                case 'error':
-                  callbacks.onError?.(parsedData.error);
-                  break;
-                case 'keepalive':
-                case 'ping':
-                  console.debug('Keepalive received:', parsedData.timestamp);
-                  break;
-              }
+              
+              events.push({ type: eventType, data: parsedData });
             } catch (e) {
               console.error('Failed to parse SSE data:', e);
             }
+          }
+        }
+        
+        // Process tokens first, then other events
+        // This ensures all tokens are processed before completion
+        const sortedEvents = events.sort((a, b) => {
+          const priority: Record<string, number> = {
+            'draft_token': 1,
+            'formatted_token': 1,
+            'progress': 2,
+            'keepalive': 3,
+            'ping': 3,
+            'draft_complete': 4,
+            'format_complete': 4,
+            'complete': 4,
+            'error': 5
+          };
+          return (priority[a.type] || 3) - (priority[b.type] || 3);
+        });
+        
+        // Process events in priority order
+        for (const event of sortedEvents) {
+          switch (event.type) {
+            case 'progress':
+              callbacks.onProgress?.(event.data);
+              break;
+            case 'draft_token':
+              callbacks.onDraftToken?.(event.data.token || '');
+              break;
+            case 'draft_complete':
+              // Add small delay to ensure all tokens are rendered
+              await new Promise(resolve => setTimeout(resolve, 10));
+              callbacks.onComplete?.(event.data);
+              break;
+            case 'error':
+              callbacks.onError?.(event.data.error);
+              break;
+            case 'keepalive':
+            case 'ping':
+              console.debug('Keepalive received:', event.data.timestamp);
+              break;
           }
         }
       }
@@ -274,10 +322,10 @@ class GenerationService {
           // Process any remaining data in buffer after stream ends
           if (buffer.trim()) {
             const lines = buffer.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('event:')) {
-                continue;
-              }
+            const events: Array<{type: string, data: any}> = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i];
               
               if (line.startsWith('data:')) {
                 const data = line.substring(5).trim();
@@ -287,32 +335,54 @@ class GenerationService {
                 
                 try {
                   const parsedData = JSON.parse(data);
-                  const eventLine = lines[lines.indexOf(line) - 1];
+                  const eventLine = i > 0 ? lines[i - 1] : '';
                   const eventType = eventLine?.startsWith('event:') 
                     ? eventLine.substring(6).trim() 
                     : 'message';
-
-                  switch (eventType) {
-                    case 'progress':
-                      callbacks.onProgress?.(parsedData);
-                      break;
-                    case 'formatted_token':
-                      callbacks.onFormattedToken?.(parsedData.token || '');
-                      break;
-                    case 'format_complete':
-                      callbacks.onComplete?.(parsedData);
-                      break;
-                    case 'error':
-                      callbacks.onError?.(parsedData.error);
-                      break;
-                    case 'keepalive':
-                    case 'ping':
-                      console.debug('Keepalive received:', parsedData.timestamp);
-                      break;
-                  }
+                  
+                  events.push({ type: eventType, data: parsedData });
                 } catch (e) {
                   console.error('Failed to parse SSE data:', e);
                 }
+              }
+            }
+            
+            // Process tokens first, then completion events
+            const sortedEvents = events.sort((a, b) => {
+              const priority: Record<string, number> = {
+                'draft_token': 1,
+                'formatted_token': 1,
+                'progress': 2,
+                'keepalive': 3,
+                'ping': 3,
+                'draft_complete': 4,
+                'format_complete': 4,
+                'complete': 4,
+                'error': 5
+              };
+              return (priority[a.type] || 3) - (priority[b.type] || 3);
+            });
+            
+            for (const event of sortedEvents) {
+              switch (event.type) {
+                case 'progress':
+                  callbacks.onProgress?.(event.data);
+                  break;
+                case 'formatted_token':
+                  callbacks.onFormattedToken?.(event.data.token || '');
+                  break;
+                case 'format_complete':
+                  // Add small delay to ensure all tokens are rendered
+                  await new Promise(resolve => setTimeout(resolve, 10));
+                  callbacks.onComplete?.(event.data);
+                  break;
+                case 'error':
+                  callbacks.onError?.(event.data.error);
+                  break;
+                case 'keepalive':
+                case 'ping':
+                  console.debug('Keepalive received:', event.data.timestamp);
+                  break;
               }
             }
           }
@@ -322,10 +392,11 @@ class GenerationService {
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          if (line.startsWith('event:')) {
-            continue;
-          }
+        // Collect all events in this chunk
+        const events: Array<{type: string, data: any}> = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
           
           if (line.startsWith('data:')) {
             const data = line.substring(5).trim();
@@ -335,32 +406,56 @@ class GenerationService {
             
             try {
               const parsedData = JSON.parse(data);
-              const eventLine = lines[lines.indexOf(line) - 1];
+              // Look for the event type in the previous line
+              const eventLine = i > 0 ? lines[i - 1] : '';
               const eventType = eventLine?.startsWith('event:') 
                 ? eventLine.substring(6).trim() 
                 : 'message';
-
-              switch (eventType) {
-                case 'progress':
-                  callbacks.onProgress?.(parsedData);
-                  break;
-                case 'formatted_token':
-                  callbacks.onFormattedToken?.(parsedData.token || '');
-                  break;
-                case 'format_complete':
-                  callbacks.onComplete?.(parsedData);
-                  break;
-                case 'error':
-                  callbacks.onError?.(parsedData.error);
-                  break;
-                case 'keepalive':
-                case 'ping':
-                  console.debug('Keepalive received:', parsedData.timestamp);
-                  break;
-              }
+              
+              events.push({ type: eventType, data: parsedData });
             } catch (e) {
               console.error('Failed to parse SSE data:', e);
             }
+          }
+        }
+        
+        // Process tokens first, then other events
+        const sortedEvents = events.sort((a, b) => {
+          const priority: Record<string, number> = {
+            'draft_token': 1,
+            'formatted_token': 1,
+            'progress': 2,
+            'keepalive': 3,
+            'ping': 3,
+            'draft_complete': 4,
+            'format_complete': 4,
+            'complete': 4,
+            'error': 5
+          };
+          return (priority[a.type] || 3) - (priority[b.type] || 3);
+        });
+        
+        // Process events in priority order
+        for (const event of sortedEvents) {
+          switch (event.type) {
+            case 'progress':
+              callbacks.onProgress?.(event.data);
+              break;
+            case 'formatted_token':
+              callbacks.onFormattedToken?.(event.data.token || '');
+              break;
+            case 'format_complete':
+              // Add small delay to ensure all tokens are rendered
+              await new Promise(resolve => setTimeout(resolve, 10));
+              callbacks.onComplete?.(event.data);
+              break;
+            case 'error':
+              callbacks.onError?.(event.data.error);
+              break;
+            case 'keepalive':
+            case 'ping':
+              console.debug('Keepalive received:', event.data.timestamp);
+              break;
           }
         }
       }
